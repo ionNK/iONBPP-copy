@@ -1,0 +1,2152 @@
+[
+  {
+    "player_id": "P004546",
+    "segment": "Casual",
+    "churn_risk": "9%",
+    "ltv": "\u20ac2439",
+    "crg_score": 55,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999972191324,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 20.144171927758485,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Mission",
+        "match_score": "4%",
+        "raw_score": 0.04072934697325627,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "3%",
+        "raw_score": 0.03991419928748531,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "3%",
+        "raw_score": 0.036238090391183676,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P000389",
+    "segment": "Casual",
+    "churn_risk": "71%",
+    "ltv": "\u20ac2645",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "3%",
+        "raw_score": 0.03813049119203164,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "3%",
+        "raw_score": 0.03813049119203164,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      },
+      {
+        "type": "ReloadBonus",
+        "match_score": "3%",
+        "raw_score": 0.0378663902907396,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      }
+    ]
+  },
+  {
+    "player_id": "P002289",
+    "segment": "Casual",
+    "churn_risk": "14%",
+    "ltv": "\u20ac-718",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Mission",
+        "match_score": "2%",
+        "raw_score": 0.02155477723146289,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "2%",
+        "raw_score": 0.02155477723146289,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      },
+      {
+        "type": "ReloadBonus",
+        "match_score": "2%",
+        "raw_score": 0.020423108026672188,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      }
+    ]
+  },
+  {
+    "player_id": "P003584",
+    "segment": "Core",
+    "churn_risk": "73%",
+    "ltv": "\u20ac15863",
+    "crg_score": 40,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999989354228,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 27.7429037110986,
+      "hours_since_major_loss": 3397.076579431891
+    },
+    "recommendations": [
+      {
+        "type": "Mission",
+        "match_score": "5%",
+        "raw_score": 0.055952262393233046,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "ReAcquisition",
+        "match_score": "5%",
+        "raw_score": 0.05546726532310503,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Win-back strategy"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "5%",
+        "raw_score": 0.05499515257782467,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P005809",
+    "segment": "Core",
+    "churn_risk": "43%",
+    "ltv": "\u20ac16465",
+    "crg_score": 40,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999934193208,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 14.883052171780111,
+      "hours_since_major_loss": 2784.54696091036
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "19%",
+        "raw_score": 0.1929619334685059,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "Mission",
+        "match_score": "16%",
+        "raw_score": 0.16204437494228766,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "14%",
+        "raw_score": 0.14844760188161227,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P005300",
+    "segment": "Core",
+    "churn_risk": "26%",
+    "ltv": "\u20ac29836",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": -5.7140329882395315,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 19.308159923245597,
+      "hours_since_major_loss": 2226.6213986658386
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "4%",
+        "raw_score": 0.04806125270530887,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "4%",
+        "raw_score": 0.046022836314560105,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "4%",
+        "raw_score": 0.046022836314560105,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      }
+    ]
+  },
+  {
+    "player_id": "P003868",
+    "segment": "Core",
+    "churn_risk": "35%",
+    "ltv": "\u20ac26274",
+    "crg_score": 40,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999977835896,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 23.56931353492379,
+      "hours_since_major_loss": 5050.471435774698
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "6%",
+        "raw_score": 0.06315280164145838,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "5%",
+        "raw_score": 0.05875316484422345,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      },
+      {
+        "type": "Activation",
+        "match_score": "5%",
+        "raw_score": 0.05875316484422345,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Dormancy risk mitigation"
+      }
+    ]
+  },
+  {
+    "player_id": "P004042",
+    "segment": "HighRoller",
+    "churn_risk": "17%",
+    "ltv": "\u20ac101718",
+    "crg_score": 7,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": -6.320344521186996,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 43.86057822182568,
+      "hours_since_major_loss": 479.5732591186631
+    },
+    "recommendations": [
+      {
+        "type": "ReAcquisition",
+        "match_score": "12%",
+        "raw_score": 0.125133142938076,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Win-back strategy"
+      },
+      {
+        "type": "ReloadBonus",
+        "match_score": "12%",
+        "raw_score": 0.12026085370462294,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "Mission",
+        "match_score": "10%",
+        "raw_score": 0.10644029408001517,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High engagement propensity"
+      }
+    ]
+  },
+  {
+    "player_id": "P009775",
+    "segment": "Casual",
+    "churn_risk": "24%",
+    "ltv": "\u20ac2807",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "7%",
+        "raw_score": 0.07311498878312246,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "7%",
+        "raw_score": 0.07311498878312246,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "7%",
+        "raw_score": 0.07179375556488075,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P003176",
+    "segment": "Casual",
+    "churn_risk": "60%",
+    "ltv": "\u20ac1105",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "6%",
+        "raw_score": 0.0623447229296519,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "6%",
+        "raw_score": 0.0623447229296519,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      },
+      {
+        "type": "Mission",
+        "match_score": "5%",
+        "raw_score": 0.05923197446355096,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High engagement propensity"
+      }
+    ]
+  },
+  {
+    "player_id": "P002019",
+    "segment": "Casual",
+    "churn_risk": "18%",
+    "ltv": "\u20ac402",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "1%",
+        "raw_score": 0.017775111055057025,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "ReAcquisition",
+        "match_score": "1%",
+        "raw_score": 0.017775111055057025,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Win-back strategy"
+      },
+      {
+        "type": "Mission",
+        "match_score": "1%",
+        "raw_score": 0.015152235709460801,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High engagement propensity"
+      }
+    ]
+  },
+  {
+    "player_id": "P003874",
+    "segment": "HighRoller",
+    "churn_risk": "84%",
+    "ltv": "\u20ac96197",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": -0.6881258343795555,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 12.573681799416232,
+      "hours_since_major_loss": 84.45521549622222
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "23%",
+        "raw_score": 0.2384704301534182,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "23%",
+        "raw_score": 0.2384704301534182,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      },
+      {
+        "type": "ReloadBonus",
+        "match_score": "23%",
+        "raw_score": 0.23449233655426496,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      }
+    ]
+  },
+  {
+    "player_id": "P009418",
+    "segment": "HighRoller",
+    "churn_risk": "28%",
+    "ltv": "\u20ac683",
+    "crg_score": 62,
+    "risk_action": "BLOCK",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999997779258,
+      "deposit_burst_flag": 2.0,
+      "avg_session_duration_30d": 35.662936808281344,
+      "hours_since_major_loss": 50.03181186662778
+    },
+    "recommendations": [
+      {
+        "type": "AccaInsurance",
+        "match_score": "13%",
+        "raw_score": 0.13325430231211735,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.0x",
+        "risk_status": "Blocked",
+        "reason": "Frequent multi-leg bets"
+      },
+      {
+        "type": "Mission",
+        "match_score": "13%",
+        "raw_score": 0.13587539330434373,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.0x",
+        "risk_status": "Blocked",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "Activation",
+        "match_score": "13%",
+        "raw_score": 0.13325430231211735,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.0x",
+        "risk_status": "Blocked",
+        "reason": "Dormancy risk mitigation"
+      }
+    ]
+  },
+  {
+    "player_id": "P004431",
+    "segment": "Core",
+    "churn_risk": "85%",
+    "ltv": "\u20ac29814",
+    "crg_score": 40,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999985663904,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 25.510808446985695,
+      "hours_since_major_loss": 8082.654544511835
+    },
+    "recommendations": [
+      {
+        "type": "AccaInsurance",
+        "match_score": "3%",
+        "raw_score": 0.03431152092282091,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      },
+      {
+        "type": "Activation",
+        "match_score": "3%",
+        "raw_score": 0.03431152092282091,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Dormancy risk mitigation"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "3%",
+        "raw_score": 0.03431152092282091,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      }
+    ]
+  },
+  {
+    "player_id": "P008159",
+    "segment": "VIP",
+    "churn_risk": "22%",
+    "ltv": "\u20ac421542",
+    "crg_score": 20,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.5842632906676261,
+      "deposit_burst_flag": 1.0,
+      "avg_session_duration_30d": 20.19577109330913,
+      "hours_since_major_loss": 124.27690268649
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "25%",
+        "raw_score": 0.25254998131208084,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "25%",
+        "raw_score": 0.25254998131208084,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      },
+      {
+        "type": "ReAcquisition",
+        "match_score": "20%",
+        "raw_score": 0.20579204992026937,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Win-back strategy"
+      }
+    ]
+  },
+  {
+    "player_id": "P001734",
+    "segment": "Casual",
+    "churn_risk": "63%",
+    "ltv": "\u20ac1357",
+    "crg_score": 55,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999955958778,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 20.71414172556242,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "7%",
+        "raw_score": 0.07930106177293467,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "Mission",
+        "match_score": "7%",
+        "raw_score": 0.07188954863103167,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "7%",
+        "raw_score": 0.07154723217236252,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P009301",
+    "segment": "Casual",
+    "churn_risk": "55%",
+    "ltv": "\u20ac4394",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "3%",
+        "raw_score": 0.030526378630167876,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "3%",
+        "raw_score": 0.03038238003587095,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "3%",
+        "raw_score": 0.03038238003587095,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      }
+    ]
+  },
+  {
+    "player_id": "P007824",
+    "segment": "Core",
+    "churn_risk": "14%",
+    "ltv": "\u20ac3457",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 16.879684261017243,
+      "hours_since_major_loss": 8678.924038222498
+    },
+    "recommendations": [
+      {
+        "type": "Mission",
+        "match_score": "3%",
+        "raw_score": 0.03587530978197832,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "Activation",
+        "match_score": "3%",
+        "raw_score": 0.03509864314090113,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Dormancy risk mitigation"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "3%",
+        "raw_score": 0.034510392402381566,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P007484",
+    "segment": "Casual",
+    "churn_risk": "16%",
+    "ltv": "\u20ac6892",
+    "crg_score": 15,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 1.0,
+      "avg_session_duration_30d": 15.446664378167275,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "6%",
+        "raw_score": 0.06646054797338934,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "6%",
+        "raw_score": 0.06646054797338934,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      },
+      {
+        "type": "ReloadBonus",
+        "match_score": "6%",
+        "raw_score": 0.06645167934792744,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      }
+    ]
+  },
+  {
+    "player_id": "P009206",
+    "segment": "Casual",
+    "churn_risk": "41%",
+    "ltv": "\u20ac2478",
+    "crg_score": 15,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": -5.248270194869046,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 19.017184706590225,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "10%",
+        "raw_score": 0.10372069217225298,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "8%",
+        "raw_score": 0.08988862532766881,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "8%",
+        "raw_score": 0.08988862532766881,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      }
+    ]
+  },
+  {
+    "player_id": "P001766",
+    "segment": "Core",
+    "churn_risk": "27%",
+    "ltv": "\u20ac19250",
+    "crg_score": 40,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999951604316,
+      "deposit_burst_flag": 1.0,
+      "avg_session_duration_30d": 11.459660048533346,
+      "hours_since_major_loss": 6489.334856653678
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "6%",
+        "raw_score": 0.06960378457920449,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "Mission",
+        "match_score": "6%",
+        "raw_score": 0.06334985712442541,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "6%",
+        "raw_score": 0.06325550334406625,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P003895",
+    "segment": "VIP",
+    "churn_risk": "67%",
+    "ltv": "\u20ac139036",
+    "crg_score": 7,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": -2.901999435350708,
+      "deposit_burst_flag": 1.0,
+      "avg_session_duration_30d": 20.1394964888037,
+      "hours_since_major_loss": 28.256073858473055
+    },
+    "recommendations": [
+      {
+        "type": "AccaInsurance",
+        "match_score": "9%",
+        "raw_score": 0.09610137564056129,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Frequent multi-leg bets"
+      },
+      {
+        "type": "Activation",
+        "match_score": "9%",
+        "raw_score": 0.09610137564056129,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Dormancy risk mitigation"
+      },
+      {
+        "type": "ReloadBonus",
+        "match_score": "8%",
+        "raw_score": 0.08341938366500096,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      }
+    ]
+  },
+  {
+    "player_id": "P002724",
+    "segment": "Casual",
+    "churn_risk": "76%",
+    "ltv": "\u20ac4614",
+    "crg_score": 55,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999878404672,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 12.743780655597698,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "9%",
+        "raw_score": 0.0990109230478101,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "Mission",
+        "match_score": "9%",
+        "raw_score": 0.09457725887115107,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "9%",
+        "raw_score": 0.0928376176399327,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P009423",
+    "segment": "Casual",
+    "churn_risk": "34%",
+    "ltv": "\u20ac3101",
+    "crg_score": 15,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 1.0,
+      "avg_session_duration_30d": 10.906854004727055,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "10%",
+        "raw_score": 0.10376377642071351,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "9%",
+        "raw_score": 0.09267747027914973,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "9%",
+        "raw_score": 0.09267747027914973,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      }
+    ]
+  },
+  {
+    "player_id": "P009805",
+    "segment": "Casual",
+    "churn_risk": "55%",
+    "ltv": "\u20ac-1453",
+    "crg_score": 55,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999959939108,
+      "deposit_burst_flag": 1.0,
+      "avg_session_duration_30d": 18.014732212192435,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "10%",
+        "raw_score": 0.10984726819676362,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "Mission",
+        "match_score": "10%",
+        "raw_score": 0.10313506864580686,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "9%",
+        "raw_score": 0.09762944739528906,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P009013",
+    "segment": "Casual",
+    "churn_risk": "5%",
+    "ltv": "\u20ac-170",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "4%",
+        "raw_score": 0.043220092249228216,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "4%",
+        "raw_score": 0.043220092249228216,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      },
+      {
+        "type": "ReloadBonus",
+        "match_score": "4%",
+        "raw_score": 0.0429223126242632,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      }
+    ]
+  },
+  {
+    "player_id": "P003282",
+    "segment": "Core",
+    "churn_risk": "5%",
+    "ltv": "\u20ac22891",
+    "crg_score": 30,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": -3.7997288804180207,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 66.94092989455099,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "8%",
+        "raw_score": 0.08792495847074877,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "Mission",
+        "match_score": "4%",
+        "raw_score": 0.04890466214004741,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "4%",
+        "raw_score": 0.04890466214004741,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      }
+    ]
+  },
+  {
+    "player_id": "P008671",
+    "segment": "HighRoller",
+    "churn_risk": "38%",
+    "ltv": "\u20ac33906",
+    "crg_score": 40,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.999999999698836,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 16.522677736675295,
+      "hours_since_major_loss": 162.91621554036945
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "4%",
+        "raw_score": 0.0481573851316081,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "Mission",
+        "match_score": "4%",
+        "raw_score": 0.04813705090253172,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "4%",
+        "raw_score": 0.04730692766870684,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P008731",
+    "segment": "Core",
+    "churn_risk": "5%",
+    "ltv": "\u20ac10442",
+    "crg_score": 22,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": -5.050516677198207,
+      "deposit_burst_flag": 1.0,
+      "avg_session_duration_30d": 37.68973236901325,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "13%",
+        "raw_score": 0.13813904497738178,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "13%",
+        "raw_score": 0.13268879455891425,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "13%",
+        "raw_score": 0.13268879455891425,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      }
+    ]
+  },
+  {
+    "player_id": "P003998",
+    "segment": "Casual",
+    "churn_risk": "60%",
+    "ltv": "\u20ac4049",
+    "crg_score": 62,
+    "risk_action": "BLOCK",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999936024568,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 37.69603935114931,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "AccaInsurance",
+        "match_score": "10%",
+        "raw_score": 0.10238867001599183,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.0x",
+        "risk_status": "Blocked",
+        "reason": "Frequent multi-leg bets"
+      },
+      {
+        "type": "Mission",
+        "match_score": "10%",
+        "raw_score": 0.10338825703017103,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.0x",
+        "risk_status": "Blocked",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "Activation",
+        "match_score": "9%",
+        "raw_score": 0.09874807197627544,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.0x",
+        "risk_status": "Blocked",
+        "reason": "Dormancy risk mitigation"
+      }
+    ]
+  },
+  {
+    "player_id": "P005207",
+    "segment": "Casual",
+    "churn_risk": "32%",
+    "ltv": "\u20ac566",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Mission",
+        "match_score": "2%",
+        "raw_score": 0.02546558496040241,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "2%",
+        "raw_score": 0.02546558496040241,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      },
+      {
+        "type": "ReloadBonus",
+        "match_score": "2%",
+        "raw_score": 0.024133654887220576,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      }
+    ]
+  },
+  {
+    "player_id": "P007986",
+    "segment": "Casual",
+    "churn_risk": "48%",
+    "ltv": "\u20ac-544",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "28%",
+        "raw_score": 0.2863845451485444,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "11%",
+        "raw_score": 0.11301776336792582,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Frequent multi-leg bets"
+      },
+      {
+        "type": "Activation",
+        "match_score": "11%",
+        "raw_score": 0.11301776336792582,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Dormancy risk mitigation"
+      }
+    ]
+  },
+  {
+    "player_id": "P000618",
+    "segment": "Core",
+    "churn_risk": "39%",
+    "ltv": "\u20ac15989",
+    "crg_score": 40,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.999999997939504,
+      "deposit_burst_flag": 1.0,
+      "avg_session_duration_30d": 27.13491211071305,
+      "hours_since_major_loss": 6791.797864725391
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "4%",
+        "raw_score": 0.04327508739441603,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "Mission",
+        "match_score": "4%",
+        "raw_score": 0.04193264680076524,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "4%",
+        "raw_score": 0.0410304252853514,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P001941",
+    "segment": "Core",
+    "churn_risk": "58%",
+    "ltv": "\u20ac-8127",
+    "crg_score": 47,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999941131454,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 34.23960807975544,
+      "hours_since_major_loss": 715.0455358419817
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "15%",
+        "raw_score": 0.1530753666136334,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "12%",
+        "raw_score": 0.12662120466711224,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      },
+      {
+        "type": "Activation",
+        "match_score": "12%",
+        "raw_score": 0.12662120466711224,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Dormancy risk mitigation"
+      }
+    ]
+  },
+  {
+    "player_id": "P007471",
+    "segment": "Casual",
+    "churn_risk": "24%",
+    "ltv": "\u20ac2192",
+    "crg_score": 55,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.999999991940034,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 22.429079435080997,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "6%",
+        "raw_score": 0.06925706050570941,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "6%",
+        "raw_score": 0.0667384731426402,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      },
+      {
+        "type": "Mission",
+        "match_score": "6%",
+        "raw_score": 0.06437047786789443,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      }
+    ]
+  },
+  {
+    "player_id": "P000168",
+    "segment": "Core",
+    "churn_risk": "30%",
+    "ltv": "\u20ac18161",
+    "crg_score": 55,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999906270504,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 23.812222360843027,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "13%",
+        "raw_score": 0.1385101654353568,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "Mission",
+        "match_score": "12%",
+        "raw_score": 0.12480933858919432,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "12%",
+        "raw_score": 0.1234009258929075,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P001929",
+    "segment": "Core",
+    "churn_risk": "60%",
+    "ltv": "\u20ac31315",
+    "crg_score": 62,
+    "risk_action": "BLOCK",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.6095302404226025,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 37.6633667366574,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "AccaInsurance",
+        "match_score": "12%",
+        "raw_score": 0.12499113647655864,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.0x",
+        "risk_status": "Blocked",
+        "reason": "Frequent multi-leg bets"
+      },
+      {
+        "type": "Mission",
+        "match_score": "13%",
+        "raw_score": 0.13440508554953748,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.0x",
+        "risk_status": "Blocked",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "Activation",
+        "match_score": "12%",
+        "raw_score": 0.12499113647655864,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.0x",
+        "risk_status": "Blocked",
+        "reason": "Dormancy risk mitigation"
+      }
+    ]
+  },
+  {
+    "player_id": "P000655",
+    "segment": "Casual",
+    "churn_risk": "10%",
+    "ltv": "\u20ac-3011",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "11%",
+        "raw_score": 0.11409158873120122,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "11%",
+        "raw_score": 0.11409158873120122,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      },
+      {
+        "type": "Mission",
+        "match_score": "10%",
+        "raw_score": 0.10551401292494728,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High engagement propensity"
+      }
+    ]
+  },
+  {
+    "player_id": "P005315",
+    "segment": "Core",
+    "churn_risk": "49%",
+    "ltv": "\u20ac9840",
+    "crg_score": 15,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": -3.411815255873192,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 24.18535770012311,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Mission",
+        "match_score": "3%",
+        "raw_score": 0.032655358355888585,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "3%",
+        "raw_score": 0.032655358355888585,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "3%",
+        "raw_score": 0.032655358355888585,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      }
+    ]
+  },
+  {
+    "player_id": "P007088",
+    "segment": "Casual",
+    "churn_risk": "10%",
+    "ltv": "\u20ac1999",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "9%",
+        "raw_score": 0.0998089678632198,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "9%",
+        "raw_score": 0.09687360016608806,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "9%",
+        "raw_score": 0.09687360016608806,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      }
+    ]
+  },
+  {
+    "player_id": "P000451",
+    "segment": "Casual",
+    "churn_risk": "45%",
+    "ltv": "\u20ac4852",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "7%",
+        "raw_score": 0.07963177552221815,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "7%",
+        "raw_score": 0.07307501900210966,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "7%",
+        "raw_score": 0.07307501900210966,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      }
+    ]
+  },
+  {
+    "player_id": "P009987",
+    "segment": "HighRoller",
+    "churn_risk": "44%",
+    "ltv": "\u20ac117601",
+    "crg_score": 55,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999988821195,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 93.8879313962573,
+      "hours_since_major_loss": 562.7411109356086
+    },
+    "recommendations": [
+      {
+        "type": "ReAcquisition",
+        "match_score": "10%",
+        "raw_score": 0.10315173311231875,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Win-back strategy"
+      },
+      {
+        "type": "Mission",
+        "match_score": "8%",
+        "raw_score": 0.08816582694159858,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "8%",
+        "raw_score": 0.08714842720952605,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      }
+    ]
+  },
+  {
+    "player_id": "P000591",
+    "segment": "Core",
+    "churn_risk": "10%",
+    "ltv": "\u20ac13123",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": -1.4936234973074058,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 18.409924775100865,
+      "hours_since_major_loss": 2862.6157820491003
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "1%",
+        "raw_score": 0.011531111351753765,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "ReAcquisition",
+        "match_score": "1%",
+        "raw_score": 0.011531111351753765,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Win-back strategy"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "1%",
+        "raw_score": 0.011092439507196024,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P006548",
+    "segment": "Core",
+    "churn_risk": "58%",
+    "ltv": "\u20ac11232",
+    "crg_score": 0,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 0.0,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "15%",
+        "raw_score": 0.15862758769148705,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "15%",
+        "raw_score": 0.15124825319287788,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "15%",
+        "raw_score": 0.15124825319287788,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      }
+    ]
+  },
+  {
+    "player_id": "P008553",
+    "segment": "VIP",
+    "churn_risk": "19%",
+    "ltv": "\u20ac93164",
+    "crg_score": 47,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999999293052,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 11.574582780693182,
+      "hours_since_major_loss": 42.13609307116945
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "8%",
+        "raw_score": 0.08056010136386274,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "Mission",
+        "match_score": "7%",
+        "raw_score": 0.07850674046341982,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "6%",
+        "raw_score": 0.06634263777648725,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P004212",
+    "segment": "Casual",
+    "churn_risk": "30%",
+    "ltv": "\u20ac6415",
+    "crg_score": 15,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": -5.873852217247476,
+      "deposit_burst_flag": 1.0,
+      "avg_session_duration_30d": 10.458509389081868,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "5%",
+        "raw_score": 0.057542761537061705,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "5%",
+        "raw_score": 0.057542761537061705,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      },
+      {
+        "type": "ReloadBonus",
+        "match_score": "5%",
+        "raw_score": 0.05635489374725083,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      }
+    ]
+  },
+  {
+    "player_id": "P005033",
+    "segment": "Casual",
+    "churn_risk": "83%",
+    "ltv": "\u20ac4124",
+    "crg_score": 55,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.99999999543754,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 18.747925409629833,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "AccaInsurance",
+        "match_score": "1%",
+        "raw_score": 0.01738922430094607,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      },
+      {
+        "type": "Mission",
+        "match_score": "1%",
+        "raw_score": 0.01738922430094607,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "Activation",
+        "match_score": "1%",
+        "raw_score": 0.01738922430094607,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Dormancy risk mitigation"
+      }
+    ]
+  },
+  {
+    "player_id": "P005338",
+    "segment": "Core",
+    "churn_risk": "73%",
+    "ltv": "\u20ac19309",
+    "crg_score": 55,
+    "risk_action": "DOWNGRADE",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.9999999983025242,
+      "deposit_burst_flag": 1.0,
+      "avg_session_duration_30d": 10.70772286824439,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "Cashback",
+        "match_score": "13%",
+        "raw_score": 0.13095023059193736,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "Mission",
+        "match_score": "12%",
+        "raw_score": 0.12074427425938743,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "High engagement propensity"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "10%",
+        "raw_score": 0.10985339761873537,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "0.5x",
+        "risk_status": "Downgraded",
+        "reason": "Frequent multi-leg bets"
+      }
+    ]
+  },
+  {
+    "player_id": "P007522",
+    "segment": "HighRoller",
+    "churn_risk": "63%",
+    "ltv": "\u20ac-13213",
+    "crg_score": 15,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": 0.0961650097802368,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 30.08701795134448,
+      "hours_since_major_loss": 29.078598254587774
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "24%",
+        "raw_score": 0.2422050088928227,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "Cashback",
+        "match_score": "18%",
+        "raw_score": 0.18034346029550338,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High recent activity volume"
+      },
+      {
+        "type": "DepositAndGet",
+        "match_score": "18%",
+        "raw_score": 0.18034346029550338,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "High LTV potential"
+      }
+    ]
+  },
+  {
+    "player_id": "P005686",
+    "segment": "Casual",
+    "churn_risk": "65%",
+    "ltv": "\u20ac-1293",
+    "crg_score": 15,
+    "risk_action": "ALLOW",
+    "risk_metrics": {
+      "loss_ratio_7d": -4.59711966567434,
+      "deposit_burst_flag": 0.0,
+      "avg_session_duration_30d": 16.876421161127606,
+      "hours_since_major_loss": 0.0
+    },
+    "recommendations": [
+      {
+        "type": "ReloadBonus",
+        "match_score": "20%",
+        "raw_score": 0.20265762512672023,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Deposit frequency trend"
+      },
+      {
+        "type": "AccaInsurance",
+        "match_score": "7%",
+        "raw_score": 0.07640445993032773,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Frequent multi-leg bets"
+      },
+      {
+        "type": "Activation",
+        "match_score": "7%",
+        "raw_score": 0.07640445993032773,
+        "model_used": "HistGradientBoosting",
+        "risk_penalty": "None",
+        "risk_status": "",
+        "reason": "Dormancy risk mitigation"
+      }
+    ]
+  }
+]

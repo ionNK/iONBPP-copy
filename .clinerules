@@ -1,0 +1,3 @@
+- Run terminal commands ONE at a time. Never chain commands with && or ||.
+- Never use redirection (>, >>, 2>&1) or pipes (|).
+- Run cd as its own command before other commands.

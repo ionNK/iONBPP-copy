@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Betika Support Center Guide v1.0</title>
+    <style>
+        @media print {
+            @page {
+                margin: 2cm;
+                size: A4;
+            }
+
+            body {
+                font-size: 11pt;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #1e293b;
+            border-bottom: 3px solid #F2D641;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+
+        h2 {
+            color: #334155;
+            margin-top: 30px;
+            border-left: 4px solid #F2D641;
+            padding-left: 10px;
+        }
+
+        h3 {
+            color: #475569;
+            margin-top: 20px;
+        }
+
+        .cover-page {
+            text-align: center;
+            padding: 100px 0;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            margin: -40px -40px 40px -40px;
+        }
+
+        .cover-page h1 {
+            color: #F2D641;
+            border: none;
+            font-size: 3em;
+            margin: 0;
+        }
+
+        .cover-page h2 {
+            color: #cbd5e1;
+            border: none;
+            font-weight: 400;
+            font-size: 1.5em;
+            margin-top: 10px;
+        }
+
+        .meta {
+            margin-top: 50px;
+            color: #94a3b8;
+        }
+
+        .step {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            gap: 15px;
+        }
+
+        .step-num {
+            background: #F2D641;
+            color: #0f172a;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .screenshot {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .caption {
+            text-align: center;
+            font-style: italic;
+            color: #64748b;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+
+        .note {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 20px 0;
+            color: #1e3a8a;
+        }
+
+        .warning {
+            background: #fff7ed;
+            border-left: 4px solid #f97316;
+            padding: 15px;
+            margin: 20px 0;
+            color: #7c2d12;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="cover-page">
+        <h1>Betika Promotions Platform</h1>
+        <h2>Support Center Guide</h2>
+        <div class="meta">
+            <p><strong>Version:</strong> 1.0</p>
+            <p><strong>Date:</strong> February 11, 2026</p>
+            <p><strong>For:</strong> Internal Users & Administrators</p>
+        </div>
+    </div>
+
+    <h1>1. Introduction to Support Center</h1>
+    <p>The <strong>Support Center</strong> is your centralized hub for resolving issues, tracking requests, and getting
+        instant answers. Integrated directly into the BPP settings, it allows you to:</p>
+    <ul>
+        <li>Log bugs and feature requests directly to Jira.</li>
+        <li>Chat with an AI Assistant for troubleshooting.</li>
+        <li>Track the status of your submitted tickets.</li>
+    </ul>
+
+    <div class="note">
+        <strong>Accessing Support:</strong> Navigate to <strong>Settings</strong> via the sidebar, then select the
+        <strong>Support</strong> tab (look for the <span style="font-family: monospace;">?</span> icon).
+    </div>
+
+    <div class="page-break"></div>
+
+    <h1>2. Logging a New Issue</h1>
+    <p>If you encounter a bug or need access to a specific feature, use the "Log Issue" tab.</p>
+
+    <div class="step">
+        <div class="step-num">1</div>
+        <div><strong>Select Category:</strong> Choose the type of issue (Bug, Access, Billing, etc.) to route your
+            ticket correctly.</div>
+    </div>
+    <div class="step">
+        <div class="step-num">2</div>
+        <div><strong>Set Priority:</strong> Mark urgent issues as High/Critical. Please reserve Critical for system
+            outages only.</div>
+    </div>
+    <div class="step">
+        <div class="step-num">3</div>
+        <div><strong>Describe the Issue:</strong> Provide a clear title and detailed description.</div>
+    </div>
+    <div class="step">
+        <div class="step-num">4</div>
+        <div><strong>Attachments:</strong> You can attach screenshots or error logs if available.</div>
+    </div>
+
+    <img src="images/support_log_issue.png" alt="Log Issue Interface" class="screenshot">
+    <p class="caption">Figure 1: The 'Log Issue' submission form</p>
+
+    <div class="page-break"></div>
+
+    <h1>3. Tracking Ticket Status</h1>
+    <p>View all your submitted requests in the "My Tickets" tab. This view provides real-time updates from the Jira
+        system.</p>
+
+    <div class="step">
+        <div class="step-num">1</div>
+        <div><strong>Status Badges:</strong>
+            <ul>
+                <li><span style="color:#3b82f6">Open</span>: Ticket received, waiting for assignment.</li>
+                <li><span style="color:#f59e0b">In Progress</span>: Team is actively working on it.</li>
+                <li><span style="color:#22c55e">Resolved</span>: Issue fixed or request completed.</li>
+            </ul>
+        </div>
+    </div>
+
+    <img src="images/support_ticket_list.png" alt="Ticket History" class="screenshot">
+    <p class="caption">Figure 2: Viewing ticket history and status</p>
+
+    <div class="page-break"></div>
+
+    <h1>4. Using the AI Assistant</h1>
+    <p>For immediate help, ask the AI Assistant. It is trained on the BPP documentation and can answer questions about
+        promotion rules, billing, and common errors.</p>
+
+    <div class="note">
+        <strong>Tip:</strong> You can ask questions like <em>"How do I create a deposit bonus?"</em> or <em>"Why can't I
+            login?"</em>
+    </div>
+
+    <img src="images/support_chat.png" alt="AI Assistant Chat" class="screenshot">
+    <p class="caption">Figure 3: Interactive AI Support Chat</p>
+
+    <div class="page-break"></div>
+
+    <h1>5. Configuration (Admin Only)</h1>
+    <p>Administrators can configure how the support system connects to external tools.</p>
+
+    <ul>
+        <li><strong>Jira Integration:</strong> Automatically creates tickets in a specified Jira Project.</li>
+        <li><strong>Email Routing:</strong> Sends support requests to a shared inbox (e.g., support@betika.com) if Jira
+            is down or not used.</li>
+    </ul>
+
+    <img src="images/support_config.png" alt="Support Configuration" class="screenshot">
+    <p class="caption">Figure 4: Admin configuration for support integrations</p>
+
+    <div class="warning">
+        <strong>Note:</strong> Changing the Jira Project Key will affect where new tickets are created. Ensure the
+        service account has write permissions to the new project.
+    </div>
+
+    <h1>6. Contact Information</h1>
+    <p>If you cannot access the system or have critical emergencies:</p>
+
+    <p>
+        <strong>Email:</strong> support@betika.com<br>
+        <strong>Emergency Hotline:</strong> +254 700 000 000<br>
+        <strong>Slack Channel:</strong> #platform-support
+    </p>
+
+</body>
+
+</html>

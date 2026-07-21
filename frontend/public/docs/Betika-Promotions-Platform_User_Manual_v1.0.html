@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Betika Promotions Platform - User Manual v1.0</title>
+    <style>
+        @media print {
+            @page {
+                margin: 2cm;
+                size: A4;
+            }
+
+            body {
+                font-size: 11pt;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .cover-page {
+            text-align: center;
+            padding: 100px 40px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a2332 0%, #2a3441 100%);
+            color: #fff;
+            margin: -20px -20px 40px -20px;
+        }
+
+        .cover-page h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #F2D641;
+        }
+
+        .cover-page h2 {
+            font-size: 32px;
+            margin-bottom: 40px;
+            font-weight: 400;
+        }
+
+        .cover-meta {
+            margin-top: 60px;
+            font-size: 18px;
+            line-height: 2;
+        }
+
+        .cover-meta p {
+            margin: 10px 0;
+        }
+
+        h1 {
+            color: #1a2332;
+            font-size: 32px;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #F2D641;
+        }
+
+        h2 {
+            color: #2a3441;
+            font-size: 24px;
+            margin: 30px 0 15px 0;
+            padding-left: 10px;
+            border-left: 4px solid #F2D641;
+        }
+
+        h3 {
+            color: #3a4451;
+            font-size: 20px;
+            margin: 25px 0 12px 0;
+        }
+
+        h4 {
+            color: #4a5461;
+            font-size: 16px;
+            margin: 20px 0 10px 0;
+            font-weight: 600;
+        }
+
+        p {
+            margin: 12px 0;
+            text-align: justify;
+        }
+
+        ul,
+        ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 4px solid #F2D641;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #1a2332;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .toc {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+
+        .toc h2 {
+            border-left: none;
+            padding-left: 0;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc li {
+            margin: 10px 0;
+        }
+
+        .toc a {
+            color: #1a2332;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            color: #F2D641;
+        }
+
+        .screenshot {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .screenshot-caption {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning::before {
+            content: "⚠️ Warning: ";
+            font-weight: bold;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success::before {
+            content: "✅ Success: ";
+            font-weight: bold;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .info::before {
+            content: "ℹ️ Info: ";
+            font-weight: bold;
+        }
+
+        .step-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #F2D641;
+            color: #1a2332;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        a {
+            color: #1a2332;
+            text-decoration: underline;
+        }
+
+        a:hover {
+            color: #F2D641;
+        }
+
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #F2D641;
+            color: #1a2332;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .print-button:hover {
+            background: #e0c431;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="print-button no-print" onclick="window.print()">🖨️ Print to PDF</button>
+
+    <!-- Cover Page -->
+    <div class="cover-page">
+        <h1>Betika Promotions Platform</h1>
+        <h2>User Manual</h2>
+        <div class="cover-meta">
+            <p><strong>Version:</strong> 1.0</p>
+            <p><strong>Author:</strong> Betika Product Team</p>
+            <p><strong>Date:</strong> February 10, 2026</p>
+            <p style="margin-top: 40px; font-style: italic;">Complete guide to managing promotions and campaigns</p>
+        </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc page-break">
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#introduction">1. Introduction</a></li>
+            <li><a href="#getting-started">2. Getting Started</a></li>
+            <li><a href="#dashboard">3. System Dashboard Overview</a></li>
+            <li><a href="#core-features">4. Core Features</a></li>
+            <li><a href="#common-tasks">5. Common User Tasks</a></li>
+            <li><a href="#troubleshooting">6. Troubleshooting</a></li>
+            <li><a href="#faq">7. FAQ</a></li>
+            <li><a href="#support">8. Support & Contact Information</a></li>
+        </ul>
+    </div>
+
+    <!-- Introduction -->
+    <section id="introduction" class="page-break">
+        <h1>1. Introduction</h1>
+
+        <h2>Purpose of the System</h2>
+        <p>The <strong>Betika Promotions Platform (BPP)</strong> is a comprehensive campaign management system designed
+            to help marketing teams create, manage, and track promotional campaigns across multiple markets and
+            platforms.</p>
+
+        <h2>Who Should Use This Manual</h2>
+        <p>This manual is designed for:</p>
+        <ul>
+            <li><strong>Marketing Managers</strong> creating and managing promotions</li>
+            <li><strong>Campaign Coordinators</strong> monitoring promotion performance</li>
+            <li><strong>Compliance Officers</strong> reviewing promotion terms and conditions</li>
+            <li><strong>Administrators</strong> overseeing the entire promotion ecosystem</li>
+        </ul>
+
+        <h2>What You Will Learn</h2>
+        <p>By the end of this manual, you will be able to:</p>
+        <ul>
+            <li>Access and navigate the BPP system</li>
+            <li>Create new promotional campaigns from scratch</li>
+            <li>Configure qualification rules and reward structures</li>
+            <li>Preview customer-facing promotion pages</li>
+            <li>Monitor campaign performance and analytics</li>
+            <li>Manage segments and target audiences</li>
+        </ul>
+    </section>
+
+    <!-- Getting Started -->
+    <section id="getting-started" class="page-break">
+        <h1>2. Getting Started</h1>
+
+        <h2>Accessing the System</h2>
+        <div class="step-box">
+            <p><span class="step-number">1</span> Open your web browser (Chrome, Firefox, Safari, or Edge recommended)
+            </p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">2</span> Navigate to the BPP URL:</p>
+            <pre>https://bpp.betika.com</pre>
+            <p style="font-style: italic; color: #666;">(Replace with your organization's actual URL)</p>
+        </div>
+
+        <h2>Logging In</h2>
+        <p>The login page provides multiple authentication options for your convenience:</p>
+
+        <div class="step-box">
+            <p><span class="step-number">1</span> On the login page, you will see multiple sign-in options:</p>
+            <ul>
+                <li><strong>Email/Password</strong> - Traditional login</li>
+                <li><strong>Google SSO</strong> - Sign in with your Google account</li>
+                <li><strong>Microsoft SSO</strong> - Sign in with your Microsoft account</li>
+            </ul>
+        </div>
+
+        <h3>For Email/Password Login:</h3>
+        <ol>
+            <li>Enter your registered email address</li>
+            <li>Enter your password</li>
+            <li>Click the <strong>"Sign In"</strong> button</li>
+        </ol>
+
+        <h3>For SSO Login:</h3>
+        <ol>
+            <li>Click the <strong>"Sign in with Google"</strong> or <strong>"Sign in with Microsoft"</strong> button
+            </li>
+            <li>Follow the authentication prompts from your provider</li>
+            <li>Grant necessary permissions when requested</li>
+        </ol>
+
+        <img src="images/login_page.png" alt="Login Page Screenshot" class="screenshot">
+        <p class="screenshot-caption">Figure 1: BPP Login Page with Email/Password and SSO options</p>
+
+        <div class="success">After successful authentication, you will be redirected to the main dashboard</div>
+
+        <h2>Password Reset Process</h2>
+        <p>If you've forgotten your password:</p>
+
+        <div class="step-box">
+            <p><span class="step-number">1</span> Click the <strong>"Forgot Password?"</strong> link on the login page
+            </p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">2</span> Enter your registered email address</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">3</span> Check your email for a password reset link</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">4</span> Click the link in the email (valid for 24 hours)</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">5</span> Enter your new password twice to confirm</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">6</span> Click <strong>"Reset Password"</strong></p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">7</span> Return to the login page and sign in with your new password</p>
+        </div>
+
+        <h2>First-Time Setup</h2>
+        <p>When you log in for the first time:</p>
+
+        <div class="step-box">
+            <p><span class="step-number">1</span> You may be prompted to complete your profile:</p>
+            <ul>
+                <li>Full Name</li>
+                <li>Department</li>
+                <li>Role</li>
+                <li>Contact Number</li>
+            </ul>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">2</span> Review and accept the Terms of Service</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">3</span> Take a quick tour of the interface (optional but recommended)</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">4</span> Set your notification preferences</p>
+        </div>
+    </section>
+
+    <!-- Dashboard Overview -->
+    <section id="dashboard" class="page-break">
+        <h1>3. System Dashboard Overview</h1>
+
+        <h2>Main Dashboard Components</h2>
+
+        <h3>A. Sidebar Navigation (Left Panel)</h3>
+        <ul>
+            <li><strong>Dashboard</strong> - Main overview and analytics</li>
+            <li><strong>Promotions</strong> - Campaign management (highlighted in yellow when active)</li>
+            <li><strong>Manual Award</strong> - Direct bonus distribution</li>
+            <li><strong>Compliance</strong> - Regulatory review and approval</li>
+            <li><strong>Experiments</strong> - A/B testing and optimization</li>
+            <li><strong>Reports</strong> - Detailed analytics and exports</li>
+        </ul>
+
+        <h3>B. Command Center (Main Area)</h3>
+        <p>The dashboard displays real-time metrics:</p>
+
+        <ol>
+            <li><strong>Revenue Trends</strong>
+                <ul>
+                    <li>Visual graph showing revenue over time</li>
+                    <li>Compare current vs. previous periods</li>
+                </ul>
+            </li>
+            <li><strong>Cost Distribution</strong>
+                <ul>
+                    <li>Pie chart showing budget allocation</li>
+                    <li>Breakdown by promotion type</li>
+                </ul>
+            </li>
+            <li><strong>Active Campaigns</strong>
+                <ul>
+                    <li>Quick view of currently running promotions</li>
+                    <li>Status indicators (Active, Paused, Scheduled)</li>
+                </ul>
+            </li>
+            <li><strong>Performance Metrics</strong>
+                <ul>
+                    <li>Claims count</li>
+                    <li>Conversion rates</li>
+                    <li>Cost per acquisition</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>C. Top Navigation Bar</h3>
+        <ul>
+            <li><strong>User Profile</strong> - Access settings and logout</li>
+            <li><strong>Notifications</strong> - System alerts and updates</li>
+            <li><strong>Help</strong> - Quick access to support</li>
+        </ul>
+
+        <h2>Understanding Status Indicators</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Indicator</th>
+                    <th>Meaning</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>🟢 <strong>Active</strong></td>
+                    <td>Promotion is currently live</td>
+                </tr>
+                <tr>
+                    <td>🟡 <strong>Scheduled</strong></td>
+                    <td>Promotion will start in the future</td>
+                </tr>
+                <tr>
+                    <td>🔴 <strong>Paused</strong></td>
+                    <td>Promotion temporarily stopped</td>
+                </tr>
+                <tr>
+                    <td>⚫ <strong>Ended</strong></td>
+                    <td>Promotion has completed</td>
+                </tr>
+                <tr>
+                    <td>🔵 <strong>Draft</strong></td>
+                    <td>Promotion not yet published</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <img src="images/dashboard.png" alt="Dashboard Overview Screenshot" class="screenshot">
+        <p class="screenshot-caption">Figure 2: Main Dashboard showing metrics, charts, and navigation</p>
+    </section>
+
+    <!-- Core Features -->
+    <section id="core-features" class="page-break">
+        <h1>4. Core Features</h1>
+
+        <h2>Feature 1: Creating a New Promotion</h2>
+
+        <h3>Accessing the Promotions Page</h3>
+        <div class="step-box">
+            <p><span class="step-number">1</span> Click <strong>"Promotions"</strong> in the left sidebar</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">2</span> You will see a list of all existing promotions with:</p>
+            <ul>
+                <li>Promotion name and type</li>
+                <li>Current status</li>
+                <li>Target segment</li>
+                <li>Performance stats (claims, cost, conversion)</li>
+                <li>Active period</li>
+            </ul>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">3</span> Click the <strong>"+ Create Promotion"</strong> button (top right,
+                yellow button)</p>
+        </div>
+
+        <img src="images/promotions_list.png" alt="Promotions List Screenshot" class="screenshot">
+        <p class="screenshot-caption">Figure 3: Promotions page showing list of campaigns with status and performance
+            metrics</p>
+
+        <h3>Step 1: Basic Information</h3>
+        <p><strong>Fill in the following fields:</strong></p>
+
+        <ol>
+            <li><strong>Promotion Name</strong> (Required)
+                <ul>
+                    <li>Enter a clear, descriptive name</li>
+                    <li>Example: "Welcome Bonus 100%"</li>
+                    <li>This is for internal use only</li>
+                </ul>
+            </li>
+            <li><strong>Display Title</strong> (Required)
+                <ul>
+                    <li>The title customers will see</li>
+                    <li>Example: "Get 100% Bonus on Your First Deposit!"</li>
+                    <li>Keep it exciting and clear</li>
+                </ul>
+            </li>
+            <li><strong>Description</strong> (Required)
+                <ul>
+                    <li>Brief explanation of the offer</li>
+                    <li>Example: "New players receive a 100% match bonus up to KES 10,000"</li>
+                    <li>2-3 sentences recommended</li>
+                </ul>
+            </li>
+            <li><strong>Promotion Type</strong> (Required)
+                <ul>
+                    <li>Select from dropdown: Deposit Match, Free Bet, Cashback, Loyalty Reward, Custom</li>
+                </ul>
+            </li>
+            <li><strong>Priority Level</strong> (Optional)
+                <ul>
+                    <li>High, Medium, or Low</li>
+                    <li>Determines display order on customer-facing pages</li>
+                </ul>
+            </li>
+        </ol>
+
+        <img src="images/create_promotion.png" alt="Create Promotion Wizard Screenshot" class="screenshot">
+        <p class="screenshot-caption">Figure 4: Step 1 of the Create Promotion wizard showing basic information fields
+        </p>
+
+        <div class="step-box">
+            <p><span class="step-number">4</span> Click <strong>"Next Step"</strong> to continue</p>
+        </div>
+
+        <h3>Step 2: Scope & Eligibility</h3>
+        <p><strong>Configure who can participate:</strong></p>
+
+        <ol>
+            <li><strong>Target Markets</strong> (Required)
+                <ul>
+                    <li>Select one or more countries: Kenya, Ghana, Tanzania, Nigeria, Mozambique, Ethiopia</li>
+                </ul>
+            </li>
+            <li><strong>Platform</strong> (Required)
+                <ul>
+                    <li>Choose where the promotion applies: Web, Mobile App (iOS), Mobile App (Android), USSD</li>
+                </ul>
+            </li>
+            <li><strong>Player Segment</strong> (Optional)
+                <ul>
+                    <li>Choose a pre-defined segment or create custom rules</li>
+                    <li>Options: All Players, New Players Only, VIP Players, Dormant Players, Custom Segment</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Customer Preview Mode</h3>
+        <p>Preview Mode allows you to see exactly what customers will see when they view your promotion.</p>
+
+        <h4>How to Access Preview Mode:</h4>
+        <p><strong>Method 1: From Promotions List</strong></p>
+        <div class="step-box">
+            <p><span class="step-number">1</span> Click the ⋮ menu next to any promotion</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">2</span> Select <strong>"Preview Customer View"</strong></p>
+        </div>
+
+        <p><strong>Method 2: From Creation Wizard</strong></p>
+        <div class="step-box">
+            <p><span class="step-number">1</span> While creating or editing a promotion</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">2</span> Click the <strong>"Preview Customer View"</strong> button in the
+                footer</p>
+        </div>
+
+        <h4>What You'll See:</h4>
+        <p>The preview shows:</p>
+        <ul>
+            <li>Betika-branded header and navigation</li>
+            <li>Promotion hero banner</li>
+            <li>"How It Works" section with numbered steps</li>
+            <li>Full Terms & Conditions</li>
+            <li>Betika footer with licensing information</li>
+        </ul>
+
+        <img src="images/customer_preview.png" alt="Customer Preview Mode Screenshot" class="screenshot">
+        <p class="screenshot-caption">Figure 5: Customer Preview Mode showing how promotions appear to end users</p>
+
+        <div class="info">At the top of the preview, you'll see a "PREVIEW MODE" badge and "Back to Admin" button to
+            return to editing.</div>
+    </section>
+
+    <!-- Common Tasks -->
+    <section id="common-tasks" class="page-break">
+        <h1>5. Common User Tasks</h1>
+
+        <h2>Task 1: Searching for a Promotion</h2>
+        <div class="step-box">
+            <p><span class="step-number">1</span> Go to the Promotions page</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">2</span> Use the search bar at the top</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">3</span> Enter keywords: Promotion name, Type, Status, Date range</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">4</span> Press Enter or click the search icon</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">5</span> Results are filtered in real-time</p>
+        </div>
+
+        <h2>Task 2: Exporting Promotion Data</h2>
+        <div class="step-box">
+            <p><span class="step-number">1</span> Go to the Promotions page</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">2</span> Select promotions to export (checkboxes)</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">3</span> Click <strong>"Export"</strong> button</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">4</span> Choose export format: CSV (for Excel), PDF (for reports), JSON (for
+                developers)</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">5</span> Click <strong>"Download"</strong></p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">6</span> File will download to your default downloads folder</p>
+        </div>
+
+        <h2>Task 3: Updating Your Profile</h2>
+        <div class="step-box">
+            <p><span class="step-number">1</span> Click your profile icon (top right)</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">2</span> Select <strong>"Settings"</strong></p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">3</span> Navigate to <strong>"Profile"</strong> tab</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">4</span> Update your information: Name, Email, Phone number, Department, Role
+            </p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">5</span> Click <strong>"Save Changes"</strong></p>
+        </div>
+    </section>
+
+    <!-- Troubleshooting -->
+    <section id="troubleshooting" class="page-break">
+        <h1>6. Troubleshooting</h1>
+
+        <h2>Issue 1: Cannot Log In</h2>
+        <p><strong>Symptoms:</strong></p>
+        <ul>
+            <li>"Invalid credentials" error</li>
+            <li>Account locked message</li>
+        </ul>
+
+        <p><strong>Possible Causes:</strong></p>
+        <ul>
+            <li>Incorrect password</li>
+            <li>Account not activated</li>
+            <li>Too many failed login attempts</li>
+        </ul>
+
+        <p><strong>Solutions:</strong></p>
+        <ol>
+            <li><strong>Reset your password</strong> - Click "Forgot Password?" on login page and follow the email
+                instructions</li>
+            <li><strong>Contact your administrator</strong> - Your account may need to be activated</li>
+            <li><strong>Wait 15 minutes</strong> - After 5 failed attempts, accounts are temporarily locked</li>
+        </ol>
+
+        <h2>Issue 2: Promotion Not Appearing on Customer Site</h2>
+        <p><strong>Symptoms:</strong></p>
+        <ul>
+            <li>Promotion shows as "Active" in BPP</li>
+            <li>Customers cannot see it on the website</li>
+        </ul>
+
+        <p><strong>Solutions:</strong></p>
+        <ol>
+            <li><strong>Check the schedule</strong> - Verify start date and time, ensure it's in the correct timezone
+            </li>
+            <li><strong>Verify targeting</strong> - Check that the correct markets are selected, confirm platform
+                settings</li>
+            <li><strong>Clear cache</strong> - Ask your technical team to clear the cache, wait 5-10 minutes for
+                propagation</li>
+            <li><strong>Check approval status</strong> - Some promotions require compliance approval</li>
+        </ol>
+
+        <h2>Issue 3: Preview Mode Not Working</h2>
+        <p><strong>Symptoms:</strong></p>
+        <ul>
+            <li>Clicking "Preview Customer View" does nothing</li>
+            <li>Preview shows blank page</li>
+        </ul>
+
+        <p><strong>Solutions:</strong></p>
+        <ol>
+            <li><strong>Allow pop-ups</strong> - Check your browser settings and allow pop-ups for the BPP domain</li>
+            <li><strong>Complete required fields</strong> - Ensure all mandatory fields are filled, save your draft
+                before previewing</li>
+            <li><strong>Enable JavaScript</strong> - Check browser settings and ensure JavaScript is enabled</li>
+            <li><strong>Try a different browser</strong> - Use Chrome, Firefox, or Safari, update to the latest version
+            </li>
+        </ol>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="page-break">
+        <h1>7. FAQ</h1>
+
+        <h2>General Questions</h2>
+
+        <h3>Q1: Who can access the BPP system?</h3>
+        <p><strong>A:</strong> Access is restricted to authorized Betika employees. You need:</p>
+        <ul>
+            <li>A valid company email address</li>
+            <li>Assigned role and permissions</li>
+            <li>Completed onboarding training</li>
+        </ul>
+
+        <h3>Q2: Can I create promotions for multiple markets at once?</h3>
+        <p><strong>A:</strong> Yes! During the "Scope & Eligibility" step, you can select multiple countries. The same
+            promotion will run across all selected markets.</p>
+
+        <h3>Q3: How long does it take for a promotion to go live?</h3>
+        <p><strong>A:</strong></p>
+        <ul>
+            <li><strong>Immediate:</strong> If published with a current start date</li>
+            <li><strong>Scheduled:</strong> Activates automatically at the specified start date/time</li>
+            <li><strong>With Approval:</strong> 1-2 business days for compliance review</li>
+        </ul>
+
+        <h3>Q4: Can I edit a promotion after it's published?</h3>
+        <p><strong>A:</strong></p>
+        <ul>
+            <li><strong>Yes:</strong> Display content, images, and terms can be updated</li>
+            <li><strong>No:</strong> Core mechanics (reward type, qualification rules) cannot be changed</li>
+            <li><strong>Workaround:</strong> Pause the current promotion and create a new one</li>
+        </ul>
+
+        <h2>Technical Questions</h2>
+
+        <h3>Q6: What browsers are supported?</h3>
+        <p><strong>A:</strong></p>
+        <ul>
+            <li>✅ Google Chrome (v90+)</li>
+            <li>✅ Mozilla Firefox (v88+)</li>
+            <li>✅ Safari (v14+)</li>
+            <li>✅ Microsoft Edge (v90+)</li>
+            <li>❌ Internet Explorer (not supported)</li>
+        </ul>
+
+        <h3>Q7: How often is data updated?</h3>
+        <p><strong>A:</strong></p>
+        <ul>
+            <li><strong>Dashboard metrics:</strong> Every 5 minutes</li>
+            <li><strong>Promotion status:</strong> Real-time</li>
+            <li><strong>Performance reports:</strong> Every 15 minutes</li>
+            <li><strong>Financial data:</strong> Every hour</li>
+        </ul>
+    </section>
+
+    <!-- Support -->
+    <section id="support" class="page-break">
+        <h1>8. Support & Contact Information</h1>
+
+        <h2>Getting Help</h2>
+
+        <h3>1. In-App Help</h3>
+        <div class="step-box">
+            <p><span class="step-number">1</span> Click the <strong>"?"</strong> icon (top right)</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">2</span> Search the knowledge base</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">3</span> Browse common topics: Getting Started, Creating Promotions, Reports &
+                Analytics, Troubleshooting</p>
+        </div>
+
+        <h3>2. Email Support</h3>
+        <p><strong>For Technical Issues:</strong></p>
+        <ul>
+            <li>Email: <strong>tech-support@betika.com</strong></li>
+            <li>Response time: 4 business hours</li>
+            <li>Include: Screenshot, error message, steps to reproduce</li>
+        </ul>
+
+        <p><strong>For Compliance Questions:</strong></p>
+        <ul>
+            <li>Email: <strong>compliance@betika.com</strong></li>
+            <li>Response time: 1 business day</li>
+            <li>Include: Promotion details, specific question</li>
+        </ul>
+
+        <p><strong>For General Inquiries:</strong></p>
+        <ul>
+            <li>Email: <strong>bpp-support@betika.com</strong></li>
+            <li>Response time: 24 hours</li>
+        </ul>
+
+        <h3>3. Live Chat</h3>
+        <div class="step-box">
+            <p><span class="step-number">1</span> Click the <strong>"Chat"</strong> icon (bottom right)</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">2</span> Describe your issue</p>
+        </div>
+        <div class="step-box">
+            <p><span class="step-number">3</span> Connect with a support agent</p>
+        </div>
+        <p><strong>Availability:</strong> Monday-Friday, 8:00 AM - 6:00 PM EAT</p>
+
+        <h3>4. Training Sessions</h3>
+        <p><strong>New User Onboarding:</strong></p>
+        <ul>
+            <li>Held every Monday at 10:00 AM</li>
+            <li>Duration: 2 hours</li>
+            <li>Register: <strong>training@betika.com</strong></li>
+        </ul>
+
+        <p><strong>Advanced Features Workshop:</strong></p>
+        <ul>
+            <li>Held first Thursday of each month</li>
+            <li>Duration: 1 hour</li>
+            <li>Topics: Segmentation, A/B testing, advanced analytics</li>
+        </ul>
+
+        <h2>Emergency Contact</h2>
+        <div class="warning">For Critical Issues (System Down, Security Breach):
+            <ul>
+                <li>📞 <strong>Emergency Hotline:</strong> +254-XXX-XXXX-XXX</li>
+                <li>📧 <strong>Emergency Email:</strong> emergency@betika.com</li>
+                <li>⏰ <strong>Available:</strong> 24/7</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div class="footer page-break">
+        <h2>Appendix: Keyboard Shortcuts</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Shortcut</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>Ctrl + N</code></td>
+                    <td>Create new promotion</td>
+                </tr>
+                <tr>
+                    <td><code>Ctrl + S</code></td>
+                    <td>Save draft</td>
+                </tr>
+                <tr>
+                    <td><code>Ctrl + P</code></td>
+                    <td>Preview customer view</td>
+                </tr>
+                <tr>
+                    <td><code>Ctrl + F</code></td>
+                    <td>Search promotions</td>
+                </tr>
+                <tr>
+                    <td><code>Ctrl + E</code></td>
+                    <td>Export data</td>
+                </tr>
+                <tr>
+                    <td><code>Esc</code></td>
+                    <td>Close modal/dialog</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p style="margin-top: 40px;">
+            <strong>End of User Manual</strong><br>
+            For the latest version of this document, visit: <strong>Settings → Documentation</strong>
+        </p>
+
+        <p style="margin-top: 20px; font-size: 12px;">
+            © 2026 Betika. All rights reserved. This document is confidential and intended for authorized personnel
+            only.
+        </p>
+    </div>
+</body>
+
+</html>

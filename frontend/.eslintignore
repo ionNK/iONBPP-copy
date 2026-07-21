@@ -1,0 +1,7 @@
+**/*.js
+venv/
+node_modules/
+.next/
+dist/
+public/
+out/

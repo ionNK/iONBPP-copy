@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PromotionStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+model Promotion {
+  id          String          @id @default(uuid())
+  name        String
+  description String?
+  type        String
+  status      PromotionStatus @default(DRAFT)
+  config      Json            // Stores the complex rules and reward structure
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  triggers    PromotionTrigger[]
+}
+
+model EventLog {
+  id        String   @id @default(uuid())
+  type      String   // e.g., 'bet_placed', 'deposit'
+  payload   Json     // The raw event data
+  processed Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  triggers  PromotionTrigger[]
+}
+
+model PromotionTrigger {
+  id          String   @id @default(uuid())
+  promotionId String
+  eventLogId  String
+  actionTaken Json     // Details of the reward given
+  createdAt   DateTime @default(now())
+
+  promotion   Promotion @relation(fields: [promotionId], references: [id])
+  eventLog    EventLog  @relation(fields: [eventLogId], references: [id])
+}
+
+model Country {
+  code         String   @id // ISO code like 'KE', 'GH'
+  name         String
+  currency     String
+  countryLimit Float
+  promoLimit   Float
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
