@@ -54,6 +54,19 @@
 --ds-opacity-faint: 0.05;
 --ds-opacity-muted: 0.1;
 --ds-opacity-overlay: 0.5;
+/* Unity inverse (Black-prefixed) opacity primitives. The base color reverses
+ * by theme; numeric names preserve the documented Figma token steps. */
+--ds-opacity-inverse-2: rgba(255, 255, 255, 0.02);
+--ds-opacity-inverse-5: rgba(255, 255, 255, 0.05);
+--ds-opacity-inverse-10: rgba(255, 255, 255, 0.1);
+--ds-opacity-inverse-15: rgba(255, 255, 255, 0.15);
+--ds-opacity-inverse-25: rgba(255, 255, 255, 0.2);
+--ds-opacity-inverse-50: rgba(255, 255, 255, 0.5);
+--ds-opacity-inverse-60: rgba(255, 255, 255, 0.6);
+--ds-opacity-inverse-70: rgba(255, 255, 255, 0.7);
+--ds-opacity-inverse-80: rgba(255, 255, 255, 0.8);
+--ds-opacity-inverse-90: rgba(255, 255, 255, 0.9);
+--ds-scrim: rgba(0, 20, 37, 0.3);
 --ds-text-disabled: var(--ds-text-muted);
 --ds-text-static: #ffffff;
 --ds-font-family: Inter, ui-sans-serif, system-ui, sans-serif;
@@ -63,6 +76,29 @@
 --ds-line-height-caption: 1.35;
 --ds-line-height-body: 1.5;
 --ds-line-height-heading: 1.3;
+/* Unity display typography retains separate mobile and desktop source values;
+ * adoption of these additive roles is deferred to the Phase 4/5 rollout. */
+--ds-font-size-display-d1-mobile: 60px;
+--ds-font-size-display-d1-desktop: 64px;
+--ds-line-height-display-d1: 96px;
+--ds-font-size-display-d2-mobile: 50px;
+--ds-font-size-display-d2-desktop: 52px;
+--ds-line-height-display-d2: 90px;
+--ds-font-size-display-d3-mobile: 48px;
+--ds-font-size-display-d3-desktop: 52px;
+--ds-line-height-display-d3: 80px;
+--ds-font-weight-display: 700;
+--ds-letter-spacing-display: -2px;
+/* Named Unity viewport tiers. CSS custom properties document the contract but
+ * media queries must use the corresponding literal values shown here. */
+--ds-breakpoint-mobile-min: 320px;
+--ds-breakpoint-mobile-max: 640px;
+--ds-breakpoint-tablet-portrait-min: 640px;
+--ds-breakpoint-tablet-portrait-max: 1280px;
+--ds-breakpoint-tablet-landscape-min: 1280px;
+--ds-breakpoint-tablet-landscape-max: 1920px;
+--ds-breakpoint-desktop-min: 1920px;
+--ds-breakpoint-desktop-max: 2560px;
 --ds-control-height-sm: 36px;
  --ds-control-height: 48px;
  --ds-transition: 0.2s ease;
@@ -96,6 +132,40 @@
 --ds-info: #2563eb;
 --ds-shadow-sm: 0 1px 2px rgba(23, 33, 47, 0.06);
 --ds-shadow-md: 0 8px 20px rgba(23, 33, 47, 0.08);
+/* Unity Light maps explicitly to Ionix light. */
+--ds-betika-blue-50: #001528;
+--ds-betika-blue-100: #001d3d;
+--ds-betika-blue-200: #2b5185;
+--ds-betika-blue-300: #41689d;
+--ds-betika-blue-400: #587fb7;
+--ds-betika-blue-500: #6f98d1;
+--ds-betika-blue-600: #6f98d1;
+--ds-betika-blue-700: #87b1eb;
+--ds-betika-blue-800: #9fcaff;
+--ds-betika-blue-900: #c6e4ff;
+--ds-betika-blue-950: #f1fdff;
+--ds-betika-grey-50: #111111;
+--ds-betika-grey-100: #262626;
+--ds-betika-grey-200: #3c3c3c;
+--ds-betika-grey-300: #545454;
+--ds-betika-grey-400: #6e6e6e;
+--ds-betika-grey-500: #888888;
+--ds-betika-grey-600: #a4a4a4;
+--ds-betika-grey-700: #c0c0c0;
+--ds-betika-grey-800: #dedede;
+--ds-betika-grey-900: #fcfcfc;
+--ds-betika-grey-950: #050505;
+--ds-opacity-inverse-2: rgba(0, 21, 40, 0.02);
+--ds-opacity-inverse-5: rgba(0, 21, 40, 0.05);
+--ds-opacity-inverse-10: rgba(0, 21, 40, 0.1);
+--ds-opacity-inverse-15: rgba(0, 21, 40, 0.15);
+--ds-opacity-inverse-25: rgba(0, 21, 40, 0.2);
+--ds-opacity-inverse-50: rgba(0, 21, 40, 0.5);
+--ds-opacity-inverse-60: rgba(0, 21, 40, 0.6);
+--ds-opacity-inverse-70: rgba(0, 21, 40, 0.7);
+--ds-opacity-inverse-80: rgba(0, 21, 40, 0.8);
+--ds-opacity-inverse-90: rgba(0, 21, 40, 0.9);
+--ds-scrim: rgba(0, 20, 37, 0.8);
 }
 
 /* Ionix dark mirrors the compact navy operational language in Promotions and Manual Award. */
@@ -124,6 +194,31 @@
 --ds-info: #60a5fa;
 --ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
 --ds-shadow-md: 0 10px 24px rgba(0, 0, 0, 0.34);
+--ds-scrim: rgba(0, 20, 37, 0.3);
+/* Unity primitive ramps: Dark mode values. These remain intentionally
+ * disconnected from live semantic tokens until Phase 4 visual review. */
+--ds-betika-blue-50: #f1fdff;
+--ds-betika-blue-100: #c6e4ff;
+--ds-betika-blue-200: #9fcaff;
+--ds-betika-blue-300: #87b1eb;
+--ds-betika-blue-400: #6f98d1;
+--ds-betika-blue-500: #587fb7;
+--ds-betika-blue-600: #587fb7;
+--ds-betika-blue-700: #41689d;
+--ds-betika-blue-800: #2b5185;
+--ds-betika-blue-900: #001d3d;
+--ds-betika-blue-950: #001528;
+--ds-betika-grey-50: #fcfcfc;
+--ds-betika-grey-100: #dedede;
+--ds-betika-grey-200: #c0c0c0;
+--ds-betika-grey-300: #a4a4a4;
+--ds-betika-grey-400: #888888;
+--ds-betika-grey-500: #6e6e6e;
+--ds-betika-grey-600: #545454;
+--ds-betika-grey-700: #3c3c3c;
+--ds-betika-grey-800: #262626;
+--ds-betika-grey-900: #111111;
+--ds-betika-grey-950: #050505;
 }
 
 /*
@@ -134,10 +229,51 @@
  * Phase 3 opt-in foundations. These class contracts are intentionally
  * additive: feature adoption and interaction semantics remain component work.
  */
+.ds-type-display-d1,
+.ds-type-display-d2,
+.ds-type-display-d3,
 .ds-type-heading,
 .ds-type-body,
 .ds-type-caption {
 font-family: var(--ds-font-family);
+}
+
+.ds-type-display-d1,
+.ds-type-display-d2,
+.ds-type-display-d3 {
+font-weight: var(--ds-font-weight-display);
+letter-spacing: var(--ds-letter-spacing-display);
+}
+
+.ds-type-display-d1 {
+font-size: var(--ds-font-size-display-d1-mobile);
+line-height: var(--ds-line-height-display-d1);
+}
+
+.ds-type-display-d2 {
+font-size: var(--ds-font-size-display-d2-mobile);
+line-height: var(--ds-line-height-display-d2);
+}
+
+.ds-type-display-d3 {
+font-size: var(--ds-font-size-display-d3-mobile);
+line-height: var(--ds-line-height-display-d3);
+}
+
+/* Unity Desktop begins at 1920px. Keep the literal synchronized with
+ * --ds-breakpoint-desktop-min; custom properties are invalid in media queries. */
+@media (min-width: 1920px) {
+.ds-type-display-d1 {
+font-size: var(--ds-font-size-display-d1-desktop);
+}
+
+.ds-type-display-d2 {
+font-size: var(--ds-font-size-display-d2-desktop);
+}
+
+.ds-type-display-d3 {
+font-size: var(--ds-font-size-display-d3-desktop);
+}
 }
 
 .ds-type-heading {
@@ -156,6 +292,12 @@ line-height: var(--ds-line-height-body);
 color: var(--ds-text-muted);
 font-size: var(--ds-font-size-caption);
 line-height: var(--ds-line-height-caption);
+}
+
+.ds-scrim {
+position: fixed;
+inset: 0;
+background: var(--ds-scrim);
 }
 
 .ds-field {
