@@ -1,3 +1,5 @@
 - Run terminal commands ONE at a time. Never chain commands with && or ||.
 - Never use redirection (>, >>, 2>&1) or pipes (|).
 - Run cd as its own command before other commands.
+- NEVER run git commit or git push. Report completed work; the human commits.
+- NEVER modify files via shell commands (python -c, sed, awk, echo redirects). Always use the file editing tools (replace_in_file / write_to_file).
