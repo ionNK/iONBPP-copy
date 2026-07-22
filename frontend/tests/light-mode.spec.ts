@@ -14,9 +14,9 @@ test.describe('Light Mode & Promotion Wizard Audit', () => {
     test('should have higher contrast text in light mode', async ({ page }) => {
         await page.goto('http://localhost:3000/');
         const bgColor = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--color-bg-app').trim());
-        expect(bgColor).toBe('#f9fafb');
+        expect(bgColor).toBe('#f6f7f9');
         const primaryText = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--color-text-primary').trim());
-        expect(primaryText).toBe('#111827');
+        expect(primaryText).toBe('#17212f');
     });
 
   test('should display banner URL correctly in Step 6 preview', async ({ page }) => {

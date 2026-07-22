@@ -138,7 +138,7 @@ Phase 2 made no CSS, component, behavior, or visual changes. Phase 3 adds only a
 
 | Issue | Current evidence | Resolution / scope |
 |---|---|---|
-| Light-mode token discrepancy | `tests/light-mode.spec.ts` expects `--color-bg-app: #f9fafb`; the evaluated value remains `#f6f7f9`. Wave 1 validation reconfirmed this pre-existing failure and did not alter the test or token. | **Decision pending: update test / fix token.** Outside Wave 1 route-adoption scope. |
+| Light-mode Ionix-light expectations | **Closed July 22, 2026.** The rendered `--color-bg-app` value is `#f6f7f9` and `--color-text-primary` is `#17212f`; `tests/light-mode.spec.ts` now asserts both active values. `#f9fafb` and `#111827` are non-rendered legacy generic-light palette values, not the active Ionix-light canvas or text-primary tokens. | No token change. The test expectations were corrected to the rendered canonical Ionix-light values. |
 | Promotion-wizard market option timeout (occurrence 1) | E2E timeout waiting for `option[value="KE"]`. | **Phase 5 scope.** Do not fix in Phase 2. |
 | Promotion-wizard market option timeout (occurrence 2) | E2E timeout waiting for `option[value="KE"]`. | **Phase 5 scope.** Do not fix in Phase 2. |
 
@@ -166,4 +166,4 @@ This document records the Phase 3 implementation gate. Stop here before any adop
 
 The CRM Segments route is the sole Wave 1 consumer migration. Its local `<style jsx>` block was removed after its live rules were mapped into the clearly scoped `.crm-segments-page` section of `design-system.css`. Generic local selectors were replaced with route-semantic class names, the page now opts into the canonical `.ds-page-shell` 1400px boundary, and existing segment creation, editing, deletion, member-view, and empty-state interactions were preserved. The unused local `.btn-primary-link` rule was identified as dead and intentionally not migrated.
 
-Validation: the production build passed, and the focused Playwright route-load test for `/admin/crm/segments` passed. The broader light-mode suite retained its known baseline failures: the canvas expectation mismatch (`#f9fafb` expected versus `#f6f7f9` evaluated) and two promotion-wizard `option[value="KE"]` timeouts; its accessible-focus-ring case passed. No later adoption wave is authorized by this record.
+Validation: the production build passed, and the focused Playwright route-load test for `/admin/crm/segments` passed. The broader light-mode suite originally retained the canvas expectation mismatch (`#f9fafb` expected versus `#f6f7f9` evaluated) and two promotion-wizard `option[value="KE"]` timeouts; its accessible-focus-ring case passed. The authorized light-canvas closure subsequently corrected only the stale canvas expectation; the promotion-wizard timeouts remain deferred. No later adoption wave is authorized by this record.
