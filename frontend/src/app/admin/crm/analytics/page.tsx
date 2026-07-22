@@ -70,7 +70,7 @@ export default function AnalyticsPage() {
     trend.map((t, i) => `${(i / (trend.length - 1)) * 100},${100 - (t[key] / maxTrend) * 92}`).join(' ');
 
   return (
-    <div className="page-container">
+    <div className="crm-analytics-page ds-page-shell">
       <div className="page-header">
         <div>
           <h1 className="page-title">Analytics</h1>
@@ -186,68 +186,7 @@ export default function AnalyticsPage() {
 
 
 
-      <style jsx>{`
-        .page-container { max-width: 1400px; margin: 0 auto; }
-        .page-header { margin-bottom: 24px; }
-        .page-title { font-size: 28px; font-weight: 700; color: var(--color-text-primary); margin: 0 0 4px 0; }
-        .page-subtitle { font-size: 14px; color: var(--color-text-secondary); margin: 0; }
-        .an-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-        .kpi { display: flex; flex-direction: column; gap: 4px; padding: 18px 20px; transition: transform 0.15s, border-color 0.15s; }
-        .kpi:hover { transform: translateY(-2px); }
-        .kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-        .kpi-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-        .kpi-label { font-size: 12px; color: var(--color-text-secondary); margin: 0; font-weight: 500; }
-        .kpi-value { font-size: 26px; font-weight: 700; color: var(--color-text-primary); margin: 0; letter-spacing: -0.01em; }
-        .kpi-delta { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
-        .kpi-delta.up { color: #699951; background: rgba(105,153,81,0.14); }
-        .kpi-delta.down { color: #f87171; background: rgba(248,113,113,0.14); }
-        .kpi-hint { font-size: 11px; color: var(--color-text-muted); margin: 2px 0 0 0; }
-        .an-charts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
-        .chart { padding: 24px; }
-        .panel-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
-        .chart-sub { font-size: 12px; color: var(--color-text-muted); margin: 3px 0 0 0; }
-        .panel-ico { color: var(--color-text-muted); flex-shrink: 0; }
-        .trend-card { margin-bottom: 16px; }
-        .legend { display: flex; gap: 16px; }
-        .legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
-        .legend i { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
-        .trend-plot { display: flex; gap: 12px; }
-        .y-axis { display: flex; flex-direction: column; justify-content: space-between; height: 220px; text-align: right; padding-bottom: 4px; }
-        .y-axis span { font-size: 10px; color: var(--color-text-muted); line-height: 1; }
-        .trend-svg { flex: 1; height: 220px; display: block; overflow: visible; }
-        .trend-x { display: grid; grid-template-columns: repeat(12, 1fr); margin-top: 8px; padding-left: 52px; }
-        .trend-x span { font-size: 11px; color: var(--color-text-muted); text-align: center; }
-
-        .funnel { display: flex; flex-direction: column; gap: 12px; }
-        .funnel-row { display: grid; grid-template-columns: 110px 1fr 44px; align-items: center; gap: 12px; }
-        .funnel-label { font-size: 13px; color: var(--color-text-secondary); }
-        .funnel-track { height: 26px; border-radius: 6px; background: var(--color-bg-input); overflow: hidden; }
-        .funnel-fill { height: 100%; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 700; color: #fff; background: linear-gradient(90deg, #699951, #84cc16); border-radius: 6px; min-width: 28px; transition: width 0.3s; }
-        .funnel-pct { font-size: 13px; font-weight: 600; color: var(--color-text-primary); text-align: right; }
-        .leaders { display: flex; flex-direction: column; gap: 4px; }
-        .leader-row { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-radius: 8px; }
-        .leader-row:nth-child(odd) { background: var(--color-bg-input); }
-        .leader-rank { width: 22px; height: 22px; border-radius: 6px; background: var(--color-bg-secondary); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--color-text-secondary); }
-        .leader-info { display: flex; flex-direction: column; flex: 1; }
-        .leader-name { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
-        .leader-meta { font-size: 12px; color: var(--color-text-muted); text-transform: capitalize; }
-        .leader-ltv { font-size: 14px; font-weight: 700; color: #699951; }
-
-        .chart-title { font-size: 16px; font-weight: 600; color: var(--color-text-primary); margin: 0 0 20px 0; }
-        .bars { display: flex; flex-direction: column; gap: 14px; }
-        .bar-row { display: grid; grid-template-columns: 90px 1fr 80px; align-items: center; gap: 12px; }
-        .bar-label { font-size: 13px; color: var(--color-text-secondary); display: inline-flex; align-items: center; gap: 7px; }
-        .bar-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .bar-track { height: 10px; border-radius: 6px; background: var(--color-bg-input); overflow: hidden; }
-        .bar-fill { height: 100%; border-radius: 6px; transition: width 0.3s; }
-        .bar-val { font-size: 13px; font-weight: 600; color: var(--color-text-primary); text-align: right; display: flex; flex-direction: column; }
-        .bar-val em { font-size: 10px; font-weight: 500; font-style: normal; color: var(--color-text-muted); }
-        .rank-1 { background: rgba(242,214,65,0.18) !important; color: #F2D641 !important; }
-        .rank-2 { background: rgba(148,163,184,0.2) !important; color: #cbd5e1 !important; }
-        .rank-3 { background: rgba(251,146,60,0.18) !important; color: #fb923c !important; }
-
-        @media (max-width: 1000px) { .an-charts { grid-template-columns: 1fr; } .an-kpis { grid-template-columns: repeat(2, 1fr); } }
-      `}</style>
+ {/* Styles are centralized in design-system.css under .crm-analytics-page. */}
     </div>
   );
 }

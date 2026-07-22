@@ -55,7 +55,7 @@ const money = (n: number) => {
   };
 
   return (
-    <div className="page-container">
+    <div className="crm-intelligence-page ds-page-shell">
       <div className="page-header">
         <div>
  <h1 className="page-title">Player Behaviour Intelligence</h1>
@@ -69,9 +69,9 @@ const money = (n: number) => {
 
       <div className="int-kpis">
         <div className="kpi glass-panel"><div className="kpi-icon"><Brain size={20} /></div><div><p className="kpi-label">Avg Score</p><p className="kpi-value">{avg}</p></div></div>
-        <div className="kpi glass-panel"><div className="kpi-icon" style={{ color: '#f87171' }}><TrendingDown size={20} /></div><div><p className="kpi-label">High Churn</p><p className="kpi-value">{highChurn}</p></div></div>
-        <div className="kpi glass-panel"><div className="kpi-icon" style={{ color: '#699951' }}><Target size={20} /></div><div><p className="kpi-label">High Propensity</p><p className="kpi-value">{highPropensity}</p></div></div>
-        <div className="kpi glass-panel"><div className="kpi-icon" style={{ color: '#fb923c' }}><AlertTriangle size={20} /></div><div><p className="kpi-label">Players Scored</p><p className="kpi-value">{players.length}</p></div></div>
+        <div className="kpi glass-panel"><div className="kpi-icon kpi-icon--danger"><TrendingDown size={20} /></div><div><p className="kpi-label">High Churn</p><p className="kpi-value">{highChurn}</p></div></div>
+        <div className="kpi glass-panel"><div className="kpi-icon kpi-icon--success"><Target size={20} /></div><div><p className="kpi-label">High Propensity</p><p className="kpi-value">{highPropensity}</p></div></div>
+        <div className="kpi glass-panel"><div className="kpi-icon kpi-icon--warning"><AlertTriangle size={20} /></div><div><p className="kpi-label">Players Scored</p><p className="kpi-value">{players.length}</p></div></div>
       </div>
 
       <div className="cols">
@@ -92,7 +92,7 @@ const money = (n: number) => {
             ))}
           </div>
 
-          <h2 className="section-title" style={{ marginTop: 28 }}>Ranked Players</h2>
+          <h2 className="section-title section-title--spaced">Ranked Players</h2>
           <div className="tabs glass-panel">
             {METRICS.map((m) => (
               <button key={m.key} className={`tab ${metric === m.key ? 'active' : ''}`} onClick={() => setMetric(m.key)}>{m.label}</button>
@@ -101,7 +101,7 @@ const money = (n: number) => {
           </div>
           <div className="grid-container glass-panel">
             <table className="data-table">
-              <thead><tr><th>Player</th><th>Segment</th><th style={{ width: '40%' }}>Score</th><th>Band</th></tr></thead>
+              <thead><tr><th>Player</th><th>Segment</th><th className="crm-intelligence-page__score-column">Score</th><th>Band</th></tr></thead>
               <tbody>
                 {ranked.map((p) => {
                   const val = p[metric];
@@ -124,7 +124,7 @@ const money = (n: number) => {
  </table>
  </div>
 
- <h2 className="section-title" style={{ marginTop: 28 }}><Target size={16} /> Next-Best-Action Queue</h2>
+ <h2 className="section-title section-title--spaced"><Target size={16} /> Next-Best-Action Queue</h2>
  <p className="nba-sub">Per-player recommendations, prioritised by urgency and confidence. RG cases suppress marketing.</p>
  <div className="nba-list">
  {nbaList.slice(0, 8).map(({ player, nba }) => (
@@ -145,7 +145,7 @@ const money = (n: number) => {
           </div>
 
           {/* CLV forecast */}
-          <h2 className="section-title" style={{ marginTop: 28 }}><LineChart size={16} /> Customer Lifetime Value Forecast</h2>
+          <h2 className="section-title section-title--spaced"><LineChart size={16} /> Customer Lifetime Value Forecast</h2>
           <p className="nba-sub">12-month projected value modelled from ARPU, deposit cadence and retention (inverse of churn).</p>
           <div className="clv-summary">
             <div className="clv-stat glass-panel">
@@ -161,7 +161,7 @@ const money = (n: number) => {
               <p className="clv-stat-val up">+{money(clv.upliftTotal)} <span>+{clv.upliftPct}%</span></p>
             </div>
           </div>
-          <div className="grid-container glass-panel" style={{ marginTop: 14 }}>
+          <div className="grid-container glass-panel crm-intelligence-page__clv-table">
             <table className="data-table">
               <thead><tr><th>Player</th><th>Current</th><th>Projected</th><th>Uplift</th><th>Retention</th><th>Conf.</th></tr></thead>
               <tbody>
@@ -202,7 +202,7 @@ const money = (n: number) => {
             ))}
           </div>
 
-          <h2 className="section-title" style={{ marginTop: 24 }}>Behaviour Drivers</h2>
+          <h2 className="section-title section-title--side-spaced">Behaviour Drivers</h2>
           <div className="drivers glass-panel">
             {drivers.map((d) => (
               <div key={d.label} className="driver">
@@ -217,7 +217,7 @@ const money = (n: number) => {
             ))}
           </div>
 
-          <h2 className="section-title" style={{ marginTop: 24 }}><ShieldAlert size={16} /> Bonus-Abuse Watchlist</h2>
+          <h2 className="section-title section-title--side-spaced"><ShieldAlert size={16} /> Bonus-Abuse Watchlist</h2>
           <div className="abuse-list">
             {abuseRows.length === 0 && <p className="empty">No abuse signals in the current cohort.</p>}
             {abuseRows.map(({ player, risk }) => (
@@ -235,125 +235,8 @@ const money = (n: number) => {
         </div>
       </div>
 
-
-      <style jsx>{STYLES}</style>
+ {/* Styles are centralized in design-system.css under .crm-intelligence-page. */}
     </div>
   );
 }
-
-const STYLES = `
-  .page-container { max-width: 1400px; margin: 0 auto; }
-  .page-header { margin-bottom: 24px; }
-  .page-title { font-size: 28px; font-weight: 700; color: var(--color-text-primary); margin: 0 0 4px 0; }
-  .page-subtitle { font-size: 14px; color: var(--color-text-secondary); margin: 0; }
-  .int-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-  .kpi { display: flex; align-items: center; gap: 14px; padding: 18px 20px; }
-  .kpi-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: var(--color-bg-input); color: var(--color-accent-purple, #a855f7); }
-  .kpi-label { font-size: 12px; color: var(--color-text-muted); margin: 0 0 2px 0; text-transform: uppercase; }
-  .kpi-value { font-size: 22px; font-weight: 700; color: var(--color-text-primary); margin: 0; }
-
-  .cols { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
-  .section-title { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 700; color: var(--color-text-primary); margin: 0 0 14px 0; }
-
-  .matrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  .quad { padding: 16px; border-top: 3px solid; }
-  .quad-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .quad-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .quad-label { font-size: 14px; font-weight: 700; color: var(--color-text-primary); }
-  .quad-count { margin-left: auto; font-size: 16px; font-weight: 700; color: var(--color-text-primary); }
-  .quad-desc { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 10px 0; line-height: 1.5; min-height: 34px; }
-  .quad-ltv { font-size: 15px; font-weight: 700; color: var(--color-text-primary); margin: 0; }
-  .quad-ltv span { font-size: 11px; font-weight: 500; color: var(--color-text-muted); }
-
-  .tabs { display: flex; align-items: center; gap: 8px; padding: 12px 16px; margin-bottom: 16px; }
-  .tab { background: var(--color-bg-input); border: 1px solid var(--color-border); color: var(--color-text-secondary); padding: 6px 14px; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 6px; }
-  .tab.active { background: var(--color-betika-yellow, #F2D641); color: #000; border-color: var(--color-betika-yellow, #F2D641); }
-  .tab-hint { margin-left: auto; font-size: 12px; color: var(--color-text-muted); }
-
-  .grid-container { display: flex; flex-direction: column; }
-  .data-table { width: 100%; border-collapse: collapse; }
-  .data-table th { text-align: left; padding: 14px 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); background: var(--color-bg-input); }
-  .data-table td { padding: 14px 20px; border-bottom: 1px solid var(--color-border); font-size: 14px; color: var(--color-text-secondary); vertical-align: middle; }
-  .data-table tr:last-child td { border-bottom: none; }
-  .cell-title { color: var(--color-text-primary); font-weight: 600; text-decoration: none; }
-  .cell-title:hover { color: var(--color-betika-yellow, #F2D641); }
-  .cell-sub { font-size: 11px; color: var(--color-text-muted); }
-  .text-secondary { color: var(--color-text-secondary); text-transform: capitalize; }
-  .score-row { display: flex; align-items: center; gap: 12px; }
-  .score-track { flex: 1; height: 8px; border-radius: 4px; background: var(--color-bg-input); overflow: hidden; }
-  .score-fill { height: 100%; border-radius: 4px; }
-  .score-val { font-size: 13px; font-weight: 600; color: var(--color-text-primary); width: 28px; }
-  .band { font-size: 11px; font-weight: 600; text-transform: uppercase; padding: 3px 10px; border: 1px solid currentColor; border-radius: 20px; }
-
-  .opp-list { display: flex; flex-direction: column; gap: 12px; }
-  .empty { font-size: 13px; color: var(--color-text-muted); padding: 12px; }
-  .opp { padding: 14px 16px; border-left: 3px solid var(--color-border); }
-  .opp.u-high { border-left-color: #f87171; }
-  .opp.u-medium { border-left-color: #fb923c; }
-  .opp.u-low { border-left-color: #699951; }
-  .opp-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .opp-title { font-size: 14px; font-weight: 700; color: var(--color-text-primary); }
-  .opp-badge { margin-left: auto; font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; }
-  .opp-badge.u-high { background: rgba(248,113,113,0.18); color: #f87171; }
-  .opp-badge.u-medium { background: rgba(251,146,60,0.18); color: #fb923c; }
-  .opp-badge.u-low { background: rgba(105,153,81,0.2); color: #699951; }
-  .opp-insight { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; margin: 0 0 12px 0; }
-  .opp-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .opp-meta { font-size: 11px; color: var(--color-text-muted); }
-  .opp-btn { display: inline-flex; align-items: center; gap: 4px; background: var(--color-betika-yellow, #F2D641); color: #000; border: none; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; }
- .opp-btn:hover { filter: brightness(0.95); }
-
- .nba-sub { font-size: 12px; color: var(--color-text-muted); margin: -6px 0 14px 0; }
- .nba-list { display: flex; flex-direction: column; gap: 10px; }
- .nba { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; border-left: 3px solid var(--color-border); }
- .nba.u-high { border-left-color: #f87171; }
- .nba.u-medium { border-left-color: #fb923c; }
- .nba.u-low { border-left-color: #699951; }
- .nba-left { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
- .nba-name { font-size: 13px; font-weight: 700; color: var(--color-text-primary); text-decoration: none; }
- .nba-name:hover { color: var(--color-betika-yellow, #F2D641); }
- .nba-title { font-size: 13px; font-weight: 600; color: var(--color-text-secondary); }
- .nba-reason { font-size: 11px; color: var(--color-text-muted); line-height: 1.45; }
- .nba-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
- .nba-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; }
- .nba-badge.u-high { background: rgba(248,113,113,0.18); color: #f87171; }
- .nba-badge.u-medium { background: rgba(251,146,60,0.18); color: #fb923c; }
- .nba-badge.u-low { background: rgba(105,153,81,0.2); color: #699951; }
- .nba-chip { font-size: 11px; font-weight: 600; color: var(--color-text-secondary); background: var(--color-bg-input); border: 1px solid var(--color-border); padding: 2px 8px; border-radius: 6px; }
- .nba-offer { font-size: 11px; color: var(--color-text-secondary); }
- .nba-conf { font-size: 11px; font-weight: 600; color: var(--color-text-muted); }
-
- .drivers { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
-
-  .driver-head { display: flex; align-items: center; gap: 6px; }
-  .driver-label { font-size: 13px; font-weight: 600; color: var(--color-text-primary); }
-  .driver-share { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--color-text-primary); }
-  .dir-up { color: #699951; }
-  .dir-down { color: #f87171; }
-  .driver-detail { font-size: 11px; color: var(--color-text-muted); margin: 2px 0 6px 0; }
-  .driver-track { height: 6px; border-radius: 3px; background: var(--color-bg-input); overflow: hidden; }
-  .driver-fill { height: 100%; border-radius: 3px; }
-
-  .clv-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 4px; }
-  .clv-stat { padding: 16px 18px; }
-  .clv-stat.accent { border: 1px solid rgba(105,153,81,0.4); }
-  .clv-stat-label { font-size: 11px; text-transform: uppercase; color: var(--color-text-muted); margin: 0 0 6px 0; }
-  .clv-stat-val { font-size: 22px; font-weight: 700; color: var(--color-text-primary); margin: 0; }
-  .clv-stat-val.up { color: #699951; }
-  .clv-stat-val span { font-size: 12px; font-weight: 600; }
-  .up { color: #699951; font-weight: 600; }
-
-  .abuse-list { display: flex; flex-direction: column; gap: 10px; }
-  .abuse { padding: 12px 14px; border-left: 3px solid var(--color-border); }
-  .abuse-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-  .abuse-name { font-size: 13px; font-weight: 700; color: var(--color-text-primary); text-decoration: none; }
-  .abuse-name:hover { color: var(--color-betika-yellow, #F2D641); }
-  .abuse-score { font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border: 1px solid currentColor; border-radius: 20px; }
-  .abuse-reasons { display: flex; flex-wrap: wrap; gap: 6px; }
-  .abuse-chip { font-size: 10px; color: var(--color-text-secondary); background: var(--color-bg-input); border: 1px solid var(--color-border); padding: 2px 8px; border-radius: 6px; }
-
-  @media (max-width: 1100px) { .cols { grid-template-columns: 1fr; } .matrix { grid-template-columns: repeat(2, 1fr); } }
-
-  @media (max-width: 900px) { .int-kpis { grid-template-columns: repeat(2, 1fr); } }
-`;
 
