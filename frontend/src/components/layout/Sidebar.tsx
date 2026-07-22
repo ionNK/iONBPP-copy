@@ -1,14 +1,43 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Megaphone, ShieldCheck, BarChart3, LogOut, ChevronRight, ChevronDown, Layers, Users, TrendingUp, Gift, LayoutGrid, FlaskConical, X, Contact, Brain, HeartPulse, PieChart, Search, ScrollText } from 'lucide-react';
+import { Megaphone, ShieldCheck, BarChart3, LogOut, ChevronRight, ChevronDown, Layers, Users, TrendingUp, Gift, LayoutGrid, FlaskConical, X, Contact, Brain, HeartPulse, PieChart, Search, ScrollText, Settings } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import {
+ FEATURE_CONFIGURATION_EVENT,
+ getFeatureConfiguration,
+ getFeatureGroupConfiguration,
+ isFeatureEnabled,
+ type FeatureConfiguration,
+ type FeatureGroupConfiguration,
+ type FeatureId,
+} from '@/lib/feature-config';
 
 type NavItem = { name: string; path: string; icon: LucideIcon; id: string };
 type NavSection = { title: string; items: NavItem[] };
 
 const dashboardItem: NavItem = { name: 'Dashboard', path: '/admin', icon: LayoutGrid, id: 'nav-dashboard' };
+
+const featureIdByNavigationId: Record<string, FeatureId> = {
+ 'nav-dashboard': 'dashboard',
+ 'nav-promotions': 'promotions',
+ 'nav-manual-award': 'manual-award',
+ 'nav-experiments': 'experiments',
+ 'nav-crm': 'crm-overview',
+ 'nav-crm-players': 'player-360',
+ 'nav-crm-segments': 'segments',
+ 'nav-crm-intelligence': 'intelligence',
+ 'nav-crm-rg': 'responsible-gaming',
+ 'nav-crm-analytics': 'crm-analytics',
+ 'nav-reports': 'reports',
+ 'nav-pred-churn': 'churn-prediction',
+ 'nav-pred-promotions': 'promo-prediction',
+ 'nav-governance': 'compliance',
+ 'nav-audit': 'audit-trail',
+ 'nav-customer-lookup': 'customer-lookup',
+ 'nav-settings': 'settings',
+};
 
 // Logical, task-oriented grouping so users can find things by "what am I trying to do".
 const navSections: NavSection[] = [
@@ -45,6 +74,7 @@ const navSections: NavSection[] = [
       { name: 'Compliance', path: '/admin/governance', icon: ShieldCheck, id: 'nav-governance' },
       { name: 'Audit Trail', path: '/admin/promotions/audit', icon: ScrollText, id: 'nav-audit' },
       { name: 'Customer Lookup', path: '/admin/promotions/customer-lookup', icon: Search, id: 'nav-customer-lookup' },
+{ name: 'Settings', path: '/admin/settings', icon: Settings, id: 'nav-settings' },
     ],
   },
 ];
@@ -55,9 +85,39 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
-  const pathname = usePathname();
+ const pathname = usePathname();
+ const [featureConfiguration, setFeatureConfiguration] =
+ useState<FeatureConfiguration>(getFeatureConfiguration);
+ const [featureGroupConfiguration, setFeatureGroupConfiguration] =
+ useState<FeatureGroupConfiguration>(getFeatureGroupConfiguration);
 
-  const isItemActive = (href: string) => {
+ useEffect(() => {
+ const refreshFeatureConfiguration = () => {
+ setFeatureConfiguration(getFeatureConfiguration());
+ setFeatureGroupConfiguration(getFeatureGroupConfiguration());
+ };
+
+ refreshFeatureConfiguration();
+ window.addEventListener(
+ FEATURE_CONFIGURATION_EVENT,
+ refreshFeatureConfiguration,
+ );
+
+ return () =>
+ window.removeEventListener(
+ FEATURE_CONFIGURATION_EVENT,
+ refreshFeatureConfiguration,
+ );
+ }, []);
+
+ const isNavigationItemEnabled = (item: NavItem) =>
+ isFeatureEnabled(
+ featureIdByNavigationId[item.id],
+ featureConfiguration,
+ featureGroupConfiguration,
+ );
+
+ const isItemActive = (href: string) => {
     if (href === '/' && pathname === '/') return true;
     if (href !== '/' && pathname?.startsWith(href)) return true;
     return false;
@@ -124,8 +184,8 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         <nav className="nav-container">
           <p className="nav-title" style={{ marginTop: 0 }}>MAIN MENU</p>
           <div className="nav-list">
-            {[dashboardItem].map((item) => {
-              const isActive = pathname === item.path;
+ {[dashboardItem].filter(isNavigationItemEnabled).map((item) => {
+ const isActive = pathname === item.path;
               return (
                 <Link
                   key={item.path}
@@ -142,10 +202,13 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             })}
           </div>
 
-          {navSections.map((section) => {
-            const collapsed = collapsedSections[section.title] ?? false;
-            const hasActiveChild = section.items.some((it) => sectionItemActive(it.path));
-            return (
+ {navSections.map((section) => {
+ const visibleItems = section.items.filter(isNavigationItemEnabled);
+ if (visibleItems.length === 0) return null;
+
+ const collapsed = collapsedSections[section.title] ?? false;
+ const hasActiveChild = visibleItems.some((it) => sectionItemActive(it.path));
+ return (
               <div key={section.title} className="nav-group">
                 <button
                   type="button"
@@ -159,8 +222,8 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                 </button>
                 {!collapsed && (
                   <div className="nav-list">
-                    {section.items.map((item) => {
-                      const isActive = sectionItemActive(item.path);
+ {visibleItems.map((item) => {
+ const isActive = sectionItemActive(item.path);
                       return (
                         <Link
                           key={item.path}

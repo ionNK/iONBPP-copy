@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import {
     Settings, Users, Shield, Bell, Database, Save, CheckCircle2, Power,
  CreditCard, Globe, Key, Webhook, Mail, Plus, Trash2, Sun, Moon, Monitor, Sparkles,
- Book, FileCode, ExternalLink, HelpCircle, FileText, PlayCircle, Activity // Added icons
+ Book, FileCode, ExternalLink, HelpCircle, FileText, PlayCircle, Activity, SlidersHorizontal // Added icons
 } from 'lucide-react';
 import ExplainerVideo from '@/components/onboarding/ExplainerVideo';
 import SupportCenter from '@/components/settings/SupportCenter';
 import SystemStatusTab from '@/components/settings/SystemStatusTab';
 import SimulatorTab from '@/components/settings/SimulatorTab';
+import UserManagementPanel from '@/components/settings/UserManagementPanel';
+import FeatureConfigurationPanel from '@/components/settings/FeatureConfigurationPanel';
 import { useTheme } from '@/context/ThemeContext';
 
 // --- Types ---
@@ -274,55 +276,16 @@ export default function SettingsPage() {
     const [newCountry, setNewCountry] = useState<Partial<CountryConfig>>({ countryLimit: 0, promoLimit: 0 });
     const [isAdding, setIsAdding] = useState(false);
 
-    // Users State
-    const [users, setUsers] = useState(USERS);
-    const [isAddingUser, setIsAddingUser] = useState(false);
-    const [newUser, setNewUser] = useState({ name: '', email: '', role: 'Viewer', password: '' });
-
- // Initial Load
- useEffect(() => {
- if (typeof window !== 'undefined') {
- const savedUsers = localStorage.getItem('settings_users');
- if (savedUsers) {
- try {
- setUsers(JSON.parse(savedUsers));
- } catch (e) { }
- }
- }
- }, []);
-
-
     const handleSave = () => {
         setIsSaving(true);
         // Persist Settings
  localStorage.setItem('settings_countries', JSON.stringify(countries));
- localStorage.setItem('settings_users', JSON.stringify(users));
 
  setTimeout(() => {
             setIsSaving(false);
             setSuccessMsg('Settings updated successfully!');
             setTimeout(() => setSuccessMsg(''), 3000);
         }, 800);
-    };
-
-    const handleAddUser = () => {
-        if (newUser.name && newUser.email && newUser.password) {
-            const userToAdd = {
-                id: Date.now(),
-                name: newUser.name,
-                email: newUser.email,
-                role: newUser.role,
-                status: 'Active',
-                password: newUser.password // In a real app, never store plain text!
-            };
-            const updatedUsers = [...users, userToAdd];
-            setUsers(updatedUsers);
-            localStorage.setItem('settings_users', JSON.stringify(updatedUsers));
-            setNewUser({ name: '', email: '', role: 'Viewer', password: '' });
-            setIsAddingUser(false);
-            setSuccessMsg('User added successfully');
-            setTimeout(() => setSuccessMsg(''), 3000);
-        }
     };
 
  const handleThemeChange = (colorMode: 'light' | 'dark') => {
@@ -373,8 +336,8 @@ export default function SettingsPage() {
         setCountries(countries.map(c => c.code === code ? { ...c, [field]: value } : c));
     };
 
-    return (
-        <div className="settings-container">
+return (
+<div className="settings-container settings-module ds-page-shell">
             <div className="page-header">
                 <div>
                     <h1 className="page-title">System Settings</h1>
@@ -390,7 +353,7 @@ export default function SettingsPage() {
 
             <div className="settings-layout">
                 {/* Sidebar Navigation */}
-                <div className="settings-nav glass-panel">
+                <div className="settings-nav ds-panel">
                     <button
                         className={`nav-btn ${activeTab === 'general' ? 'active' : ''}`}
                         onClick={() => setActiveTab('general')}
@@ -415,14 +378,20 @@ export default function SettingsPage() {
                     >
                         <Globe size={18} /> Countries & Limits
                     </button>
-                    <button
-                        className={`nav-btn ${activeTab === 'users' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('users')}
-                    >
-                        <Users size={18} /> Users & Roles
-                    </button>
-                    <button
-                        className={`nav-btn ${activeTab === 'integrations' ? 'active' : ''}`}
+ <button
+ className={`nav-btn ${activeTab === 'users' ? 'active' : ''}`}
+ onClick={() => setActiveTab('users')}
+ >
+ <Users size={18} /> Users & Roles
+ </button>
+ <button
+ className={`nav-btn ${activeTab === 'features' ? 'active' : ''}`}
+ onClick={() => setActiveTab('features')}
+ >
+ <SlidersHorizontal size={18} /> Feature Configuration
+ </button>
+ <button
+ className={`nav-btn ${activeTab === 'integrations' ? 'active' : ''}`}
                         onClick={() => setActiveTab('integrations')}
                     >
                         <Webhook size={18} /> Integrations
@@ -448,7 +417,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Content Area */}
-                <div className="settings-content glass-panel">
+                <div className="settings-content ds-panel">
 
                     {/* --- GENERAL TAB --- */}
                     {activeTab === 'general' && (
@@ -462,14 +431,14 @@ export default function SettingsPage() {
  <label>Theme Family</label>
  <div className="theme-options">
  <button
- className={`theme-card ${themeFamily === 'default' ? 'active' : ''}`}
+ className={`theme-card ds-choice ${themeFamily === 'default' ? 'active is-selected' : ''}`}
  onClick={() => handleThemeFamilyChange('default')}
  >
  <Monitor size={24} />
  <span>Default</span>
  </button>
  <button
- className={`theme-card ${themeFamily === 'ionix' ? 'active' : ''}`}
+ className={`theme-card ds-choice ${themeFamily === 'ionix' ? 'active is-selected' : ''}`}
  onClick={() => handleThemeFamilyChange('ionix')}
  >
  <Sparkles size={24} />
@@ -482,14 +451,14 @@ export default function SettingsPage() {
  <label>Color Mode</label>
  <div className="theme-options">
  <button
- className={`theme-card ${theme === 'light' ? 'active' : ''}`}
+ className={`theme-card ds-choice ${theme === 'light' ? 'active is-selected' : ''}`}
  onClick={() => handleThemeChange('light')}
  >
  <Sun size={24} />
  <span>Light Mode</span>
  </button>
  <button
- className={`theme-card ${theme === 'dark' ? 'active' : ''}`}
+ className={`theme-card ds-choice ${theme === 'dark' ? 'active is-selected' : ''}`}
  onClick={() => handleThemeChange('dark')}
  >
  <Moon size={24} />
@@ -532,7 +501,7 @@ export default function SettingsPage() {
                             </div>
 
                             {isAdding && (
-                                <div className="add-country-form glass-card">
+                                <div className="add-country-form ds-card">
                                     <h4>Add New Country</h4>
                                     <div className="add-grid">
                                         {/* Progressive Dropdown */}
@@ -598,7 +567,7 @@ export default function SettingsPage() {
                                 {countries.map(country => (
                                     <div key={country.code} className="country-row key-row">
                                         <div className="font-medium">
-                                            <span style={{ marginRight: '8px' }}>{getFlagEmoji(country.code)}</span>
+                                            <span className="country-flag">{getFlagEmoji(country.code)}</span>
                                             {country.name}
                                         </div>
                                         <div className="badge-code">{country.code}</div>
@@ -630,101 +599,22 @@ export default function SettingsPage() {
                         </div>
                     )}
 
-                    {/* --- USERS TAB --- */}
-                    {activeTab === 'users' && (
-                        <div className="tab-pane">
-                            <div className="pane-header">
-                                <h3>User Management</h3>
-                                <button className="btn-secondary" onClick={() => setIsAddingUser(!isAddingUser)}>
-                                    <Plus size={14} /> Add User
-                                </button>
-                            </div>
+{/* --- USERS & ROLES TAB --- */}
+{activeTab === 'users' && (
+<div className="tab-pane">
+<UserManagementPanel />
+</div>
+)}
 
-                            {isAddingUser && (
-                                <div className="add-country-form glass-card" style={{ marginBottom: 24 }}>
-                                    <h4>Add New User</h4>
-                                    <div className="add-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
-                                        <input
-                                            placeholder="Full Name"
-                                            value={newUser.name}
-                                            onChange={e => setNewUser({ ...newUser, name: e.target.value })}
-                                        />
-                                        <input
-                                            placeholder="Email Address"
-                                            value={newUser.email}
-                                            onChange={e => setNewUser({ ...newUser, email: e.target.value })}
-                                        />
-                                        <select
-                                            value={newUser.role}
-                                            onChange={e => setNewUser({ ...newUser, role: e.target.value })}
-                                            className="full-select"
-                                        >
-                                            <option value="Admin">Admin</option>
-                                            <option value="Editor">Editor</option>
-                                            <option value="Viewer">Viewer</option>
-                                            <option value="Analyst">Analyst</option>
-                                        </select>
-                                        <input
-                                            type="password"
-                                            placeholder="Password"
-                                            value={newUser.password}
-                                            onChange={e => setNewUser({ ...newUser, password: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="form-actions">
-                                        <button className="btn-cancel" onClick={() => setIsAddingUser(false)}>Cancel</button>
-                                        <button className="btn-confirm" onClick={handleAddUser} disabled={!newUser.name || !newUser.email || !newUser.password}>Create User</button>
-                                    </div>
-                                </div>
-                            )}
+ {/* --- FEATURE CONFIGURATION TAB --- */}
+ {activeTab === 'features' && (
+ <div className="tab-pane">
+ <FeatureConfigurationPanel onSaved={setSuccessMsg} />
+ </div>
+ )}
 
-                            <table className="users-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Role</th>
-                                        <th>Email</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {users.map(user => (
-                                        <tr key={user.id}>
-                                            <td className="font-medium">{user.name}</td>
-                                            <td><span className="role-badge">{user.role}</span></td>
-                                            <td className="text-secondary">{user.email}</td>
-                                            <td>
-                                                <span className={`status-dot ${user.status.toLowerCase()}`}></span>
-                                                {user.status}
-                                            </td>
-                                            <td>
-                                                <button className="icon-btn"><Settings size={14} /></button>
-                                                <button
-                                                    className="icon-btn danger"
-                                                    onClick={() => {
-                                                        if (confirm('Delete user?')) {
-                                                            const updated = users.filter(u => u.id !== user.id);
-                                                            setUsers(updated);
-                                                            localStorage.setItem('settings_users', JSON.stringify(updated));
-                                                            setSuccessMsg('User deleted');
-                                                            setTimeout(() => setSuccessMsg(''), 3000);
-                                                        }
-                                                    }}
-                                                    style={{ marginLeft: 8 }}
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-
-                    {/* --- INTEGRATIONS TAB --- */}
-                    {activeTab === 'integrations' && (
+ {/* --- INTEGRATIONS TAB --- */}
+ {activeTab === 'integrations' && (
                         <div className="tab-pane">
                             <h3>External Services</h3>
                             <div className="integrations-list">
@@ -774,7 +664,7 @@ export default function SettingsPage() {
                     {activeTab === 'support' && (
                         <div className="tab-pane">
                             <h3>Help & Support Center</h3>
-                            <p style={{ color: '#94a3b8', marginBottom: 20 }}>Need assistance? Log an issue, chat with our AI assistant, or configure support integrations.</p>
+                            <p className="support-tab-intro">Need assistance? Log an issue, chat with our AI assistant, or configure support integrations.</p>
                             <SupportCenter />
                         </div>
                     )}
@@ -786,23 +676,20 @@ export default function SettingsPage() {
                                 <h3>System Documentation</h3>
                                 <div className="doc-tabs">
                                     <button
-                                        className="doc-tab-btn"
-                                        onClick={() => setShowVideo(true)}
-                                        style={{ marginRight: 12, color: '#eab308' }}
+className="doc-tab-btn doc-tab-btn-about"
+onClick={() => setShowVideo(true)}
                                     >
                                         <PlayCircle size={14} /> About Platform
                                     </button>
                                     <button
-                                        className={`doc-tab-btn ${docTab === 'faq' ? 'active' : ''}`}
-                                        onClick={() => setDocTab('faq')}
-                                        style={{ marginRight: 12 }}
+className={`doc-tab-btn doc-tab-btn-spaced ${docTab === 'faq' ? 'active' : ''}`}
+onClick={() => setDocTab('faq')}
                                     >
                                         <HelpCircle size={14} /> FAQ
                                     </button>
                                     <button
-                                        className="doc-tab-btn"
-                                        onClick={() => window.dispatchEvent(new Event('restart-tour'))}
-                                        style={{ marginRight: 12 }}
+className="doc-tab-btn doc-tab-btn-spaced"
+onClick={() => window.dispatchEvent(new Event('restart-tour'))}
                                     >
                                         <CheckCircle2 size={14} /> Start Tour
                                     </button>
@@ -821,7 +708,7 @@ export default function SettingsPage() {
                                 </div>
                             </div>
 
-                            <div className="doc-content glass-card">
+                            <div className="doc-content ds-card">
                                 {docTab === 'manual' && (
                                     <div className="doc-section">
                                         <h4>📚 Betika Promotions Platform - User Manual v1.0</h4>
@@ -883,9 +770,9 @@ export default function SettingsPage() {
                                             </a>
                                         </div>
 
-                                        <div className="help-box" style={{ marginTop: '24px' }}>
-                                            <HelpCircle size={18} />
-                                            <p>Need more help? Contact support at <a href="mailto:support@betika.com" style={{ color: '#F2D641' }}>support@betika.com</a></p>
+<div className="help-box help-box-spaced">
+<HelpCircle size={18} />
+<p>Need more help? Contact support at <a href="mailto:support@betika.com" className="help-link">support@betika.com</a></p>
                                         </div>
                                     </div>
                                 )}
@@ -895,75 +782,75 @@ export default function SettingsPage() {
                                         <h4>❓ Frequently Asked Questions</h4>
                                         <p>Quick answers to common questions about the Betika Promotions Platform.</p>
 
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '24px' }}>
-                                            {/* General Questions */}
-                                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '16px' }}>
-                                                <h5 style={{ color: '#F2D641', margin: '0 0 8px 0', fontSize: '15px' }}>How do I create a new promotion?</h5>
-                                                <p style={{ margin: 0, color: '#e5e7eb', fontSize: '14px', lineHeight: '1.6' }}>
+<div className="faq-list">
+{/* General Questions */}
+<div className="faq-card">
+<h5>How do I create a new promotion?</h5>
+<p>
                                                     Navigate to Promotions → Click "Create New Promotion" → Follow the 7-step wizard to configure your promotion details, eligibility rules, rewards, and schedule.
                                                 </p>
                                             </div>
 
-                                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '16px' }}>
-                                                <h5 style={{ color: '#F2D641', margin: '0 0 8px 0', fontSize: '15px' }}>Can I edit a promotion after it's published?</h5>
-                                                <p style={{ margin: 0, color: '#e5e7eb', fontSize: '14px', lineHeight: '1.6' }}>
+<div className="faq-card">
+<h5>Can I edit a promotion after it&apos;s published?</h5>
+<p>
                                                     Yes, but with limitations. You can edit the display messaging and extend the end date. Core rules like eligibility and rewards cannot be changed once live to maintain fairness.
                                                 </p>
                                             </div>
 
-                                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '16px' }}>
-                                                <h5 style={{ color: '#F2D641', margin: '0 0 8px 0', fontSize: '15px' }}>How do budget limits work?</h5>
-                                                <p style={{ margin: 0, color: '#e5e7eb', fontSize: '14px', lineHeight: '1.6' }}>
+<div className="faq-card">
+<h5>How do budget limits work?</h5>
+<p>
                                                     There are two types of limits: Country Limit (total cap for all promotions in a market) and Promotion Limit (cap for a single campaign). The system automatically stops awarding when limits are reached.
                                                 </p>
                                             </div>
 
-                                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '16px' }}>
-                                                <h5 style={{ color: '#F2D641', margin: '0 0 8px 0', fontSize: '15px' }}>What's the difference between "Active" and "Live" status?</h5>
-                                                <p style={{ margin: 0, color: '#e5e7eb', fontSize: '14px', lineHeight: '1.6' }}>
+<div className="faq-card">
+<h5>What&apos;s the difference between &quot;Active&quot; and &quot;Live&quot; status?</h5>
+<p>
                                                     "Active" means the promotion is published and ready. "Live" means it's currently running (within the start/end date range). A promotion can be Active but not yet Live if the start date is in the future.
                                                 </p>
                                             </div>
 
-                                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '16px' }}>
-                                                <h5 style={{ color: '#F2D641', margin: '0 0 8px 0', fontSize: '15px' }}>How do I preview how a promotion looks to customers?</h5>
-                                                <p style={{ margin: 0, color: '#e5e7eb', fontSize: '14px', lineHeight: '1.6' }}>
+<div className="faq-card">
+<h5>How do I preview how a promotion looks to customers?</h5>
+<p>
                                                     In the Promotions list, click the three-dot menu (⋮) next to any promotion and select "Preview Customer View". This opens a simulation of how customers will see the promotion on the Betika platform.
                                                 </p>
                                             </div>
 
-                                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '16px' }}>
-                                                <h5 style={{ color: '#F2D641', margin: '0 0 8px 0', fontSize: '15px' }}>Can I target specific user segments?</h5>
-                                                <p style={{ margin: 0, color: '#e5e7eb', fontSize: '14px', lineHeight: '1.6' }}>
+<div className="faq-card">
+<h5>Can I target specific user segments?</h5>
+<p>
                                                     Yes! In Step 2 (Scope & Eligibility) of the wizard, you can define eligibility rules based on user attributes like registration date, activity level, location, and more.
                                                 </p>
                                             </div>
 
-                                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '16px' }}>
-                                                <h5 style={{ color: '#F2D641', margin: '0 0 8px 0', fontSize: '15px' }}>What happens if I pause a promotion?</h5>
-                                                <p style={{ margin: 0, color: '#e5e7eb', fontSize: '14px', lineHeight: '1.6' }}>
+<div className="faq-card">
+<h5>What happens if I pause a promotion?</h5>
+<p>
                                                     Pausing immediately stops new awards from being issued. The promotion disappears from customer-facing interfaces but existing awards remain valid. You can resume it anytime.
                                                 </p>
                                             </div>
 
-                                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '16px' }}>
-                                                <h5 style={{ color: '#F2D641', margin: '0 0 8px 0', fontSize: '15px' }}>How do I download promotion performance data?</h5>
-                                                <p style={{ margin: 0, color: '#e5e7eb', fontSize: '14px', lineHeight: '1.6' }}>
+<div className="faq-card">
+<h5>How do I download promotion performance data?</h5>
+<p>
                                                     Click the "Export" button in the top-right of the Promotions list. You can export as CSV or Excel with filters for date range, status, and country.
                                                 </p>
                                             </div>
 
-                                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '16px' }}>
-                                                <h5 style={{ color: '#F2D641', margin: '0 0 8px 0', fontSize: '15px' }}>Who can I contact for technical support?</h5>
-                                                <p style={{ margin: 0, color: '#e5e7eb', fontSize: '14px', lineHeight: '1.6' }}>
-                                                    Email <a href="mailto:support@betika.com" style={{ color: '#F2D641', textDecoration: 'none' }}>support@betika.com</a> or use the in-app chat (bottom-right corner). For urgent issues, contact your account manager directly.
+<div className="faq-card">
+<h5>Who can I contact for technical support?</h5>
+<p>
+Email <a href="mailto:support@betika.com" className="faq-link">support@betika.com</a> or use the in-app chat (bottom-right corner). For urgent issues, contact your account manager directly.
                                                 </p>
                                             </div>
                                         </div>
 
-                                        <div className="help-box" style={{ marginTop: '24px' }}>
-                                            <HelpCircle size={18} />
-                                            <p>Can't find your answer? Check the <span onClick={() => setDocTab('manual')} style={{ color: '#F2D641', cursor: 'pointer', textDecoration: 'underline' }}>User Manual</span> or contact <a href="mailto:support@betika.com" style={{ color: '#F2D641' }}>support@betika.com</a></p>
+<div className="help-box help-box-spaced">
+<HelpCircle size={18} />
+<p>Can&apos;t find your answer? Check the <span onClick={() => setDocTab('manual')} className="faq-manual-link">User Manual</span> or contact <a href="mailto:support@betika.com" className="help-link">support@betika.com</a></p>
                                         </div>
                                     </div>
                                 )}
@@ -1018,140 +905,6 @@ export default function SettingsPage() {
 
                 </div>
             </div>
-
-            <style jsx>{`
-        .settings-container { max-width: 1200px; margin: 0 auto; padding: 24px; color: var(--color-text-primary); }
-        .page-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 32px; }
-        .page-title { font-size: 28px; font-weight: 700; margin: 0 0 8px 0; color: var(--color-text-primary); }
-        .page-subtitle { color: var(--color-text-secondary); margin: 0; font-size: 14px; }
-        
-        .settings-footer { position: sticky; bottom: 0; z-index: 20; margin-top: 32px; margin-left: -32px; margin-right: -32px; margin-bottom: -32px; padding: 20px 32px; border-top: 1px solid var(--color-border); display: flex; align-items: center; justify-content: flex-end; gap: 16px; background: var(--color-bg-panel); backdrop-filter: blur(10px); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; box-shadow: 0 -4px 16px rgba(0,0,0,0.15); }
-
-
-        .footer-spacer { flex: 1; display: flex; align-items: center; }
-        .footer-hint { font-size: 12px; color: var(--color-text-secondary); font-style: italic; }
-        .btn-save { display: flex; align-items: center; gap: 8px; background: var(--color-betika-yellow); color: #000; border: none; padding: 10px 32px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 15px; }
-
-        .btn-save:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(242, 214, 65, 0.2); }
-        .btn-save:disabled { opacity: 0.6; cursor: wait; transform: none; }
-        
-        .success-toast { position: fixed; top: 24px; right: 24px; z-index: 1000; background: rgba(74, 222, 128, 0.1); color: #4ade80; padding: 12px 20px; border-radius: 8px; border: 1px solid rgba(74, 222, 128, 0.2); display: flex; align-items: center; gap: 8px; font-weight: 600; animation: slideIn 0.3s ease-out; backdrop-filter: blur(10px); }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        
-        .settings-layout { display: grid; grid-template-columns: 240px 1fr; gap: 24px; align-items: start; }
-        .glass-panel { background: var(--color-bg-panel); border: 1px solid var(--color-border); border-radius: 12px; backdrop-filter: blur(10px); }
-        
-        .settings-nav { padding: 12px; display: flex; flex-direction: column; gap: 4px; }
-        .nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 16px; background: transparent; border: none; color: var(--color-text-secondary); font-size: 14px; font-weight: 500; text-align: left; cursor: pointer; border-radius: 8px; transition: all 0.2s; }
-        .nav-btn:hover { background: var(--color-border); color: var(--color-text-primary); }
-        .nav-btn.active { background: var(--color-betika-yellow); color: #000; font-weight: 600; }
-        
-        .settings-content { padding: 32px; min-height: 600px; display: flex; flex-direction: column; }
-        .tab-pane { flex: 1; }
-        .tab-pane h3 { margin: 0 0 24px 0; font-size: 18px; font-weight: 600; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; color: var(--color-text-primary); }
-        
-        /* Theme Toggles */
-        .theme-options { display: flex; gap: 16px; margin-top: 12px; }
-        .theme-card { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 12px; cursor: pointer; color: var(--color-text-secondary); transition: all 0.2s; }
-        .theme-card:hover { border-color: var(--color-betika-yellow); }
-        .theme-card.active { border-color: var(--color-betika-yellow); color: var(--color-text-primary); background: rgba(242, 214, 65, 0.1); }
-        
-        /* Countries Tab */
-        .pane-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .btn-secondary { background: var(--color-bg-card); border: 1px solid var(--color-border); color: var(--color-text-primary); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        
-        .countries-list { display: flex; flex-direction: column; gap: 8px; }
-        .list-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 0.5fr; gap: 12px; font-size: 11px; text-transform: uppercase; color: var(--color-text-secondary); padding: 0 12px; margin-bottom: 8px; }
-        .country-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 0.5fr; gap: 12px; align-items: center; padding: 12px; background: var(--color-bg-card); border-radius: 8px; border: 1px solid var(--color-border); }
-        .country-row:hover { border-color: var(--color-border-hover); }
-        
-        .badge-code { background: var(--color-border); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-family: monospace; width: fit-content; color: var(--color-text-primary); }
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        .text-muted { color: var(--color-text-secondary); font-size: 12px; }
-        
-        .inline-input { background: transparent; border: 1px solid transparent; color: var(--color-text-primary); text-align: right; width: 100%; font-family: monospace; padding: 4px; border-radius: 4px; }
-        .inline-input:hover, .inline-input:focus { background: var(--color-bg-input); border-color: var(--color-border); outline: none; }
-        
-        .add-country-form { padding: 20px; background: var(--color-bg-panel); margin-bottom: 24px; border: 1px solid var(--color-betika-yellow); border-radius: 8px; }
-        .add-grid { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-        .add-grid input, .add-grid select { background: var(--color-bg-input); border: 1px solid var(--color-border); padding: 8px 12px; border-radius: 6px; color: var(--color-text-primary); width: 100%; }
-        .add-grid select { cursor: pointer; }
-        .add-grid .input-readonly { background: var(--color-bg-input); opacity: 0.7; color: var(--color-text-secondary); cursor: not-allowed; border-color: transparent; }
-        
-        .form-actions { display: flex; justify-content: flex-end; gap: 12px; }
-        .btn-cancel { background: transparent; border: 1px solid var(--color-border); color: var(--color-text-primary); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-        .btn-confirm { background: var(--color-betika-yellow); color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
-        .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .btn-icon.danger { color: #f87171; background: transparent; border: none; cursor: pointer; opacity: 0.7; }
-        .btn-icon.danger:hover { opacity: 1; background: rgba(248, 113, 113, 0.1); border-radius: 4px; }
-        
-        /* Other Common Styles */
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 11px; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 8px; letter-spacing: 0.5px; }
-        input[type="text"], select { width: 100%; background: var(--color-bg-input); border: 1px solid var(--color-border); padding: 10px 12px; border-radius: 6px; color: var(--color-text-primary); outline: none; font-size: 14px; }
-        
-        .users-table { width: 100%; border-collapse: collapse; }
-        .users-table th { text-align: left; padding: 12px; font-size: 11px; text-transform: uppercase; color: var(--color-text-secondary); }
-        .users-table td { padding: 12px; border-bottom: 1px solid var(--color-border); font-size: 13px; color: var(--color-text-primary); }
-        .role-badge { background: var(--color-bg-input); padding: 4px 8px; border-radius: 4px; font-size: 11px; color: var(--color-text-primary); }
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-        .status-dot.active { background: #4ade80; }
-        .status-dot.inactive { background: #94a3b8; }
-        .icon-btn { background: transparent; border: none; color: var(--color-text-secondary); cursor: pointer; padding: 4px; }
-        
-        .integrations-list { display: grid; gap: 16px; }
-        .integration-card { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 8px; }
-        .int-icon { width: 40px; height: 40px; background: var(--color-bg-input); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: var(--color-text-primary); }
-        .int-info { flex: 1; }
-        .int-info h4 { margin: 0 0 4px 0; font-size: 14px; color: var(--color-text-primary); }
-        .int-info .status { font-size: 11px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px; }
-        .dot { width: 6px; height: 6px; border-radius: 50%; }
-        .dot.connected { background: #4ade80; }
-        .dot.disconnected { background: #f87171; }
-        .int-actions { display: flex; align-items: center; gap: 16px; }
-        .btn-configure { background: transparent; border: 1px solid var(--color-border); color: var(--color-text-primary); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
-        
-        .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--color-bg-input); transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: var(--color-text-primary); transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #4ade80; }
-        input:checked + .slider:before { transform: translateX(16px); background-color: #fff; }
-        
-        .notif-group { display: flex; flex-direction: column; gap: 16px; }
-        .notif-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
-        .notif-item:last-child { border-bottom: none; }
-        .notif-info h4 { margin: 0 0 4px 0; font-size: 14px; color: var(--color-text-primary); }
-        .notif-info p { margin: 0; font-size: 12px; color: var(--color-text-secondary); }
-
-        /* Documentation Styles */
-        .doc-tabs { display: flex; gap: 8px; background: var(--color-bg-input); padding: 4px; border-radius: 8px; }
-        .doc-tab-btn { background: transparent; border: none; color: var(--color-text-secondary); padding: 6px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; transition: all 0.2s; }
-        .doc-tab-btn.active { background: var(--color-bg-panel); color: var(--color-text-primary); font-weight: 600; shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .doc-tab-btn:hover:not(.active) { color: var(--color-text-primary); }
-
-        .doc-content { padding: 24px; background: var(--color-bg-card); border-radius: 12px; border: 1px solid var(--color-border); }
-        .doc-section h4 { margin: 0 0 8px 0; color: var(--color-text-primary); font-size: 16px; }
-        .doc-section p { color: var(--color-text-secondary); font-size: 13px; margin-bottom: 24px; line-height: 1.5; }
-
-        .doc-link-list { display: grid; gap: 12px; margin-bottom: 24px; }
-        .doc-link { display: flex; align-items: start; gap: 12px; padding: 16px; background: var(--color-bg-panel); border: 1px solid var(--color-border); border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.2s; }
-        .doc-link:hover { border-color: var(--color-betika-yellow); transform: translateY(-1px); }
-        .link-title { display: block; font-weight: 600; font-size: 14px; margin-bottom: 2px; color: var(--color-text-primary); }
-        .link-desc { display: block; font-size: 12px; color: var(--color-text-secondary); }
-        .ext-icon { opacity: 0.5; margin-left: auto; color: var(--color-text-secondary); }
-
-        .help-box { background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2); padding: 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px; color: var(--color-accent-cyan); font-size: 13px; }
-        .help-box p { margin: 0; color: inherit; }
-        .help-box a { color: var(--color-text-primary); text-decoration: underline; }
-
-        .code-snippet { background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; margin-bottom: 24px; font-family: monospace; }
-        .snippet-header { background: var(--color-bg-panel); padding: 8px 16px; font-size: 11px; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border); }
-        .code-snippet pre { margin: 0; padding: 16px; font-size: 12px; color: var(--color-accent-purple); overflow-x: auto; }
-      `}</style>
         </div >
     );
 }

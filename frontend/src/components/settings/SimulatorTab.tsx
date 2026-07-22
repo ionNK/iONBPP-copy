@@ -189,23 +189,27 @@ export default function SimulatorTab() {
     };
 
     return (
-        <div className="tab-pane">
-            <div className="header">
-                <div>
-                    <h3>Event Simulator</h3>
-                    <p style={{ color: 'var(--color-text-secondary)', marginBottom: 20 }}>Trigger complex mock user events to test promotion rules.</p>
+ <div className="tab-pane simulator-tab">
+ <div className="header">
+ <div>
+ <h3>Event Simulator</h3>
+ <p className="simulator-subtitle">Trigger complex mock user events to test promotion rules.</p>
                 </div>
             </div>
 
             <div className="content-grid-tab">
                 {/* Configuration Panel */}
-                <div className="panel-inner config-panel">
+                <div className="panel-inner config-panel ds-panel">
                     <h4 className="panel-title-sm"><Activity size={16} /> Event Configuration</h4>
 
                     {/* Scenario Quick Picks */}
                     <div className="scenarios-list">
                         {SCENARIOS.map((s, idx) => (
-                            <button key={idx} className="btn-scenario" onClick={() => loadScenario(s)}>
+                            <button
+ key={idx}
+ className="btn-scenario ds-action-button ds-action-button--outline ds-action-button--outline-compact ds-action-button--outline-hover-neutral ds-action-button--surface ds-action-button--secondary"
+ onClick={() => loadScenario(s)}
+>
                                 <Zap size={14} className={idx % 2 === 0 ? 'text-yellow' : 'text-purple'} />
                                 {s.label}
                             </button>
@@ -230,8 +234,9 @@ export default function SimulatorTab() {
                     {/* Event Type Selector */}
                     <div className="form-group">
                         <label>Event Type</label>
-                        <select
-                            value={selectedEventId}
+<select
+ className="ds-select"
+ value={selectedEventId}
                             onChange={(e) => setSelectedEventId(e.target.value)}
                         >
                             {currentCategory?.events.map((ev: any) => (
@@ -243,7 +248,7 @@ export default function SimulatorTab() {
                     {/* Player ID (Global) */}
                     <div className="form-group">
                         <label>Player ID</label>
-                        <input type="text" value={playerId} onChange={(e) => setPlayerId(e.target.value)} />
+                        <input className="ds-control" type="text" value={playerId} onChange={(e) => setPlayerId(e.target.value)} />
                     </div>
 
                     {/* Dynamic Params */}
@@ -256,7 +261,7 @@ export default function SimulatorTab() {
                                         <div className="array-header">
                                             <label>{param.name}</label>
                                             <button
-                                                className="btn-add-item"
+                                                className="btn-add-item ds-action-button ds-action-button--outline ds-action-button--outline-sm"
                                                 onClick={() => handleArrayPush(param.name, param.itemSchema)}
                                             >
                                                 + Add Item
@@ -267,23 +272,25 @@ export default function SimulatorTab() {
                                                 <div key={idx} className="array-item-card">
                                                     <div className="item-header">
                                                         <span>Item #{idx + 1}</span>
-                                                        <button className="btn-remove" onClick={() => handleArrayRemove(param.name, idx)}>×</button>
+                                                        <button className="btn-remove ds-action-button ds-action-button--secondary" type="button" aria-label={`Remove item ${idx + 1}`} onClick={() => handleArrayRemove(param.name, idx)}>×</button>
                                                     </div>
                                                     <div className="item-fields-grid">
                                                         {param.itemSchema.map((subParam: any) => (
                                                             <div key={subParam.name} className="sub-field">
                                                                 <label>{subParam.name}</label>
                                                                 {subParam.options ? (
-                                                                    <select
-                                                                        value={item[subParam.name] || ''}
+<select
+ className="ds-select"
+ value={item[subParam.name] || ''}
                                                                         onChange={(e) => handleArrayItemChange(param.name, idx, subParam.name, e.target.value)}
                                                                     >
                                                                         <option value="">Select...</option>
                                                                         {subParam.options.map((o: string) => <option key={o} value={o}>{o}</option>)}
                                                                     </select>
                                                                 ) : (
-                                                                    <input
-                                                                        type={subParam.type === 'float' ? 'number' : 'text'}
+<input
+ className="ds-control"
+ type={subParam.type === 'float' ? 'number' : 'text'}
                                                                         value={item[subParam.name] || ''}
                                                                         onChange={(e) => handleArrayItemChange(param.name, idx, subParam.name, e.target.value)}
                                                                         placeholder={subParam.name}
@@ -300,8 +307,9 @@ export default function SimulatorTab() {
                                     <div className="form-group">
                                         <label>{param.name}</label>
                                         {param.options ? (
-                                            <select
-                                                value={formData[param.name] || ''}
+<select
+ className="ds-select"
+ value={formData[param.name] || ''}
                                                 onChange={(e) => handleInputChange(param.name, e.target.value)}
                                             >
                                                 <option value="">Select...</option>
@@ -310,16 +318,18 @@ export default function SimulatorTab() {
                                                 ))}
                                             </select>
                                         ) : param.type === 'boolean' ? (
-                                            <select
-                                                value={String(formData[param.name])}
+<select
+ className="ds-select"
+ value={String(formData[param.name])}
                                                 onChange={(e) => handleInputChange(param.name, e.target.value === 'true')}
                                             >
                                                 <option value="false">No</option>
                                                 <option value="true">Yes</option>
                                             </select>
                                         ) : (
-                                            <input
-                                                type={param.type === 'float' || param.type === 'integer' ? 'number' : 'text'}
+<input
+ className="ds-control"
+ type={param.type === 'float' || param.type === 'integer' ? 'number' : 'text'}
                                                 value={formData[param.name] || ''}
                                                 onChange={(e) => handleInputChange(param.name, e.target.value)}
                                                 step={param.type === 'float' ? '0.01' : '1'}
@@ -332,7 +342,7 @@ export default function SimulatorTab() {
                     </div>
 
                     <button
-                        className="btn-primary"
+                        className="btn-primary ds-action-button ds-action-button--primary ds-action-button--primary-lg ds-action-button--block"
                         onClick={handleSimulate}
                         disabled={loading}
                     >
@@ -341,7 +351,7 @@ export default function SimulatorTab() {
                 </div>
 
                 {/* Logs Panel */}
-                <div className="panel-inner logs-panel">
+                <div className="panel-inner logs-panel ds-panel">
                     <h4 className="panel-title-sm">Execution Logs</h4>
                     <div className="logs-container">
                         {logs.length === 0 ? (
@@ -366,130 +376,6 @@ export default function SimulatorTab() {
                     </div>
                 </div>
             </div>
-
-            <style jsx>{`
-                .header { margin-bottom: 24px; }
-                
-                .content-grid-tab {
-                    display: grid;
-                    grid-template-columns: 350px 1fr;
-                    gap: 20px;
-                    align-items: start;
-                }
-
-                .panel-inner {
-                    background: var(--color-bg-panel);
-                    border: 1px solid var(--color-border);
-                    border-radius: 12px;
-                    padding: 20px;
-                    box-shadow: var(--shadow-sm);
-                }
-                .panel-title-sm { margin: 0 0 16px 0; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--color-text-primary); }
-
-                /* Scenarios */
-                .scenarios-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-                .btn-scenario { 
-                    background: var(--color-bg-input); border: 1px solid var(--color-border); 
-                    border-radius: 6px; padding: 6px 12px; font-size: 11px; color: var(--color-text-secondary); 
-                    cursor: pointer; display: flex; align-items: center; gap: 6px; 
-                }
-                .btn-scenario:hover { background: var(--color-bg-app); border-color: var(--color-border-hover); color: var(--color-text-primary); }
-                .text-yellow { color: #facc15; }
-                .text-purple { color: #c084fc; }
-
-                .divider { height: 1px; background: var(--color-border); margin: 20px 0; }
-
-                /* Category Tabs */
-                .category-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--color-border); }
-                .cat-tab { 
-                    background: transparent; border: none; color: var(--color-text-secondary); padding: 6px 12px; 
-                    font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; 
-                    border-bottom: 2px solid transparent; 
-                }
-                .cat-tab.active { color: var(--color-betika-yellow); border-bottom-color: var(--color-betika-yellow); }
-
-                /* Form */
-                .form-group { margin-bottom: 12px; }
-                .form-group label { display: block; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; }
-                .form-group input, .form-group select {
-                    width: 100%;
-                    background: var(--color-bg-input);
-                    border: 1px solid var(--color-border);
-                    color: var(--color-text-primary);
-                    padding: 8px;
-                    border-radius: 6px;
-                    outline: none;
-                    transition: border-color 0.2s;
-                    font-size: 12px;
-                }
-                .form-group input:focus, .form-group select:focus {
-                    border-color: var(--color-betika-yellow);
-                    background: var(--color-bg-panel);
-                }
-
-                /* Array Fields */
-                .array-field-group { margin-bottom: 20px; }
-                .array-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-                .btn-add-item { background: var(--color-bg-input); border: 1px solid var(--color-border); color: var(--color-betika-yellow); font-size: 11px; padding: 4px 10px; border-radius: 4px; cursor: pointer; }
-                
-                .array-items { display: flex; flex-direction: column; gap: 6px; }
-                .array-item-card { background: var(--color-bg-app); border: 1px solid var(--color-border); padding: 12px; border-radius: 8px; }
-                .item-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 10px; text-transform: uppercase; color: var(--color-text-muted); font-weight: 600; }
-                .btn-remove { background: transparent; border: none; color: #f87171; cursor: pointer; font-size: 16px; }
-                
-                .item-fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-                .sub-field input, .sub-field select { width: 100%; background: var(--color-bg-input); border: 1px solid var(--color-border); color: var(--color-text-primary); padding: 6px; border-radius: 4px; font-size: 11px; }
-
-                .dynamic-params { background: var(--color-bg-app); padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--color-border); }
-                .dynamic-params h4 { margin: 0 0 12px 0; font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
-
-                .btn-primary {
-                    width: 100%;
-                    background: var(--color-betika-yellow);
-                    color: #000;
-                    border: none;
-                    border-radius: 8px;
-                    padding: 12px;
-                    font-weight: 700;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    font-size: 14px;
-                }
-                .btn-primary:active { transform: scale(0.98); }
-                .btn-primary:hover { opacity: 0.9; box-shadow: var(--shadow-md); }
-                .btn-primary:disabled { opacity: 0.5; cursor: wait; }
-
-                .logs-container { max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-                .empty-state { color: var(--color-text-muted); font-style: italic; text-align: center; padding: 30px; font-size: 13px; }
-
-                .log-item {
-                    background: var(--color-bg-panel);
-                    border: 1px solid var(--color-border);
-                    border-radius: 8px;
-                    padding: 12px;
-                    font-family: inherit;
-                    font-size: 12px;
-                }
-                .log-item.success { border-left: 4px solid #4ade80; }
-                .log-item.pending { border-left: 4px solid #facc15; }
-
-                .log-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-                .status-dot { width: 8px; height: 8px; border-radius: 50%; }
-                .status-dot.success { background: #4ade80; }
-                .status-dot.pending { background: #facc15; }
-                .timestamp { color: var(--color-text-muted); font-size: 11px; }
-                .status-text { color: var(--color-text-primary); font-weight: 700; }
-                .badge-processed { 
-                    font-size: 9px; background: rgba(74, 222, 128, 0.1); color: #22c55e; 
-                    padding: 2px 6px; border-radius: 4px; margin-left: auto; font-weight: 700;
-                }
-
-                .log-details pre { margin: 0; background: var(--color-bg-input); padding: 12px; border-radius: 6px; overflow-x: auto; color: var(--color-text-secondary); font-size: 11px; border: 1px solid var(--color-border); }
-            `}</style>
         </div>
     );
 }

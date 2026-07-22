@@ -14,9 +14,10 @@ export default function AppShell({ children, interClassName }: { children: React
 
  const isLoginPage = pathname === '/admin/login';
  const isPromotionsRoute =
-pathname === '/admin/manual-award' ||
-pathname === '/admin/promotions' ||
-pathname?.startsWith('/admin/promotions/');
+ pathname === '/admin/manual-award' ||
+ pathname === '/admin/promotions' ||
+ pathname?.startsWith('/admin/promotions/');
+ const isSettingsRoute = pathname === '/admin/settings';
 
  if (isLoginPage) {
     return (
@@ -27,7 +28,7 @@ pathname?.startsWith('/admin/promotions/');
   }
 
   return (
- <div className={`app-shell ${isPromotionsRoute ? 'promotions-module' : ''} ${interClassName || ''}`}>
+ <div className={`app-shell ${isPromotionsRoute ? 'promotions-module' : ''} ${isSettingsRoute ? 'settings-module' : ''} ${interClassName || ''}`}>
  <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <OnboardingTour />
 

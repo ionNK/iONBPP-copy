@@ -49,6 +49,15 @@ backend/dist/
 *.tsbuildinfo
 next-env.d.ts
 
-# Generated ML training datasets (regenerate with ml_pipeline/data_generator.py)
-ml_pipeline/data/events.csv
-ml_pipeline/data/train_data.csv
+# Generated ML artifacts (regenerate with ml_pipeline scripts)
+ml_pipeline/data/
+ml_pipeline/models/
+ml_pipeline/plots/
+ml_pipeline/results/
+
+# Generated reports and documentation exports
+/design.md
+frontend/lighthouse-report.json
+frontend/step_*.png
+frontend/public/docs/*.pdf
+frontend/public/docs/images/

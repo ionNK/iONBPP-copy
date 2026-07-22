@@ -22,8 +22,8 @@ const isThemeFamily = (value: string | null): value is ThemeFamily =>
   value === 'default' || value === 'ionix';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ColorMode>('dark');
-  const [themeFamily, setThemeFamilyState] = useState<ThemeFamily>('default');
+const [theme, setThemeState] = useState<ColorMode>('light');
+const [themeFamily, setThemeFamilyState] = useState<ThemeFamily>('ionix');
 
   const applyTheme = (colorMode: ColorMode, family: ThemeFamily) => {
     document.documentElement.setAttribute('data-theme', colorMode);
@@ -33,9 +33,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Keep legacy color-mode preferences so existing users retain their appearance.
     const savedColorMode = localStorage.getItem('betika-theme') || localStorage.getItem('theme');
-    const colorMode = isColorMode(savedColorMode) ? savedColorMode : 'dark';
-    const savedThemeFamily = localStorage.getItem('betika-theme-family');
-    const family = isThemeFamily(savedThemeFamily) ? savedThemeFamily : 'default';
+const colorMode = isColorMode(savedColorMode) ? savedColorMode : 'light';
+const savedThemeFamily = localStorage.getItem('betika-theme-family');
+const family = isThemeFamily(savedThemeFamily) ? savedThemeFamily : 'ionix';
 
     setThemeState(colorMode);
     setThemeFamilyState(family);

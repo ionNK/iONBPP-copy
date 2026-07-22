@@ -29,10 +29,14 @@
   --color-bg-sidebar: var(--gray-950);
   /* #09090b */
   --color-bg-header: rgba(0, 0, 0, 0.8);
-  --color-bg-input: var(--gray-800);
-  --color-bg-input-focus: var(--gray-700);
+--color-bg-input: var(--gray-800);
+--color-bg-input-focus: var(--gray-700);
+--color-bg-surface: var(--gray-900);
+--color-bg-elevated: var(--gray-800);
+--color-bg-hover: var(--gray-800);
+--color-primary: var(--color-betika-yellow);
 
-  --color-text-primary: var(--gray-50);
+--color-text-primary: var(--gray-50);
   --color-text-secondary: var(--gray-400);
   --color-text-muted: var(--gray-600);
   --color-text-inverse: var(--gray-950);
@@ -64,10 +68,14 @@
   --color-bg-card: var(--gray-0);
   --color-bg-sidebar: var(--gray-0);
   --color-bg-header: rgba(255, 255, 255, 0.9);
-  --color-bg-input: #f3f4f6;
-  --color-bg-input-focus: var(--gray-0);
+--color-bg-input: #f3f4f6;
+--color-bg-input-focus: var(--gray-0);
+--color-bg-surface: var(--gray-0);
+--color-bg-elevated: #eef0f3;
+--color-bg-hover: #f3f4f6;
+--color-primary: var(--color-betika-yellow);
 
-  --color-text-primary: #111827;
+--color-text-primary: #111827;
   /* Gray-900 */
   --color-text-secondary: #4b5563;
   /* Gray-600 - High Contrast */
@@ -92,6 +100,80 @@
   --sidebar-hover-bg: #f3f4f6;
   --sidebar-profile-bg: #f9fafb;
   --focus-ring: 0 0 0 2px var(--color-bg-app), 0 0 0 4px var(--color-betika-green);
+}
+
+/*
+ * Ionix is the current product baseline. These selectors intentionally define
+ * a complete application palette so feature modules can consume shared tokens
+ * rather than carrying light/dark-specific colors locally.
+ */
+[data-theme-family='ionix'][data-theme='light'] {
+--color-bg-app: #f6f7f9;
+--color-bg-panel: #ffffff;
+--color-bg-card: #ffffff;
+--color-bg-sidebar: #ffffff;
+--color-bg-header: rgba(255, 255, 255, 0.92);
+--color-bg-input: #f1f3f5;
+--color-bg-input-focus: #ffffff;
+--color-bg-surface: #ffffff;
+--color-bg-elevated: #e9edf1;
+--color-bg-hover: #f1f3f5;
+--color-primary: var(--color-betika-yellow);
+
+--color-text-primary: #17212f;
+--color-text-secondary: #52606d;
+--color-text-muted: #7b8794;
+--color-text-inverse: #ffffff;
+--color-text-logo: #17212f;
+
+--color-border: #dfe4ea;
+--color-border-hover: #c7d0da;
+--glass-bg: rgba(255, 255, 255, 0.76);
+--shadow-sm: 0 1px 2px rgba(23, 33, 47, 0.06);
+--shadow-md: 0 8px 20px rgba(23, 33, 47, 0.08);
+
+--sidebar-active-bg: var(--color-betika-yellow);
+--sidebar-active-text: #17212f;
+--sidebar-hover-bg: #f1f3f5;
+--sidebar-profile-bg: #f6f7f9;
+--focus-ring: 0 0 0 2px var(--color-bg-app), 0 0 0 4px #699951;
+}
+
+/*
+ * The dark Ionix palette follows the operational visual language already
+ * established by Promotions and Manual Award: deep navy canvas, subtly
+ * elevated translucent controls, low-contrast borders, and yellow actions.
+ */
+[data-theme-family='ionix'][data-theme='dark'] {
+--color-bg-app: #00152e;
+--color-bg-panel: #001d3d;
+--color-bg-card: #001d3d;
+--color-bg-sidebar: #00152e;
+--color-bg-header: rgba(0, 21, 46, 0.88);
+--color-bg-input: rgba(255, 255, 255, 0.06);
+--color-bg-input-focus: rgba(255, 255, 255, 0.1);
+--color-bg-surface: #001d3d;
+--color-bg-elevated: rgba(255, 255, 255, 0.1);
+--color-bg-hover: rgba(255, 255, 255, 0.08);
+--color-primary: var(--color-betika-yellow);
+
+--color-text-primary: #f5f7fa;
+--color-text-secondary: #b7c3d0;
+--color-text-muted: #8292a5;
+--color-text-inverse: #00152e;
+--color-text-logo: #ffffff;
+
+--color-border: rgba(255, 255, 255, 0.15);
+--color-border-hover: rgba(255, 255, 255, 0.28);
+--glass-bg: rgba(0, 29, 61, 0.72);
+--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
+--shadow-md: 0 10px 24px rgba(0, 0, 0, 0.34);
+
+--sidebar-active-bg: var(--color-betika-yellow);
+--sidebar-active-text: #00152e;
+--sidebar-hover-bg: rgba(255, 255, 255, 0.08);
+--sidebar-profile-bg: rgba(255, 255, 255, 0.05);
+--focus-ring: 0 0 0 2px var(--color-bg-app), 0 0 0 4px var(--color-betika-yellow);
 }
 
 html {
@@ -640,7 +722,8 @@ a {
    The route marker is provided by AppShell. These values intentionally never
    alter Default or any non-Promotions screen.
    -------------------------------------------------------------------------- */
-[data-theme-family='ionix'] .promotions-module {
+[data-theme-family='ionix'] .promotions-module,
+[data-theme-family='ionix'] .settings-module {
   --unity-navy: #001528;
   --unity-blue: #001d3d;
   --unity-blue-soft: rgba(0, 29, 61, 0.9);
@@ -677,11 +760,98 @@ a {
   color: var(--unity-text);
 }
 
+[data-theme-family='ionix'] .settings-module {
+ background: transparent;
+}
+
+[data-theme-family='ionix'] .settings-module .glass-panel,
+[data-theme-family='ionix'] .settings-module .settings-footer,
+[data-theme-family='ionix'] .settings-module .add-country-form,
+[data-theme-family='ionix'] .settings-module .doc-link {
+  background: var(--unity-blue-soft) !important;
+  border-color: var(--unity-line-soft) !important;
+  box-shadow: none;
+}
+
+[data-theme-family='ionix'] .settings-module .theme-card,
+[data-theme-family='ionix'] .settings-module .country-row,
+[data-theme-family='ionix'] .settings-module .integration-card,
+[data-theme-family='ionix'] .settings-module .doc-content {
+  background: var(--unity-blue-soft) !important;
+  border-color: var(--unity-line-soft) !important;
+}
+
+[data-theme-family='ionix'] .settings-module .nav-btn:hover,
+[data-theme-family='ionix'] .settings-module .btn-secondary:hover,
+[data-theme-family='ionix'] .settings-module .btn-configure:hover,
+[data-theme-family='ionix'] .settings-module .btn-cancel:hover,
+[data-theme-family='ionix'] .settings-module .doc-tab-btn.active,
+[data-theme-family='ionix'] .settings-module .doc-link:hover {
+  background: var(--unity-fill-hover) !important;
+  border-color: var(--unity-line) !important;
+}
+
+[data-theme-family='ionix'] .settings-module .theme-card.active {
+  background: rgba(255, 222, 36, 0.12) !important;
+  border-color: var(--unity-yellow) !important;
+}
+
+[data-theme-family='ionix'] .settings-module .nav-btn.active,
+[data-theme-family='ionix'] .settings-module .btn-save,
+[data-theme-family='ionix'] .settings-module .btn-confirm {
+  background: var(--unity-yellow) !important;
+  color: var(--unity-navy) !important;
+}
+
+[data-theme-family='ionix'] .settings-module input,
+[data-theme-family='ionix'] .settings-module select,
+[data-theme-family='ionix'] .settings-module .doc-tabs,
+[data-theme-family='ionix'] .settings-module .code-snippet,
+[data-theme-family='ionix'] .settings-module .int-icon,
+[data-theme-family='ionix'] .settings-module .badge-code,
+[data-theme-family='ionix'] .settings-module .slider {
+  background: var(--unity-fill) !important;
+  border-color: var(--unity-line-soft) !important;
+  color: var(--unity-text) !important;
+}
+
+[data-theme-family='ionix'] .settings-module input:focus,
+[data-theme-family='ionix'] .settings-module select:focus,
+[data-theme-family='ionix'] .settings-module .inline-input:hover,
+[data-theme-family='ionix'] .settings-module .inline-input:focus {
+  background: var(--unity-fill-hover) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-theme-family='ionix'] .settings-module .help-box {
+  background: rgba(6, 182, 212, 0.12) !important;
+  border-color: rgba(6, 182, 212, 0.35) !important;
+}
+
+[data-theme-family='ionix'] .settings-module .success-toast {
+  background: rgba(71, 170, 57, 0.16) !important;
+  border-color: rgba(71, 170, 57, 0.42) !important;
+  color: #8be07d !important;
+}
+
+/*
+ * Shared Ionix feature canvas. Keeping it at the AppShell content level makes
+ * every feature sit on the same Promotions backdrop instead of relying on a
+ * module-local container background.
+ */
+[data-theme-family='ionix'] .app-shell,
+[data-theme-family='ionix'] .content-area {
+ background:
+ radial-gradient(circle at 88% 0%, rgba(33, 61, 143, 0.22), transparent 34rem),
+ #001528;
+}
+
 [data-theme-family='ionix'] .promotions-module .content-area {
-  padding: 32px 36px 48px;
-  background:
-    radial-gradient(circle at 88% 0%, rgba(33, 61, 143, 0.22), transparent 34rem),
-    var(--unity-navy);
+ padding: 32px 36px 48px;
+}
+
+[data-theme-family='ionix'] .settings-module .content-area {
+ padding: 32px 36px 48px;
 }
 
 [data-theme-family='ionix'] .promotions-module .sidebar {
@@ -729,6 +899,53 @@ a {
   color: var(--unity-navy);
 }
 [data-theme-family='ionix'] .promotions-module .mobile-overlay { background: rgba(0, 21, 40, 0.8); }
+
+/* Settings inherits the operational shell treatment while keeping its own controls. */
+[data-theme-family='ionix'] .settings-module .sidebar {
+ background: var(--unity-navy);
+ border-right-color: var(--unity-line-soft);
+ padding: 20px 16px;
+}
+[data-theme-family='ionix'] .settings-module .sidebar .logo-area {
+ padding: 12px 8px 16px;
+ margin-bottom: 12px;
+ border-bottom: 1px solid var(--unity-line-soft);
+}
+[data-theme-family='ionix'] .settings-module .sidebar .logo-text { color: var(--unity-text) !important; }
+[data-theme-family='ionix'] .settings-module .sidebar .nav-title {
+ color: var(--unity-muted);
+ font-size: 11px;
+ font-weight: 700;
+ letter-spacing: .09em;
+}
+[data-theme-family='ionix'] .settings-module .sidebar .nav-item {
+ color: var(--unity-secondary);
+ border-radius: 8px;
+ min-height: 44px;
+ margin: 2px 0;
+}
+[data-theme-family='ionix'] .settings-module .sidebar .nav-item:hover {
+ background: var(--unity-fill-hover);
+ color: var(--unity-text);
+}
+[data-theme-family='ionix'] .settings-module .sidebar .nav-item.active {
+ background: var(--unity-yellow);
+ color: var(--unity-navy);
+ font-weight: 700;
+}
+[data-theme-family='ionix'] .settings-module .sidebar .footer-profile,
+[data-theme-family='ionix'] .settings-module .sidebar .profile-bg {
+ border-color: var(--unity-line-soft);
+}
+[data-theme-family='ionix'] .settings-module .sidebar .profile-bg {
+ background: var(--unity-fill);
+ border-radius: 14px;
+}
+[data-theme-family='ionix'] .settings-module .sidebar .avatar {
+ background: var(--unity-yellow);
+ color: var(--unity-navy);
+}
+[data-theme-family='ionix'] .settings-module .mobile-overlay { background: rgba(0, 21, 40, 0.8); }
 
 [data-theme-family='ionix'] .promotions-module .glass-panel,
 [data-theme-family='ionix'] .promotions-module .card,
@@ -879,7 +1096,8 @@ box-shadow: none !important;
 }
 
 @media (max-width: 768px) {
-  [data-theme-family='ionix'] .promotions-module .content-area { padding: 80px 20px 32px; }
+ [data-theme-family='ionix'] .promotions-module .content-area,
+ [data-theme-family='ionix'] .settings-module .content-area { padding: 80px 20px 32px; }
   [data-theme-family='ionix'] .promotions-module .page-header,
   [data-theme-family='ionix'] .promotions-module .header-actions,
   [data-theme-family='ionix'] .promotions-module .toolbar { gap: 12px; }
