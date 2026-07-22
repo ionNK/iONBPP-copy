@@ -61,3 +61,4 @@ frontend/lighthouse-report.json
 frontend/step_*.png
 frontend/public/docs/*.pdf
 frontend/public/docs/images/
+frontend/*.png

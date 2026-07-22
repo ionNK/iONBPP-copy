@@ -127,7 +127,7 @@ export default function PromotionDetailsPage() {
     if (!promo) return <div className="p-12 text-center text-muted">Loading promotion details...</div>;
 
  return (
- <div className="details-page">
+ <div className="promotion-details-page">
  <button onClick={() => router.back()} className="back-btn"><ArrowLeft size={16} /> Back to List</button>
 
  {/* ===== HERO ===== */}
@@ -308,7 +308,7 @@ export default function PromotionDetailsPage() {
 
  <div className="glass-panel rail-card">
  <h4>Status</h4>
- <p className="muted">This promotion is <b style={{ color: 'var(--color-primary)' }}>{promo.status}</b> and targeting <b>{promo.segment}</b> in {promo.market === 'ET' ? 'Ethiopia' : 'Kenya'}.</p>
+ <p className="muted">This promotion is <b className="status-emphasis">{promo.status}</b> and targeting <b>{promo.segment}</b> in {promo.market === 'ET' ? 'Ethiopia' : 'Kenya'}.</p>
  </div>
  </aside>
 
