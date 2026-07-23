@@ -215,3 +215,12 @@ Deferred items:
 1. **Promotion wizard market selection:** two known E2E timeouts remain waiting for `option[value="KE"]`; they are unrelated to the stylesheet centralization and remain deferred from the prior baseline.
 2. **Parallel-suite nondeterminism:** the combined Governance/Live Monitoring tests can fail under their default parallel workers when shared storage or the test server prevents the Live Monitoring tab from mounting. The serialized `--workers=1` run is the established deterministic baseline.
 3. **Light-mode scrim review:** `ActionModal` now adopts the approved Phase 3 `--ds-scrim` token, but the intended rendered light-mode scrim value remains subject to design review before broader dialog/drawer adoption.
+
+## 13. Adoption record — Phase 4, Wave 3, CountrySwitcher
+
+**Validation date:** July 23, 2026
+**Approved surface:** `frontend/src/components/layout/CountrySwitcher.tsx`
+
+CountrySwitcher presentation was migrated from its component-local `<style jsx>` block to the canonical `design-system.css` layer, with local visual values mapped to existing `--ds-*` surface, text, border, accent, success, spacing, radius, shadow, and transition tokens. The component's DOM shape, state flow, handlers, responsive label behavior, permission-derived options, and current ARIA contract (`aria-haspopup`, `aria-expanded`, `role="listbox"`, `role="option"`, and `aria-selected`) remain unchanged.
+
+**Deferred Phase 6 accessibility item:** the current listbox-shaped interaction has no Escape-key close behavior, no arrow-key option navigation, and no focus return to the trigger (`role="listbox"` control) after selection or dismissal. These are known keyboard-contract gaps, intentionally preserved in this visual-only migration; Phase 6 must define and implement the complete focus and keyboard model rather than changing behavior incrementally here.

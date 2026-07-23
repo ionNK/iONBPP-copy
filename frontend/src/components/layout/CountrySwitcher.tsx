@@ -73,55 +73,6 @@ export default function CountrySwitcher() {
           ))}
         </div>
       )}
-
-      <style jsx>{`
-        .country-switcher { position: relative; }
-        .cs-trigger {
-          display: flex; align-items: center; gap: 8px;
-          background: var(--color-bg-input);
-          border: 1px solid var(--color-border);
-          color: var(--color-text-primary);
-          padding: 8px 12px; border-radius: 8px; cursor: pointer;
-          font-size: 13px; font-weight: 600;
-          transition: border-color 0.2s, background 0.2s;
-        }
-        .cs-trigger:hover { border-color: var(--color-betika-yellow); }
-        .cs-label { white-space: nowrap; }
-        .flag { font-size: 15px; line-height: 1; }
-        .cs-chev { color: var(--color-text-secondary); transition: transform 0.2s; }
-        .cs-chev.up { transform: rotate(180deg); }
-
-        .cs-menu {
-          position: absolute; top: calc(100% + 8px); right: 0;
-          width: 240px; background: var(--color-bg-panel);
-          border: 1px solid var(--color-border); border-radius: 12px;
-          box-shadow: var(--shadow-lg, 0 12px 32px rgba(0,0,0,0.25));
-          padding: 8px; z-index: 60;
-        }
-        .cs-section {
-          font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
-          color: var(--color-text-muted); margin: 4px 8px 6px; font-weight: 700;
-        }
-        .cs-item {
-          width: 100%; display: flex; align-items: center; gap: 10px;
-          padding: 9px 10px; border-radius: 8px; border: none;
-          background: transparent; cursor: pointer; color: var(--color-text-primary);
-          font-size: 13px; text-align: left;
-        }
-        .cs-item:hover { background: var(--color-bg-input); }
-        .cs-item.active { background: var(--color-bg-input); }
-        .cs-item-ico {
-          width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
-          color: var(--color-text-secondary);
-        }
-        .cs-item-name { flex: 1; font-weight: 600; }
-        .cs-item-sub { font-size: 11px; color: var(--color-text-muted); }
-        .cs-check { color: var(--color-betika-green, #22c55e); margin-left: 4px; }
-
-        @media (max-width: 768px) {
-          .cs-label { display: none; }
-        }
-      `}</style>
     </div>
   );
 }
