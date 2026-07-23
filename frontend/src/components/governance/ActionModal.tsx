@@ -49,7 +49,7 @@ export default function ActionModal({
 
 
   return (
-    <div className="modal-overlay" onClick={onCancel}>
+    <div className="modal-overlay governance-action-modal" onClick={onCancel}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
           <h3 className={danger ? 'danger' : ''}>
@@ -97,31 +97,6 @@ export default function ActionModal({
           </button>
         </div>
       </div>
-
-      <style jsx>{`
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .modal { background: var(--color-bg-panel); border: 1px solid var(--color-border); border-radius: 14px; padding: 24px; width: 100%; max-width: 460px; box-shadow: 0 20px 60px rgba(0,0,0,.4); animation: modalIn .18s ease-out; }
-        @keyframes modalIn { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
-        .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-        .modal-head h3 { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; margin: 0; color: var(--color-text-primary); }
-        .modal-head h3.danger { color: #f87171; }
-        .close { background: transparent; border: none; color: var(--color-text-muted); cursor: pointer; }
-        .close:hover { color: var(--color-text-primary); }
-        .desc { font-size: 13px; color: var(--color-text-muted); line-height: 1.5; margin: 0 0 16px; }
-        .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .03em; margin: 12px 0 6px; }
-        .req { color: #f87171; }
-        .reason, .phrase { width: 100%; background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--color-text-primary); font-family: inherit; resize: vertical; }
-        .reason:focus, .phrase:focus { outline: none; border-color: var(--color-betika-yellow); box-shadow: 0 0 0 2px rgba(255,204,0,.2); }
-
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .btn { padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--color-border); }
-        .btn:disabled { opacity: .45; cursor: not-allowed; }
-        .btn.ghost { background: transparent; color: var(--color-text-muted); }
-        .btn.ghost:hover { color: var(--color-text-primary); }
-        .btn.primary { background: var(--color-betika-yellow); color: #000; border-color: var(--color-betika-yellow); }
-        .btn.danger { background: #dc2626; color: #fff; border-color: #dc2626; }
-      `}</style>
     </div>
   );
 }
