@@ -91,7 +91,7 @@ test.describe('Governance — Approvals review', () => {
 
     // Navigate to the audit view and confirm the approve event shows up.
     await page.goto('/admin/promotions/audit', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('.entry').filter({ hasText: 'Approved' }).first()).toBeVisible();
+    await expect(page.locator('.promotion-audit-page__entry').filter({ hasText: 'Approved' }).first()).toBeVisible();
   });
 
   test('Request Changes keeps the item in the queue', async ({ page }) => {
