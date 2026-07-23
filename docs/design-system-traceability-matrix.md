@@ -167,3 +167,12 @@ This document records the Phase 3 implementation gate. Stop here before any adop
 The CRM Segments route is the sole Wave 1 consumer migration. Its local `<style jsx>` block was removed after its live rules were mapped into the clearly scoped `.crm-segments-page` section of `design-system.css`. Generic local selectors were replaced with route-semantic class names, the page now opts into the canonical `.ds-page-shell` 1400px boundary, and existing segment creation, editing, deletion, member-view, and empty-state interactions were preserved. The unused local `.btn-primary-link` rule was identified as dead and intentionally not migrated.
 
 Validation: the production build passed, and the focused Playwright route-load test for `/admin/crm/segments` passed. The broader light-mode suite originally retained the canvas expectation mismatch (`#f9fafb` expected versus `#f6f7f9` evaluated) and two promotion-wizard `option[value="KE"]` timeouts; its accessible-focus-ring case passed. The authorized light-canvas closure subsequently corrected only the stale canvas expectation; the promotion-wizard timeouts remain deferred. No later adoption wave is authorized by this record.
+
+## 10. Adoption record — Wave 2, Batch 3, route 1
+
+**Validation date:** July 23, 2026
+**Approved surface:** `LiveMonitoring` within `/admin/reports` (Analytics & Reports → Live Monitoring tab)
+
+The Live Monitoring component is the first one-route Wave 2 migration. Its local `<style jsx>` block was removed and its presentation rules were transferred unchanged to a clearly scoped `.live-monitoring` section in `design-system.css`. The component keeps only its two existing data-driven inline styles: metric-label color and the calculated budget-fill width/color. No markup, polling behavior, promotion links, live toggle, or nested `OperationalControls` behavior changed.
+
+Validation: `grep` found exactly **2** intentional dynamic inline styles and no `<style>` block. The production build passed. `tests/live-monitoring.spec.ts` passed in isolation; `tests/operational-controls.spec.ts` passed (**4/4**); and the serialized related route suite `tests/governance-approvals.spec.ts tests/live-monitoring.spec.ts --workers=1` passed (**5/5**). The same combined suite was nondeterministic under its default five parallel workers: its four approval tests passed, while the Live Monitoring tab did not mount, consistent with shared browser-storage/test-server interference rather than this stylesheet migration. Next route migration remains gated on human review and commit of this route.

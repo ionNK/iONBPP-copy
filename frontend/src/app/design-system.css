@@ -2242,6 +2242,35 @@ margin-top: auto;
 @media(max-width:1024px){.governance-page .kpi-row{grid-template-columns:repeat(2,1fr)}.governance-page .charts-row,.governance-page .budgets-grid{grid-template-columns:1fr}}@media(max-width:768px){.governance-page .page-header{align-items:flex-start;flex-direction:column;gap:16px}.governance-page .tabs-nav{overflow-x:auto}.governance-page .tab-btn{white-space:nowrap}.governance-page .kpi-row{grid-template-columns:1fr}}
 
 /* Governance ActionModal — centrally maintained component presentation. */
+
+/* Governance Live Monitoring — centrally maintained component presentation. */
+.live-monitoring { padding-bottom: 40px; }
+.live-monitoring .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.live-monitoring .sub { margin: 0; color: var(--color-text-muted); font-size: 13px; }
+.live-monitoring .livebtn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-input); color: var(--color-text-muted); font-size: 13px; font-weight: 600; cursor: pointer; }
+.live-monitoring .livebtn.on { border-color: var(--color-betika-green); color: var(--color-betika-green); }
+.live-monitoring .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-betika-green); animation: live-monitoring-pulse 1.2s infinite; }
+@keyframes live-monitoring-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+.live-monitoring .card { margin-bottom: 16px; padding: 20px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-bg-surface); }
+.live-monitoring .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.live-monitoring .name { color: var(--color-text-primary); font-size: 16px; font-weight: 700; text-decoration: none; }
+.live-monitoring .name:hover { color: var(--color-primary); }
+.live-monitoring .pid { margin-left: 10px; color: var(--color-text-muted); font-family: monospace; font-size: 12px; }
+.live-monitoring .state { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.live-monitoring .state.active { background: rgba(105, 153, 81, .2); color: var(--color-betika-green); }
+.live-monitoring .state.paused { background: rgba(250, 204, 21, .2); color: #d97706; }
+.live-monitoring .state.ended { background: var(--color-bg-hover); color: var(--color-text-muted); }
+.live-monitoring .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 18px; }
+.live-monitoring .metric { display: flex; flex-direction: column; gap: 4px; padding: 12px; border-radius: 8px; background: var(--color-bg-hover); }
+.live-monitoring .mlabel { font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
+.live-monitoring .mval { color: var(--color-text-primary); font-size: 18px; font-weight: 700; }
+.live-monitoring .brow { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; }
+.live-monitoring .brow span { color: var(--color-text-muted); }
+.live-monitoring .brow b { color: var(--color-text-primary); }
+.live-monitoring .btrack { height: 8px; overflow: hidden; border-radius: 4px; background: var(--color-bg-hover); }
+.live-monitoring .bfill { height: 100%; border-radius: 4px; transition: width .5s; }
+.live-monitoring .controls { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-border); }
+@media (max-width: 900px) { .live-monitoring .grid { grid-template-columns: repeat(3, 1fr); } }
 .governance-action-modal {
 position: fixed;
 z-index: 1000;

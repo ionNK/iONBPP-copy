@@ -51,7 +51,7 @@ export default function LiveMonitoring() {
     setPromos(prev => prev.map(p => (p.id === id ? { ...p, state: next } : p)));
 
   return (
-    <div className="mon animate-fade">
+    <div className="live-monitoring animate-fade">
       <div className="head">
         <p className="sub">Real-time promotion funnel, outcomes and budget burn.</p>
         <button className={`livebtn ${live ? 'on' : ''}`} onClick={() => setLive(v => !v)}>
@@ -97,36 +97,6 @@ export default function LiveMonitoring() {
           </div>
         );
       })}
-
-      <style jsx>{`
-        .mon { padding-bottom: 40px; }
-        .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .sub { color: var(--color-text-muted); font-size: 13px; margin: 0; }
-        .livebtn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-bg-input); color: var(--color-text-muted); font-size: 13px; font-weight: 600; cursor: pointer; }
-        .livebtn.on { color: var(--color-betika-green); border-color: var(--color-betika-green); }
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-betika-green); animation: pulse 1.2s infinite; }
-        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
-        .card { background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-        .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .name { font-size: 16px; font-weight: 700; color: var(--color-text-primary); text-decoration: none; }
-        .name:hover { color: var(--color-primary); }
-        .pid { font-family: monospace; font-size: 12px; color: var(--color-text-muted); margin-left: 10px; }
-        .state { font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; }
-        .state.active { color: var(--color-betika-green); background: rgba(105,153,81,.2); }
-        .state.paused { color: #d97706; background: rgba(250,204,21,.2); }
-        .state.ended { color: var(--color-text-muted); background: var(--color-bg-hover); }
-        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 18px; }
-        .metric { background: var(--color-bg-hover); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 4px; }
-        .mlabel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
-        .mval { font-size: 18px; font-weight: 700; color: var(--color-text-primary); }
-        .brow { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
-        .brow span { color: var(--color-text-muted); }
-        .brow b { color: var(--color-text-primary); }
-        .btrack { height: 8px; border-radius: 4px; background: var(--color-bg-hover); overflow: hidden; }
-        .bfill { height: 100%; border-radius: 4px; transition: width .5s; }
-        .controls { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-border); }
-        @media (max-width: 900px) { .grid { grid-template-columns: repeat(3, 1fr); } }
-      `}</style>
     </div>
   );
 }
