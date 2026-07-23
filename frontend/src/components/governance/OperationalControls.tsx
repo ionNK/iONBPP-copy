@@ -97,9 +97,9 @@ export default function OperationalControls({
 
   const visible = CONTROLS.filter((c) => c.visibleWhen.includes(state));
 
-  if (state === 'ended') {
-    return <span className="oc-ended">This promotion has ended — no operational controls available.</span>;
-  }
+ if (state === 'ended') {
+ return <span className="operational-controls oc-ended">This promotion has ended — no operational controls available.</span>;
+ }
 
   const iconFor = (k: ControlKey) => {
     switch (k) {
@@ -123,8 +123,8 @@ export default function OperationalControls({
     setActive(null);
   };
 
-  return (
-    <div className="oc-wrap">
+ return (
+ <div className="operational-controls oc-wrap">
       {visible.map((c) => {
         const allowed = can(c.permission);
         return (
@@ -154,17 +154,6 @@ export default function OperationalControls({
           onCancel={() => setActive(null)}
         />
       )}
-
-      <style jsx>{`
-        .oc-wrap { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-        .oc-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-bg-input); color: var(--color-text-primary); font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
-        .oc-btn.compact { padding: 6px 9px; }
-        .oc-btn:hover:not(:disabled) { border-color: var(--color-primary); }
-        .oc-btn.danger { color: #f87171; border-color: rgba(248,113,113,.4); }
-        .oc-btn.danger:hover:not(:disabled) { background: rgba(248,113,113,.12); border-color: #f87171; }
-        .oc-btn:disabled { opacity: .4; cursor: not-allowed; }
-        .oc-ended { font-size: 12px; color: var(--color-text-muted); font-style: italic; }
-      `}</style>
     </div>
   );
 }

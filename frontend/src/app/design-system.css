@@ -2243,6 +2243,16 @@ margin-top: auto;
 
 /* Governance ActionModal — centrally maintained component presentation. */
 
+/* Governance OperationalControls — centrally maintained component presentation. */
+.operational-controls.oc-wrap { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.operational-controls .oc-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-input); color: var(--color-text-primary); font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.operational-controls .oc-btn.compact { padding: 6px 9px; }
+.operational-controls .oc-btn:hover:not(:disabled) { border-color: var(--color-primary); }
+.operational-controls .oc-btn.danger { border-color: rgba(248,113,113,.4); color: #f87171; }
+.operational-controls .oc-btn.danger:hover:not(:disabled) { border-color: #f87171; background: rgba(248,113,113,.12); }
+.operational-controls .oc-btn:disabled { opacity: .4; cursor: not-allowed; }
+.operational-controls.oc-ended { color: var(--color-text-muted); font-size: 12px; font-style: italic; }
+
 /* Governance Live Monitoring — centrally maintained component presentation. */
 .live-monitoring { padding-bottom: 40px; }
 .live-monitoring .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }

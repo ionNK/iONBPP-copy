@@ -176,3 +176,14 @@ Validation: the production build passed, and the focused Playwright route-load t
 The Live Monitoring component is the first one-route Wave 2 migration. Its local `<style jsx>` block was removed and its presentation rules were transferred unchanged to a clearly scoped `.live-monitoring` section in `design-system.css`. The component keeps only its two existing data-driven inline styles: metric-label color and the calculated budget-fill width/color. No markup, polling behavior, promotion links, live toggle, or nested `OperationalControls` behavior changed.
 
 Validation: `grep` found exactly **2** intentional dynamic inline styles and no `<style>` block. The production build passed. `tests/live-monitoring.spec.ts` passed in isolation; `tests/operational-controls.spec.ts` passed (**4/4**); and the serialized related route suite `tests/governance-approvals.spec.ts tests/live-monitoring.spec.ts --workers=1` passed (**5/5**). The same combined suite was nondeterministic under its default five parallel workers: its four approval tests passed, while the Live Monitoring tab did not mount, consistent with shared browser-storage/test-server interference rather than this stylesheet migration. Next route migration remains gated on human review and commit of this route.
+
+## 11. Adoption record — Wave 2, Batch 3, route 2
+
+**Validation date:** July 23, 2026
+**Approved surface:** `OperationalControls` within `/admin/promotions/PRM-2024-001` and `/admin/reports` (Live Monitoring cards)
+
+`OperationalControls` is the second one-route Wave 2 migration. Its local `<style jsx>` block was removed and its presentation rules were transferred unchanged to the clearly scoped `.operational-controls` section in `design-system.css`. The component has no inline styles. No control definitions, permission gating, modal invocation, audit-trail writes, state transitions, or compact-versus-labelled markup changed.
+
+Manual source-level comparison covered both consumers: the promotion-detail page uses labelled action controls and the reports Live Monitoring cards use compact icon-only controls. The migrated selectors preserve the shared wrapper, default, danger, disabled, compact, hover, and ended-state contracts in both contexts.
+
+Validation: the inline-style guardrail found **0** `style=` attributes and **0** `<style>` blocks in `OperationalControls.tsx`. The production build passed (with only the pre-existing Recharts zero-dimension prerender warnings). `tests/operational-controls.spec.ts --workers=1` passed (**4/4**). No test changes were needed because this existing focused suite exercises the promotion-detail consumer; the previously recorded Live Monitoring suite covers the reports consumer. Changes remain uncommitted for human review; start no further route migration until this route is reviewed and committed.
