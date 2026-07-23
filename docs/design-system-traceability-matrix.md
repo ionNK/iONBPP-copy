@@ -234,3 +234,14 @@ CustomerHeader presentation was migrated from its component-local `<style jsx>` 
 **Preserved product behavior:** the existing prefix navigation predicate intentionally marks both **Sports** and **Live In-Play** active at `/customer/sports/live`; this visual-only migration preserves that current behavior rather than redefining information architecture. Search, deposit, and notification controls remain presentation-only because no behavior was introduced in this scoped migration.
 
 **Dedicated coverage:** `frontend/tests/customer-header.spec.ts` covers route presence, navigation URLs, active-link behavior (including the existing live-route overlap), theme toggle persistence, and a reactive rewards-context update after redemption.
+
+## 15. Adoption record — Phase 4, Wave 3, MatchCard
+
+**Validation date:** July 23, 2026
+**Approved surface:** `frontend/src/components/sports/MatchCard.tsx` within `/customer/sports`
+
+MatchCard presentation was migrated from its component-local `<style jsx>` block to the canonical `design-system.css` layer under the scoped `.s-match-card` contract. Static local values now consume existing `--ds-*` surface, text, border, accent, spacing, radius, and transition tokens. The component's DOM shape, selection/expansion state, handlers, and decimal/fractional rendering branch remain unchanged.
+
+**Documented testability finding:** `toggleOddsFormat` exists in the bet-slip context, but no current consumer exposes an odds-format control and `oddsFormat` is neither persisted nor URL-driven. The dedicated E2E spec therefore covers the reachable default decimal branch only. The fractional rendering branch is preserved verbatim and is currently unreachable by users and untestable through E2E without a product decision; flag for product review as a planned feature, dead code, or missing UI.
+
+**Dedicated coverage:** `frontend/tests/match-card.spec.ts` covers default decimal rendering, live/upcoming details, selection add/remove through the bet-slip flow, and additional-market expansion/collapse.
