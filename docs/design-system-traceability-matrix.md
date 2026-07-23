@@ -224,3 +224,13 @@ Deferred items:
 CountrySwitcher presentation was migrated from its component-local `<style jsx>` block to the canonical `design-system.css` layer, with local visual values mapped to existing `--ds-*` surface, text, border, accent, success, spacing, radius, shadow, and transition tokens. The component's DOM shape, state flow, handlers, responsive label behavior, permission-derived options, and current ARIA contract (`aria-haspopup`, `aria-expanded`, `role="listbox"`, `role="option"`, and `aria-selected`) remain unchanged.
 
 **Deferred Phase 6 accessibility item:** the current listbox-shaped interaction has no Escape-key close behavior, no arrow-key option navigation, and no focus return to the trigger (`role="listbox"` control) after selection or dismissal. These are known keyboard-contract gaps, intentionally preserved in this visual-only migration; Phase 6 must define and implement the complete focus and keyboard model rather than changing behavior incrementally here.
+
+## 14. Adoption record — Phase 4, Wave 3, CustomerHeader
+
+**Approved surface:** `frontend/src/components/customer/CustomerHeader.tsx`
+
+CustomerHeader presentation was migrated from its component-local `<style jsx>` block to the canonical `design-system.css` layer under the scoped `.customer-header` contract. Static presentation now consumes the existing `--ds-*` spacing, surface, border, text, accent, success, radius, and transition tokens where semantic equivalents exist. The shared header's DOM shape, navigation URLs and active-link predicate, reward-context subscription, theme toggle behavior, and all event handlers remain unchanged.
+
+**Preserved product behavior:** the existing prefix navigation predicate intentionally marks both **Sports** and **Live In-Play** active at `/customer/sports/live`; this visual-only migration preserves that current behavior rather than redefining information architecture. Search, deposit, and notification controls remain presentation-only because no behavior was introduced in this scoped migration.
+
+**Dedicated coverage:** `frontend/tests/customer-header.spec.ts` covers route presence, navigation URLs, active-link behavior (including the existing live-route overlap), theme toggle persistence, and a reactive rewards-context update after redemption.
