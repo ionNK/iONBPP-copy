@@ -28,10 +28,16 @@ test.describe('Light Mode & Promotion Wizard Audit', () => {
     await page.locator('.type-card').filter({ hasText: 'Cashback' }).click({ force: true });
     await page.getByRole('button', { name: 'Next Step' }).click();
 
-    // Step 2 — Scope (market required)
-    await page.waitForSelector('option[value="KE"]', { state: 'attached' });
-    await page.locator('select').filter({ hasText: 'Select a Target Market' }).selectOption('KE');
-    await page.getByRole('button', { name: 'Next Step' }).click();
+// Step 2 — Scope (market required)
+const marketTrigger = page.locator('button.market-trigger');
+await expect(marketTrigger).toBeVisible();
+if (!(await marketTrigger.textContent())?.includes('Kenya')) {
+ await marketTrigger.click();
+ const marketListbox = page.getByRole('listbox', { name: 'Target Market' });
+ await expect(marketListbox).toBeVisible();
+ await marketListbox.getByRole('option', { name: /Kenya/i }).click();
+}
+await page.getByRole('button', { name: 'Next Step' }).click();
 
     // Steps 3, 4, 5 — defaults are valid, just advance to Step 6 (Display)
     for (let i = 0; i < 3; i++) {
@@ -41,11 +47,11 @@ test.describe('Light Mode & Promotion Wizard Audit', () => {
 
     // Enter Banner URL
     const bannerUrl = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-    await page.fill('input[placeholder="https://example.com/image.jpg"]', bannerUrl);
+    await page.getByRole('textbox', { name: 'Banner image URL' }).fill(bannerUrl);
 
-    // Verify Live Preview Image renders the banner
-    const previewImg = page.locator('.betika-card-media img.card-img-cover').first();
-    await expect(previewImg).toHaveAttribute('src', bannerUrl);
+// Verify the Live Preview image renders the banner.
+const previewImg = page.getByAltText('Promotion banner preview');
+await expect(previewImg).toHaveAttribute('src', bannerUrl);
   });
 
   test('should show edit links in Step 7 and navigate back', async ({ page }) => {
@@ -57,10 +63,16 @@ test.describe('Light Mode & Promotion Wizard Audit', () => {
     await page.locator('.type-card').filter({ hasText: 'Cashback' }).click({ force: true });
     await page.getByRole('button', { name: 'Next Step' }).click();
 
-    // Step 2 — Scope (market required)
-    await page.waitForSelector('option[value="KE"]', { state: 'attached' });
-    await page.locator('select').filter({ hasText: 'Select a Target Market' }).selectOption('KE');
-    await page.getByRole('button', { name: 'Next Step' }).click();
+// Step 2 — Scope (market required)
+const marketTrigger = page.locator('button.market-trigger');
+await expect(marketTrigger).toBeVisible();
+if (!(await marketTrigger.textContent())?.includes('Kenya')) {
+ await marketTrigger.click();
+ const marketListbox = page.getByRole('listbox', { name: 'Target Market' });
+ await expect(marketListbox).toBeVisible();
+ await marketListbox.getByRole('option', { name: /Kenya/i }).click();
+}
+await page.getByRole('button', { name: 'Next Step' }).click();
 
     // Steps 3, 4, 5, 6 — advance with valid defaults to reach Step 7 (Review)
     for (let i = 0; i < 4; i++) {

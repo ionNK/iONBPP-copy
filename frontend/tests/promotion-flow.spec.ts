@@ -20,9 +20,15 @@ test('create promotion wizard flow', async ({ page }) => {
  const audiencePicker = page.locator('.seg-trigger');
  await expect(audiencePicker).toContainText('Select Segment (Optional)');
  await expect(audiencePicker).not.toContainText(/Sportsbook (Users|Players)/i);
-    await page.waitForSelector('option[value="KE"]', { state: 'attached' });
-    await page.locator('select').filter({ hasText: 'Select a Target Market' }).selectOption('KE');
- const allPlatforms = page.getByRole('button', { name: 'All', exact: true });
+const marketTrigger = page.locator('button.market-trigger');
+await expect(marketTrigger).toBeVisible();
+if (!(await marketTrigger.textContent())?.includes('Kenya')) {
+ await marketTrigger.click();
+ const marketListbox = page.getByRole('listbox', { name: 'Target Market' });
+ await expect(marketListbox).toBeVisible();
+ await marketListbox.getByRole('option', { name: /Kenya/i }).click();
+}
+const allPlatforms = page.getByRole('button', { name: 'All', exact: true });
  await expect(allPlatforms).toHaveAttribute('aria-pressed', 'false');
  await allPlatforms.click();
  await expect(allPlatforms).toHaveAttribute('aria-pressed', 'true');
