@@ -33,19 +33,22 @@ export default function ExplainerVideo({ isOpen, onClose }: ExplainerVideoProps)
                         exit={{ opacity: 0 }}
                         onClick={onClose}
                     />
-                    <motion.div
-                        className="video-modal"
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+<motion.div
+className="video-modal"
+role="dialog"
+aria-modal="true"
+aria-labelledby="explainer-video-title"
+initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                     >
-                        <button className="close-btn" onClick={onClose}>
+                        <button className="close-btn" type="button" aria-label="Close video" onClick={onClose}>
                             <X size={20} />
                         </button>
 
                         <div className="video-header">
-                            <h2>Welcome to Betika Promotions</h2>
+                            <h2 id="explainer-video-title">Welcome to Betika Promotions</h2>
                             <p>Here's a quick 30s overview of the platform.</p>
                         </div>
 
@@ -83,11 +86,11 @@ export default function ExplainerVideo({ isOpen, onClose }: ExplainerVideoProps)
                         .video-backdrop {
                             position: fixed;
                             inset: 0;
-                            background: rgba(0, 0, 0, 0.4);
-                            z-index: 100000;
-                            backdrop-filter: blur(8px);
+background: var(--ds-scrim);
+z-index: 100000;
+backdrop-filter: blur(8px);
                         }
-                        [data-theme='dark'] .video-backdrop { background: rgba(0, 0, 0, 0.85); }
+                        [data-theme='dark'] .video-backdrop { background: var(--ds-opacity-inverse-90); }
                         
                         .video-modal {
                             position: fixed;
@@ -96,31 +99,31 @@ export default function ExplainerVideo({ isOpen, onClose }: ExplainerVideoProps)
                             transform: translate(-50%, -50%) !important;
                             width: 100%;
                             max-width: 800px;
-                            background: var(--color-bg-panel);
-                            border: 1px solid var(--color-border);
-                            border-radius: 20px;
-                            padding: 32px;
-                            z-index: 100001;
-                            box-shadow: var(--shadow-xl);
+background: var(--ds-surface);
+border: 1px solid var(--ds-border);
+border-radius: var(--ds-radius-lg);
+padding: var(--ds-space-8);
+z-index: 100001;
+box-shadow: var(--ds-shadow-md);
                         }
 
                         .close-btn {
                             position: absolute;
                             top: 20px;
                             right: 20px;
-                            background: var(--color-bg-input);
-                            border: 1px solid var(--color-border);
-                            color: var(--color-text-secondary);
-                            padding: 8px;
-                            border-radius: 50%;
+background: var(--ds-surface-raised);
+border: 1px solid var(--ds-border-subtle);
+color: var(--ds-text-secondary);
+padding: var(--ds-space-2);
+border-radius: var(--ds-radius-pill);
                             cursor: pointer;
                             transition: all 0.2s;
                         }
-                        .close-btn:hover { background: var(--color-bg-input-focus); color: var(--color-text-primary); }
+                        .close-btn:hover { background: var(--ds-surface-hover); color: var(--ds-text-primary); }
 
                         .video-header { margin-bottom: 24px; text-align: center; }
-                        .video-header h2 { font-size: 24px; font-weight: 700; color: var(--color-text-primary); margin: 0 0 8px 0; }
-                        .video-header p { color: var(--color-text-secondary); font-size: 15px; margin: 0; }
+.video-header h2 { font-size: 24px; font-weight: 700; color: var(--ds-text-primary); margin: 0 0 var(--ds-space-2) 0; }
+.video-header p { color: var(--ds-text-secondary); font-size: 15px; margin: 0; }
 
                         .video-player {
                             width: 100%;
@@ -130,10 +133,10 @@ export default function ExplainerVideo({ isOpen, onClose }: ExplainerVideoProps)
                             overflow: hidden;
                             position: relative;
                             margin-bottom: 24px;
-                            border: 1px solid var(--color-border);
-                        }
+border: 1px solid var(--ds-border);
+}
 
-                        .video-placeholder {
+.video-placeholder {
                             width: 100%;
                             height: 100%;
                             position: relative;
@@ -157,7 +160,7 @@ export default function ExplainerVideo({ isOpen, onClose }: ExplainerVideoProps)
                             z-index: 2;
                             width: 80px;
                             height: 80px;
-                            background: var(--color-betika-yellow, #F2D641);
+                            background: var(--ds-accent, #F2D641);
                             border-radius: 50%;
                             display: flex;
                             align-items: center;
@@ -187,10 +190,10 @@ export default function ExplainerVideo({ isOpen, onClose }: ExplainerVideoProps)
                             align-items: center;
                         }
 
-                        .btn-skip {
-                            background: transparent;
-                            border: 1px solid transparent;
-                            color: var(--color-text-secondary);
+.btn-skip {
+background: transparent;
+border: 1px solid transparent;
+color: var(--ds-text-secondary);
                             font-size: 14px;
                             font-weight: 500;
                             cursor: pointer;
@@ -201,7 +204,7 @@ export default function ExplainerVideo({ isOpen, onClose }: ExplainerVideoProps)
                             border-radius: 8px;
                             transition: all 0.2s;
                         }
-                        .btn-skip:hover { color: var(--color-text-primary); background: var(--color-bg-input); border-color: var(--color-border); }
+                        .btn-skip:hover { color: var(--ds-text-primary); background: var(--ds-surface-raised); border-color: var(--ds-border-subtle); }
 
                         [data-theme='light'] .btn-primary {
                              background: var(--color-betika-yellow);

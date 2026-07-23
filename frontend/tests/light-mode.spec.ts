@@ -93,7 +93,19 @@ await page.getByRole('button', { name: 'Next Step' }).click();
     await expect(page.getByRole('heading', { name: 'Basic Information' })).toBeVisible({ timeout: 5000 });
   });
 
-    test('should have accessible focus rings', async ({ page }) => {
+    test('should open and close the platform explainer video from documentation', async ({ page }) => {
+ await page.getByRole('button', { name: 'Documentation' }).click();
+ await page.getByRole('button', { name: 'About Platform' }).click();
+
+ const dialog = page.getByRole('dialog', { name: 'Welcome to Betika Promotions' });
+ await expect(dialog).toBeVisible();
+ await expect(dialog.getByAltText('Platform Preview')).toBeVisible();
+
+ await dialog.getByRole('button', { name: 'Close video' }).click();
+ await expect(dialog).toBeHidden();
+ });
+
+ test('should have accessible focus rings', async ({ page }) => {
     await page.goto('http://localhost:3000/admin/settings');
     // Tab through elements to reach a theme card
         await page.keyboard.press('Tab');

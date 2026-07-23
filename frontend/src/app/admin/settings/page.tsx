@@ -888,7 +888,9 @@ Email <a href="mailto:support@betika.com" className="faq-link">support@betika.co
                         </div>
                     )}
 
-                    {/* --- GLOBAL SAVE BUTTON (Moved to Bottom) --- */}
+                    <ExplainerVideo isOpen={showVideo} onClose={() => setShowVideo(false)} />
+
+ {/* --- GLOBAL SAVE BUTTON (Moved to Bottom) --- */}
           <div className="settings-footer">
             <div className="footer-spacer">
               <span className="footer-hint">Changes apply across all tabs when you save.</span>
