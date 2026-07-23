@@ -186,4 +186,32 @@ Validation: `grep` found exactly **2** intentional dynamic inline styles and no 
 
 Manual source-level comparison covered both consumers: the promotion-detail page uses labelled action controls and the reports Live Monitoring cards use compact icon-only controls. The migrated selectors preserve the shared wrapper, default, danger, disabled, compact, hover, and ended-state contracts in both contexts.
 
-Validation: the inline-style guardrail found **0** `style=` attributes and **0** `<style>` blocks in `OperationalControls.tsx`. The production build passed (with only the pre-existing Recharts zero-dimension prerender warnings). `tests/operational-controls.spec.ts --workers=1` passed (**4/4**). No test changes were needed because this existing focused suite exercises the promotion-detail consumer; the previously recorded Live Monitoring suite covers the reports consumer. Changes remain uncommitted for human review; start no further route migration until this route is reviewed and committed.
+Validation: the inline-style guardrail found **0** `style=` attributes and **0** `<style>` blocks in `OperationalControls.tsx`. The production build passed (with only the pre-existing Recharts zero-dimension prerender warnings). `tests/operational-controls.spec.ts --workers=1` passed (**4/4**). No test changes were needed because this existing focused suite exercises the promotion-detail consumer; the previously recorded Live Monitoring suite covers the reports consumer. Committed as `9e0279f` after human review.
+
+## 12. Wave 2 completion ledger
+
+**Wave window:** July 22–23, 2026
+**Scope:** approved CRM analytics/player/intelligence, authorized CRM risk/segment surfaces, and Governance route/component migrations.
+**Delivery model:** static `<style jsx>` presentation was centralized into scoped `design-system.css` sections; data-driven inline expressions and all behavioral markup were retained.
+
+| Batch / surface | Migrated route or component | Commit | Preserved dynamic expressions | Recorded validation outcome |
+|---|---|---|---:|---|
+| Batch 1 | `/admin/crm/analytics` | `10a0298` | 7 | Build passed; inline-style guardrail confirmed expected 7. |
+| Batch 1 | `/admin/crm/players` | `10a0298` | 1 | Build passed; inline-style guardrail confirmed expected 1. |
+| Batch 1 | `/admin/crm/intelligence` | `10a0298` | 7 | Build passed; inline-style guardrail confirmed expected 7. |
+| Batch 2 | `/admin/crm/responsible-gaming` | `856fd64` | 11 | Build passed; seven static spacing props centralized; authorized consumer behavior retained. |
+| Batch 3 | `/admin/governance` | `7f82e82` | Data-driven budget/chart values retained | Governance approvals baseline initially 3/4; stale audit-route test selector was corrected in `fd3b688`, restoring 4/4. |
+| Batch 3 | `ActionModal` | `8b95982` | 0 | Build and governance approval coverage passed; first approved consumer of canonical `--ds-scrim`. |
+| Batch 3 | `ResponsibleGambling` | `8b95982` | 0 | Feature-scoped static styles centralized without changes to its two consumer routes. |
+| Batch 3 | `LiveMonitoring` | `1133ac9` | 2 | Build passed; focused Live Monitoring coverage passed; serialized related suite passed 5/5. |
+| Batch 3 | `OperationalControls` | `9e0279f` | 0 | Build passed; focused operational-controls suite passed 4/4; labelled and compact consumers compared. |
+
+### Final Wave 2 validation and deferred follow-up
+
+Final validation completed July 23, 2026: `npm --prefix frontend run build` passed. The deterministic complete affected suite set — `governance-approvals`, `operational-controls`, `live-monitoring`, and `ui-ux-links` — passed **31/31** with `--workers=1`. The build emitted only the pre-existing Recharts zero-dimension prerender warnings. All Wave 2 adoption records above are committed; this ledger and final validation record remain intentionally uncommitted for human review.
+
+Deferred items:
+
+1. **Promotion wizard market selection:** two known E2E timeouts remain waiting for `option[value="KE"]`; they are unrelated to the stylesheet centralization and remain deferred from the prior baseline.
+2. **Parallel-suite nondeterminism:** the combined Governance/Live Monitoring tests can fail under their default parallel workers when shared storage or the test server prevents the Live Monitoring tab from mounting. The serialized `--workers=1` run is the established deterministic baseline.
+3. **Light-mode scrim review:** `ActionModal` now adopts the approved Phase 3 `--ds-scrim` token, but the intended rendered light-mode scrim value remains subject to design review before broader dialog/drawer adoption.
