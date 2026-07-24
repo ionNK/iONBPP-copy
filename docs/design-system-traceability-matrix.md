@@ -245,3 +245,14 @@ MatchCard presentation was migrated from its component-local `<style jsx>` block
 **Documented testability finding:** `toggleOddsFormat` exists in the bet-slip context, but no current consumer exposes an odds-format control and `oddsFormat` is neither persisted nor URL-driven. The dedicated E2E spec therefore covers the reachable default decimal branch only. The fractional rendering branch is preserved verbatim and is currently unreachable by users and untestable through E2E without a product decision; flag for product review as a planned feature, dead code, or missing UI.
 
 **Dedicated coverage:** `frontend/tests/match-card.spec.ts` covers default decimal rendering, live/upcoming details, selection add/remove through the bet-slip flow, and additional-market expansion/collapse.
+
+## 16. Adoption record — Phase 4, Wave 3, Player360
+
+**Validation date:** July 23, 2026  
+**Approved surface:** `frontend/src/components/crm/Player360.tsx` within `/admin/crm/[id]`
+
+Player360's static local `<style jsx>` rules were moved to the scoped `.p360` section in `design-system.css`, using existing design-system tokens for semantic surface, text, border, accent, feedback, spacing, radius, and transition values. The component's hero identity, local tab state (with Overview as the default), notes effect/state, action handlers, peer links, responsive layout, sticky rail, and runtime inline values are preserved. Runtime inline contracts remain only for lifecycle badge colors, health color, and `RailBar` label color plus calculated width/background.
+
+**Explicit boundary:** `PlayerTabs.tsx` is an adjacent conditional-tab consumer and is deliberately untouched. Its selectors and its dynamic timeline/bonus colors and progress widths are not part of the `.p360` contract. No ARIA or keyboard-semantic changes are introduced in this visual-only turn.
+
+**Dedicated coverage:** `frontend/tests/player-360.spec.ts` covers resolved and not-found detail paths, hero identity, tab switching, action-to-recent-actions reactivity, notes persistence in the local UI state, and peer navigation.

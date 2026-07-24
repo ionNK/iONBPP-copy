@@ -145,53 +145,8 @@ export default function Player360({ player }: { player: Player }) {
               </ul>
             )}
           </div>
-        </aside>
-      </div>
- <style jsx>{`
- .p360 { display: flex; flex-direction: column; gap: 16px; }
- .hero { display: flex; gap: 20px; padding: 22px; align-items: flex-start; flex-wrap: wrap; }
- .avatar { width: 64px; height: 64px; border-radius: 16px; background: var(--color-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; flex-shrink: 0; }
- .hero-meta { flex: 1; min-width: 240px; }
- .hero-meta h1 { font-size: 24px; }
- .sub { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--color-text-secondary); margin: 4px 0 10px; }
- .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
- .badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; background: var(--color-bg-input); display: inline-flex; align-items: center; gap: 4px; }
- .badge.rg { color: #f87171; }
- .channels { display: flex; flex-wrap: wrap; gap: 6px; }
- .chan { font-size: 11px; padding: 2px 8px; border-radius: 6px; }
- .chan.on { color: #699951; background: rgba(105,153,81,.12); }
- .chan.off { color: var(--color-text-secondary); background: var(--color-bg-input); }
- .hero-stats { display: flex; gap: 22px; }
- .stat { display: flex; flex-direction: column; gap: 2px; }
- .stat span { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .5px; }
- .stat b { font-size: 20px; }
- .stat .ltv { color: var(--color-primary); }
- .stat .pred { color: #38bdf8; }
- .actions { display: flex; flex-wrap: wrap; gap: 8px; }
- .actions button { display: inline-flex; align-items: center; gap: 6px; background: var(--color-bg-input); border: 1px solid var(--color-border); color: var(--color-text-primary); padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s; }
- .actions button:hover { border-color: var(--color-primary); }
- .actions button.danger:hover { border-color: #f87171; color: #f87171; }
- .body { display: grid; grid-template-columns: 1fr 300px; gap: 16px; align-items: start; }
- .main { min-width: 0; }
- .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--color-border); margin-bottom: 16px; overflow-x: auto; }
- .tabs button { background: none; border: none; color: var(--color-text-secondary); padding: 10px 14px; font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
- .tabs button.active { color: var(--color-primary); border-bottom-color: var(--color-primary); font-weight: 600; }
- .rail { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 16px; }
- .rail-card { padding: 16px; }
-        .rail-card h4 { font-size: 13px; margin-bottom: 12px; }
-        .abuse-note { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #f87171; margin-top: 4px; line-height: 1.35; }
-
- .muted { font-size: 13px; color: var(--color-text-secondary); }
- .peers, .feed { display: flex; flex-direction: column; gap: 8px; }
- .peers li { display: flex; justify-content: space-between; font-size: 13px; }
- .peers a { color: var(--color-text-primary); }
- .peers a:hover { color: var(--color-primary); }
- .peers span { color: var(--color-text-secondary); }
- .feed li { display: flex; flex-direction: column; }
- .feed b { font-size: 13px; font-weight: 500; }
- .feed span { font-size: 11px; color: var(--color-text-secondary); }
- @media (max-width: 900px) { .body { grid-template-columns: 1fr; } .rail { position: static; } }
- `}</style>
+ </aside>
+ </div>
  </div>
  );
 }
@@ -199,14 +154,8 @@ export default function Player360({ player }: { player: Player }) {
 function RailBar({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div className="rail-bar">
-      <div className="rb-head"><span>{label}</span><b style={{ color }}>{value}</b></div>
-      <div className="rb-track"><span style={{ width: `${value}%`, background: color }} /></div>
-      <style jsx>{`
-        .rail-bar { margin-bottom: 12px; }
-        .rb-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
-        .rb-track { height: 5px; border-radius: 3px; background: var(--color-bg-input); overflow: hidden; }
-        .rb-track span { display: block; height: 100%; }
-      `}</style>
+ <div className="rb-head"><span>{label}</span><b style={{ color }}>{value}</b></div>
+ <div className="rb-track"><span style={{ width: `${value}%`, background: color }} /></div>
     </div>
   );
 }
