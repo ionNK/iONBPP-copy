@@ -278,3 +278,14 @@ Rewards Hub static local styling was moved to the canonical `design-system.css` 
 **Preserved inline contract:** the calculated `.progress-fill` width remains inline because it is runtime state. No static styling remains inline after replacing the two modal alignment declarations with the scoped `.modal-title` and `.pc-item-balance` selectors. The Rewards Hub namespace is page-owned and does not collide with the adjacent `.p360` or `.p-tabs` contracts. No ARIA or keyboard-semantic changes are introduced in this visual-only adoption.
 
 **Dedicated coverage:** `frontend/tests/rewards-hub.spec.ts` covers the rendered loyalty/store surface, calculated inline progress width, store filtering, redemption modal opening, and cancellation.
+
+## 19. Adoption record — Phase 4, Wave 3, Customer Home
+
+**Validation date:** July 24, 2026
+**Approved surface:** `frontend/src/app/customer/page.tsx` within `/customer`
+
+Customer Home static styling was moved from the page-local `<style jsx>` block into `design-system.css` under the existing `.customer-container.customer-home` namespace. Static layout, typography, surfaces, cards, navigation affordances, hover treatments, and the 1200px responsive rules now consume the canonical scoped layer and applicable existing design-system tokens. The customer layout, rewards context subscription, promotion context subscription, dynamic game and promotion data rendering, route links, and handlers remain unchanged.
+
+**Preserved inline contracts:** the runtime reward-nudge progress width and the per-game dynamic gradient backgrounds remain inline. No ARIA or keyboard-semantic changes are introduced in this visual-only adoption. The Customer Home scope is page-owned and does not collide with the established Rewards Hub, Player360, or PlayerTabs namespaces.
+
+**Validation:** dedicated `frontend/tests/customer-home.spec.ts` passed **2/2** with serialized Playwright execution, covering the main customer surface, static section counts, retained dynamic inline width/gradient contracts, customer navigation destinations, and the 1200px responsive layout contract. The serialized customer regression selection (`customer-header`, `rewards-hub`, and `customer-home`) passed **7/7**. Production build and `git diff --check` passed; the build emitted only pre-existing Recharts zero-dimension prerender warnings. The known untracked, failing `frontend/tests/player-360.spec.ts` was not changed or run as part of this adoption.

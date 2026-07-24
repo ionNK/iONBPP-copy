@@ -2789,3 +2789,50 @@ display: none;
 .rewards-hub-container .spin-anim { animation: rewards-hub-spin 1s linear infinite; }
 @keyframes rewards-hub-spin { 100% { transform: rotate(360deg); } }
 @media (max-width: 1100px) { .rewards-hub-container .main-rewards-grid { grid-template-columns: 1fr; } .rewards-hub-container .tier-ladder-row { grid-template-columns: repeat(3, 1fr); } }
+
+/* Phase 4 Wave 3: Customer Home keeps its existing customer-container contract. */
+.customer-container.customer-home { display: flex; flex-direction: column; gap: 40px; }
+.customer-container.customer-home .hero-banner { display: flex; min-height: 400px; align-items: center; padding: 64px; border: 1px solid var(--color-border); border-radius: 24px; background: linear-gradient(135deg, rgb(0 0 0 / 60%) 0%, transparent 100%), url('/assets/casino-hero.jpg'); background-position: center; background-size: cover; }
+.customer-container.customer-home .hero-title { max-width: 600px; margin: 12px 0 20px; font-size: 48px; font-weight: 900; line-height: 1.1; }
+.customer-container.customer-home .hero-desc { max-width: 500px; margin-bottom: 32px; color: var(--color-text-secondary); font-size: 18px; }
+.customer-container.customer-home .btn-cta { padding: 16px 32px; border: 0; border-radius: 12px; background: var(--color-betika-green); color: var(--ds-text-static); cursor: pointer; font-weight: 800; }
+.customer-container.customer-home .rewards-nudge-section { margin-top: -20px; }
+.customer-container.customer-home .rewards-nudge-card { display: flex; align-items: center; justify-content: space-between; padding: 24px 32px; border: 1px solid var(--color-border); border-radius: 20px; background: linear-gradient(90deg, #1a1a1a 0%, #0f172a 100%); box-shadow: 0 10px 30px rgb(0 0 0 / 40%); }
+.customer-container.customer-home .nudge-left { display: flex; gap: 24px; align-items: center; }
+.customer-container.customer-home .nudge-icon-box { display: flex; width: 60px; height: 60px; align-items: center; justify-content: center; border-radius: 16px; background: rgb(242 214 65 / 10%); }
+.customer-container.customer-home .nudge-tier { color: var(--color-betika-yellow); font-size: 11px; font-weight: 900; letter-spacing: 1px; }
+.customer-container.customer-home .nudge-title { margin: 4px 0; font-size: 22px; font-weight: 900; }
+.customer-container.customer-home .nudge-desc { margin: 0; color: var(--color-text-muted); font-size: 13px; }
+.customer-container.customer-home .nudge-right { display: flex; gap: 40px; align-items: center; }
+.customer-container.customer-home .nudge-progress-group { width: 240px; }
+.customer-container.customer-home .nudge-pg-label { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--color-text-secondary); font-size: 12px; }
+.customer-container.customer-home .nudge-bar-bg { height: 8px; overflow: hidden; border-radius: 4px; background: rgb(0 0 0 / 30%); }
+.customer-container.customer-home .nudge-bar-fill { height: 100%; border-radius: 4px; background: var(--color-betika-green); }
+.customer-container.customer-home .btn-nudge-action { display: flex; gap: var(--ds-space-2); align-items: center; padding: 14px 24px; border-radius: 12px; background: var(--color-betika-yellow); color: #000; font-weight: 900; text-decoration: none; transition: .2s; }
+.customer-container.customer-home .btn-nudge-action:hover { filter: brightness(1.1); transform: translateY(-2px); }
+.customer-container.customer-home .category-chips { display: flex; gap: var(--ds-space-3); }
+.customer-container.customer-home .chip { padding: 10px 20px; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-bg-input); color: var(--color-text-secondary); cursor: pointer; font-size: var(--ds-font-size-body); font-weight: 700; }
+.customer-container.customer-home .chip.active { border-color: var(--color-betika-yellow); background: var(--color-betika-yellow); color: #000; }
+.customer-container.customer-home .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.customer-container.customer-home .section-title { display: flex; gap: var(--ds-space-3); align-items: center; color: var(--ds-text-static); font-size: 22px; font-weight: 900; }
+.customer-container.customer-home .view-all { color: var(--color-betika-yellow); font-size: var(--ds-font-size-body); font-weight: 700; text-decoration: none; }
+.customer-container.customer-home .game-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+.customer-container.customer-home .game-card { position: relative; overflow: hidden; aspect-ratio: 3 / 4; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg-card); cursor: pointer; }
+.customer-container.customer-home .live-game-grid { grid-template-columns: repeat(4, 1fr); }
+.customer-container.customer-home .live-game-card { aspect-ratio: 16 / 9; }
+.customer-container.customer-home .game-image { display: flex; height: 100%; align-items: center; justify-content: center; }
+.customer-container.customer-home .game-initial { opacity: .1; font-size: 48px; font-weight: 900; }
+.customer-container.customer-home .game-overlay { position: absolute; right: 0; bottom: 0; left: 0; padding: 16px; background: linear-gradient(0deg, rgb(0 0 0 / 90%) 0%, transparent 100%); }
+.customer-container.customer-home .game-title { margin: 0; font-size: var(--ds-font-size-body); font-weight: 800; }
+.customer-container.customer-home .game-provider { margin: 4px 0 0; color: var(--color-text-muted); font-size: 11px; }
+.customer-container.customer-home .play-btn { position: absolute; top: 50%; left: 50%; display: flex; width: 48px; height: 48px; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-betika-green); opacity: 0; transition: .3s; transform: translate(-50%, -50%) scale(.8); }
+.customer-container.customer-home .game-card:hover .play-btn { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.customer-container.customer-home .promotions-section-header { margin-top: 32px; }
+.customer-container.customer-home .promo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.customer-container.customer-home .promo-card { display: flex; justify-content: space-between; padding: 24px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-bg-card); }
+.customer-container.customer-home .promo-card-green { border-left: 4px solid var(--color-betika-green); }
+.customer-container.customer-home .promo-card-purple { border-left: 4px solid var(--color-accent-purple); }
+.customer-container.customer-home .promo-name { margin: 0 0 8px; font-size: 20px; font-weight: 900; }
+.customer-container.customer-home .promo-desc { margin-bottom: 20px; color: var(--color-text-secondary); font-size: var(--ds-font-size-body); }
+.customer-container.customer-home .btn-outline { padding: 10px 20px; border: 1px solid var(--color-border); border-radius: 10px; background: transparent; color: var(--ds-text-static); cursor: pointer; font-weight: 700; }
+@media (max-width: 1200px) { .customer-container.customer-home .game-grid { grid-template-columns: repeat(4, 1fr); } .customer-container.customer-home .rewards-nudge-card { flex-direction: column; gap: 24px; align-items: flex-start; } .customer-container.customer-home .nudge-right { width: 100%; justify-content: space-between; } }
