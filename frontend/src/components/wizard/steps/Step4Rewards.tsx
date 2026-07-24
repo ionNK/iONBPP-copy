@@ -175,8 +175,8 @@ export default function StepRewards() {
         }
     };
 
-    return (
-        <div className="step-container">
+return (
+ <div className="wizard-rewards step-container">
 <div className="form-panel ds-panel">
 <h2 className="panel-title">Reward Configuration</h2>
 
@@ -464,7 +464,7 @@ export default function StepRewards() {
 
             <div className="form-section mt-8">
                 <div className="toggle-header">
-                    <label className="ds-section-label" style={{ marginBottom: 0 }}>Multi-Day Offer Window</label>
+                    <label className="ds-section-label multi-day-label">Multi-Day Offer Window</label>
 <label className="ds-switch">
 <input type="checkbox" checked={multiDay.enabled} onChange={(e) => updateRewards({ multiDay: { ...multiDay, enabled: e.target.checked } })} />
 <span className="ds-switch__track" />
@@ -506,134 +506,6 @@ export default function StepRewards() {
             </div>
 
         </div>
-
-
-            <style jsx>{`
-                .step-container { max-width: 900px; margin: 0 auto; animation: slideIn 0.3s ease-out; }
-                @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-.form-panel { padding: 32px; }
-.panel-title { margin: 0 0 4px; color: var(--color-text-primary); font-size: 20px; font-weight: 600; line-height: 1.3; }
-
-                /* Validation Warning */
-                .validation-warning { background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px; animation: keyframe 0.3s ease; }
-                .vw-header { display: flex; align-items: center; gap: 8px; font-weight: 700; color: #f87171; margin-bottom: 8px; font-size: 14px; }
-                .vw-list { margin: 0; padding-left: 24px; color: #fecaca; font-size: 13px; }
-                .vw-list li { margin-bottom: 4px; }
-                
-                .text-warning { color: #f87171; }
-
-/* Reward grid follows the promotion-type global choice pattern. */
-.rewards-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 32px; }
-.reward-card { display: flex; min-height: 107px; flex-direction: column; align-items: flex-start; gap: 6px; overflow: hidden; padding: 16px; color: var(--color-text-primary); cursor: pointer; text-align: left; }
-.type-radio { position: relative; width: 16px; height: 16px; flex-shrink: 0; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 50%; }
-.type-radio.is-selected { border: 2px solid #008e00; }
-.type-radio.is-selected::after { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; border-radius: 50%; background: #008e00; content: ''; transform: translate(-50%, -50%); }
-.type-name { color: var(--color-text-primary); font-size: 14px; font-weight: 500; line-height: 1.25; }
-.type-desc { color: var(--color-text-muted); font-size: 12px; font-weight: 400; line-height: 1.35; }
-
-                /* Config Box */
-                .config-box { background: var(--color-bg-input); border-radius: 12px; border: 1px solid var(--color-border); padding: 24px; }
-                .config-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-                .sub-title { margin: 0; font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
-
-                .toggle-group { display: flex; background: var(--color-bg-card); padding: 4px; border-radius: 8px; }
- .toggle-btn { color: var(--color-text-muted); padding: 6px 12px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; }
- .toggle-btn.is-selected { background: var(--ds-surface-selected); border-color: var(--ds-accent); color: var(--color-text-primary); }
-
-                /* Simple Mode */
-                .value-inputs { display: flex; align-items: center; justify-content: space-between; }
-                .input-col label { display: block; font-size: 12px; color: var(--color-text-muted); margin-bottom: 8px; }
-                .arrow-col { display: flex; align-items: center; justify-content: center; padding-top: 24px; }
-                
-                .big-input-wrapper { display: flex; align-items: center; padding: 0 16px; width: 220px; }
-                .big-input { background: transparent; border: none; color: var(--color-text-primary); font-size: 32px; font-weight: 700; width: 100%; padding: 16px 0; outline: none; text-align: right; }
-                .suffix { font-size: 24px; color: var(--color-text-muted); font-weight: 600; margin-left: 8px; }
-                .prefix { font-size: 24px; color: var(--color-text-muted); font-weight: 600; margin-right: 8px; }
-
-                /* Tiered Matrix */
-                .tiered-matrix { display: flex; flex-direction: column; gap: 8px; }
-                
-                .matrix-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 11px; color: var(--color-text-muted); }
-                .pill-selector { background: var(--color-bg-app); border-radius: 20px; padding: 2px; display: flex; }
- .pill { padding: 4px 12px; border-radius: 18px; font-size: 11px; color: var(--color-text-muted); cursor: pointer; }
- .pill.is-selected { background: var(--ds-accent); border-color: var(--ds-accent); color: #000; font-weight: 600; }
-
-                .matrix-header { display: flex; padding: 0 12px; margin-bottom: 4px; }
-                .col { flex: 1; font-size: 11px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; padding-right: 8px; }
-                .col-action { width: 30px; }
-                
-                .matrix-row { display: flex; align-items: center; gap: 8px; background: var(--color-bg-card); border: 1px solid var(--color-border); padding: 8px 12px; border-radius: 8px; transition: all 0.2s; }
-                .matrix-row:hover { background: var(--color-bg-input-focus); border-color: var(--color-border-hover); }
-                
-                .field-group { display: flex; align-items: center; gap: 8px; background: var(--color-bg-input); padding: 6px 10px; border-radius: 6px; width: 100%; border: 1px solid transparent; }
- .field-group:focus-within { border-color: var(--ds-accent); background: rgba(242, 214, 65, 0.05); }
- .field-group.highlight { background: rgba(242, 214, 65, 0.1); border-color: rgba(242, 214, 65, 0.2); }
-
- .field-icon { opacity: 0.5; color: var(--color-text-primary); }
- .t-input { color: var(--color-text-primary); font-size: 13px; width: 100%; }
- .t-input.bold { font-weight: 700; color: var(--ds-accent); }
-                .t-select { background: transparent; border: none; color: var(--color-text-primary); font-size: 13px; width: 100%; outline: none; cursor: pointer; }
-                .t-select option { background: var(--color-bg-panel); color : var(--color-text-primary) }
-                
-                .remove-btn { background: transparent; border: none; color: var(--color-text-muted); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
-                .remove-btn:hover { color: #f87171; }
-                
- .add-row-btn { padding: 10px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; }
-                
-                .matrix-info { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 11px; color: var(--color-text-muted); font-style: italic; }
-
-                /* Radio options */
-                .radio-group { display: flex; gap: 24px; }
-                .radio-opt { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--color-text-secondary); font-size: 13px; }
-                .radio-opt input { accent-color: var(--ds-accent); }
-
-                /* Free Bet / Qualifying / Multi-Day config grids */
-                .fb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-                .fb-field { display: flex; flex-direction: column; gap: 8px; }
-                .fb-field > label { font-size: 12px; font-weight: 600; color: var(--color-text-secondary); }
- .fb-field input[type="number"]:not(.ds-control), .fb-field input[type="text"]:not(.ds-control), .fb-field input[type="time"]:not(.ds-control) {
- background: var(--color-bg-card);
- border: 1px solid var(--color-border);
- color: var(--color-text-primary);
- padding: 10px 12px;
- border-radius: 8px;
- font-size: 14px;
- outline: none;
- transition: all 0.2s;
- }
- .fb-select { cursor: pointer; font-size: 14px; }
-        .fb-select option { background: var(--color-bg-panel); color: var(--color-text-primary); }
- .fb-input-wrap { display: flex; align-items: center; padding: 0 12px; }
- .fb-input-wrap:focus-within { border-color: var(--ds-accent); box-shadow: 0 0 0 1px var(--ds-accent); }
-                .fb-input-wrap input { border: none !important; box-shadow: none !important; background: transparent !important; padding: 10px 0 !important; flex: 1; }
-                .fb-prefix { font-size: 13px; font-weight: 600; color: var(--color-text-muted); margin-right: 8px; }
-                .fb-hint { font-size: 11px; color: var(--color-text-muted); line-height: 1.4; }
-
-                .toggle-field { justify-content: flex-start; }
-                .toggle-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-
- .mt-8 { margin-top: 32px; }
-
-@media (max-width: 720px) {
-.form-panel { padding: 24px; }
-.rewards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 440px) {
-.form-panel { padding: 20px; }
-.rewards-grid { grid-template-columns: 1fr; }
-}
-
-/* Template guidance layout; notice visuals are supplied by the global design system. */
-.template-guidance { align-items: flex-start; margin-bottom: 24px; }
-.tg-content { min-width: 0; }
-.tg-title { margin: 1px 0 8px; font-size: 13px; font-weight: 700; }
-.tg-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.tg-chip { padding: 3px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.16); color: inherit; font-size: 12px; }
-.tg-hint { margin: 10px 0 0; color: inherit; font-size: 12px; line-height: 1.4; opacity: 0.76; }
-
- `}</style>
 
         </div>
     );

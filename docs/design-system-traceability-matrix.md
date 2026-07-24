@@ -159,6 +159,15 @@ Later candidates requiring separate authorization and visual review:
 
 This document records the Phase 3 implementation gate. Stop here before any adoption or later-phase work.
 
+## 9. Adoption record — Phase 4, Wave 3, Step 5 Schedule
+
+**Validation date:** July 24, 2026
+**Approved surface:** `frontend/src/components/wizard/steps/Step5Schedule.tsx`
+
+Step 5 Schedule presentation was migrated from its component-local `<style jsx>` block into the canonical `design-system.css` layer beneath the new `.wizard-schedule` root scope. The migration preserves the existing schedule state model, start/end datetime controls, recurring toggle, click-away frequency menu, active-day toggles, usage limits, validation summary, and all existing labels, IDs, ARIA roles, and handler behavior. No wizard navigation, validation policy, or currency behavior changed.
+
+**Dedicated coverage:** `frontend/tests/schedule-step.spec.ts` exercises entry through the wizard, date summary validation and recovery, recurring state, frequency selection, weekday state, usage-limit persistence, and the scoped root’s rendered width. The component now contains no static `<style>` block or inline `style=` attributes. Keyboard menu navigation, Escape dismissal, and focus restoration remain deferred component-behavior work; the existing click-away behavior was deliberately preserved.
+
 ## 9. Adoption record — Wave 1
 
 **Validation date:** July 22, 2026
@@ -322,3 +331,14 @@ Static presentation for the wizard support batch was moved from three component-
 **Preserved behavior and test contracts:** wizard state, navigation, upload refs/FileReader paths, tab/device/channel/badge interactions, previews, summaries, planned-date formatting, Edit callbacks, ARIA labels, and the review confirmation control are unchanged. The four Step 7 inline `textTransform: 'capitalize'` declarations remain intentional runtime markup. Existing checks continue to target **Banner image URL**, **Promotion banner preview**, the **Promotion Summary Overview** region, and seven `button.edit-link` controls.
 
 **Validation:** local `<style jsx>` blocks were reduced from **1/1/1 to 0/0/0** for WizardStepper, Step6Display, and Step7Review; inline-style counts are **0/0/4**, preserving Step 7’s four declared transforms. Serialized promotion-flow and light-mode coverage, production build, and `git diff --check` are recorded with this batch. The known untracked, failing `frontend/tests/player-360.spec.ts` was not changed or run.
+
+## 23. Adoption record — Phase 4, Wave 3, wizard steps batch 1
+
+**Validation date:** July 24, 2026
+**Approved surfaces:** `frontend/src/components/wizard/steps/Step1Basics.tsx`, `frontend/src/components/wizard/steps/Step4Rewards.tsx`, and `frontend/src/components/wizard/steps/Step5Schedule.tsx`
+
+Static presentation for the first wizard-step batch was centralized from the three component-local `<style jsx>` blocks into scoped `design-system.css` contracts: `.wizard-basics`, `.wizard-rewards`, and `.wizard-schedule`. The migration retains the existing `step-container`, `form-panel`, `ds-control`, `ds-choice`, `ds-notice`, `ds-panel`, and switch/dropdown composition while applying the available shared tokens for color, spacing, radius, border, surface, shadow, and transitions. No wizard-step markup, navigation, data model, validation policy, or event-handler behavior changed.
+
+**Preserved behavior and state contracts:** Step 1 retains saved-template expansion/loading, basic-field validation recovery, promotion-type filtering/sorting/selection, and template-detail rendering. Step 4 retains market-derived free-bet currency synchronization, locally stored country-limit evaluation, reward/calc/matrix selection, tier add/edit/remove behavior, wagering and free-bet controls, and multi-day switches. Step 5 retains start/end datetime state, duration summary validation/recovery, recurring state, click-away frequency menu, active-day selection, and usage-limit persistence. No ARIA or keyboard-semantic changes were introduced; keyboard menu navigation, Escape dismissal, and focus restoration for the Step 5 frequency listbox remain deferred component-behavior work.
+
+**Validation:** all three local `<style jsx>` blocks and all component inline `style=` attributes were removed (**1/1/1 to 0/0/0** and **0/0/0** inline styles). Serialized `promotion-flow` and `schedule-step` coverage passed **2/2**, exercising the end-to-end wizard flow plus schedule summary, recurrence, frequency, weekdays, and limits. `npm --prefix frontend run build` and `git diff --check` passed; the build emitted only the pre-existing Recharts zero-dimension prerender warnings. This batch is intentionally uncommitted for human review.
