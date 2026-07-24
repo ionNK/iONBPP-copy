@@ -395,7 +395,7 @@ paramDef.options.map((option) => ({ value: option, label: option })),
                         placeholder="Min"
                         onChange={(e) => updateRule(triggerId, rule.id, 'value', `${e.target.value}-${max || ''}`)}
                     />
-                    <span className="text-muted text-xs" style={{ color: 'var(--color-text-muted)' }}>to</span>
+                    <span className="range-separator text-muted text-xs">to</span>
                     <input
                         type="number"
  className="trigger-input interactive-input ds-control"
@@ -419,7 +419,7 @@ paramDef.options.map((option) => ({ value: option, label: option })),
     };
 
     return (
-        <div className="step-container">
+        <div className="wizard-triggers step-container">
             <div className="trigger-layout">
                 <div className="ds-panel">
                     <div className="panel-header">
@@ -453,7 +453,7 @@ paramDef.options.map((option) => ({ value: option, label: option })),
                                             {idx > 0 && <div className="kwd block-sep">OR</div>}
                                             <div><span className="kwd">WHEN</span> EVENT <span className="str">"{getEventLabel(trigger.eventId)}"</span></div>
                                             {(trigger.rules || []).map((rule) => (
-                                                <div key={rule.id} style={{ paddingLeft: 20 }}>
+                                                <div key={rule.id} className="code-rule-line">
                                                     <span className="kwd">AND</span> <span className="prop">{rule.param}</span> <span className="op">{rule.operator}</span> <span className="val">"{rule.value}"</span>
                                                 </div>
                                             ))}
@@ -579,257 +579,6 @@ OPERATORS,
                     </div>
                 )}
             </div>
-
-<style jsx>{`
- .step-container { max-width: 900px; margin: 0 auto; animation: fadeUp 0.3s ease; }
- @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-.trigger-layout { display: flex; flex-direction: column; gap: 20px; }
-.ds-panel {
- padding: 32px;
- display: flex;
- flex-direction: column;
-}
-
-.form-scrollable { overflow-y: auto; flex: 1; scrollbar-width: thin; scrollbar-color: var(--color-border) transparent; margin-top: 20px; padding-right: 2px; }
-.form-scrollable::-webkit-scrollbar { width: 6px; }
-.form-scrollable::-webkit-scrollbar-thumb { background-color: var(--color-border); border-radius: 999px; }
-
-.panel-title { color: var(--color-text-primary); font-size: 17px; line-height: 1.3; margin: 0 0 5px; display: flex; align-items: center; gap: 9px; }
-.panel-subtitle { color: var(--color-text-muted); font-size: 13px; line-height: 1.5; margin: 0; }
- .header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
-
- .cap-reminder {
- align-self: flex-start;
- margin-top: 14px;
- }
- .cap-reminder strong { color: inherit; }
-
-.trigger-hint {
-display: flex;
-align-items: center;
-gap: 7px;
-font-size: 12px;
-line-height: 1.45;
-color: var(--color-text-muted);
-padding: 2px 0 8px;
-}
-.trigger-hint :global(svg) { color: #4ade80; flex: 0 0 auto; }
-
- .channel-warning {
- margin: 6px 0 0 32px;
- }
-
-        .text-yellow { color: var(--color-betika-yellow); }
-
-
-                /* Trigger Cards */
-.triggers-container { display: flex; flex-direction: column; gap: 18px; padding-bottom: 8px; }
- .trigger-card {
- overflow: hidden;
- }
-
-.trigger-header {
-padding: 14px 18px;
-background: var(--color-bg-input);
-border-bottom: 1px solid var(--color-border);
-display: flex;
-justify-content: space-between;
-align-items: center;
-gap: 16px;
-}
-.trigger-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.trigger-badge {
-font-size: 10px;
-letter-spacing: 0.05em;
-font-weight: 800;
-background: var(--color-betika-yellow);
-color: #131313;
-padding: 4px 7px;
-border-radius: 5px;
-}
-.trigger-name { font-size: 14px; font-weight: 700; color: var(--color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.rules-list { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
-.rule-item { display: flex; align-items: center; gap: 10px; }
-.rule-badge { font-size: 10px; font-weight: 800; letter-spacing: 0.04em; color: var(--color-text-muted); width: 28px; text-align: right; }
-.rule-content { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; }
-.param-label {
-font-size: 10px;
-letter-spacing: 0.04em;
-color: var(--color-betika-yellow);
-font-weight: 800;
-min-width: 92px;
-text-transform: uppercase;
-background: rgba(242, 214, 65, 0.1);
-border: 1px solid rgba(242, 214, 65, 0.18);
-padding: 7px 8px;
-border-radius: 7px;
-text-align: center;
-}
-                
- /* Rule-specific sizing; the global design-system primitives own visual treatment. */
-.op-mini, .val-mini, .trigger-input, .interactive-input {
- font-size: 13px;
- display: block;
- width: 100%;
-}
-
-                .trigger-input::placeholder { color: var(--color-text-muted); font-size: 13px; }
-
-.op-mini-wrapper {
-position: relative;
-width: 176px;
-min-width: 176px;
-}
-                
-.op-mini {
-width: 100%;
-margin: 0;
-}
-
-.val-mini { flex: 1; }
-.trigger-input { flex: 1; }
-
-.rule-dropdown { position: relative; }
-.rule-dropdown-menu {
-position: absolute;
-top: calc(100% + 6px);
-left: 0;
-width: 100%;
-min-width: max-content;
-max-height: 220px;
-overflow-y: auto;
-}
-.rule-dropdown-check { flex: 0 0 auto; color: var(--ds-success-bright); }
-                
-                /* Reset icon button styles within rules */
-                .icon-btn { 
-                    height: 32px; 
-                    width: 32px; 
-                    background: transparent; 
-                    border: 1px solid transparent; 
-                    color: var(--color-text-muted); 
-                    cursor: pointer; 
-                    border-radius: 6px; 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    transition: all 0.2s; 
-                    margin-left: 8px;
-                }
-                .icon-btn:hover { color: var(--color-text-primary); background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
-                .icon-btn.danger:hover { color: #f87171; background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.2); }
-
-/* Add Condition Area */
-.add-condition-section { margin-left: 38px; margin-top: 2px; }
-.add-condition-btn {
-background: transparent;
-border: 1px dashed var(--color-border);
-color: var(--color-text-muted);
-padding: 8px 12px;
-border-radius: 8px;
-font-size: 12px;
-cursor: pointer;
-display: flex;
-align-items: center;
-gap: 7px;
-transition: border-color 0.2s, background-color 0.2s, color 0.2s;
-}
-.add-condition-btn:hover { border-color: var(--color-betika-yellow); color: var(--color-betika-yellow); background: rgba(242, 214, 65, 0.05); }
-
-.param-selector-inline {
-background: var(--color-bg-panel);
-border: 1px solid var(--color-border);
-border-radius: 10px;
-width: fit-content;
-min-width: 220px;
-animation: fadeIn 0.1s;
-z-index: 10;
-position: relative;
-overflow: hidden;
-box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-}
-.param-picker-header { padding: 10px 12px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 800; letter-spacing: 0.05em; color: var(--color-text-muted); text-transform: uppercase; }
-.param-options { padding: 6px; display: flex; flex-direction: column; }
-.param-opt { width: 100%; padding: 8px 10px; color: var(--color-text-secondary); font-size: 12px; cursor: pointer; text-align: left; }
-.param-opt:hover { color: var(--color-text-primary); }
-
-.logic-connector { text-align: center; font-size: 10px; letter-spacing: 0.05em; font-weight: 800; color: var(--color-text-muted); margin: 2px 0; position: relative; }
-.logic-connector::before, .logic-connector::after { content: ''; display: block; height: 9px; width: 1px; background: var(--color-border); margin: 0 auto; }
-
-.btn-add-trigger {
-width: 100%;
-padding: 14px;
-border: 1px dashed var(--color-border);
-border-radius: 10px;
-background: transparent;
-color: var(--color-text-muted);
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 8px;
-cursor: pointer;
-transition: border-color 0.2s, background-color 0.2s, color 0.2s;
-margin-top: 18px;
-font-size: 13px;
-font-weight: 700;
-}
-.btn-add-trigger:hover {
-border-color: var(--color-betika-yellow);
-color: var(--color-betika-yellow);
-background: rgba(242, 214, 65, 0.05);
-}
-
-/* Modal */
-.modal-overlay { position: fixed; inset: 0; padding: 24px; background: rgba(1, 10, 24, 0.72); backdrop-filter: blur(5px); z-index: 100; display: flex; align-items: center; justify-content: center; }
-.event-modal { background: var(--color-bg-panel); width: min(680px, 100%); border: 1px solid var(--color-border); border-radius: 16px; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,0.42); }
-.modal-header { padding: 18px 22px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: var(--color-bg-card); }
-.modal-header h3 { margin: 0; font-size: 16px; color: var(--color-text-primary); }
-.modal-header button { background: transparent; border: none; color: var(--color-text-muted); cursor: pointer; padding: 4px; display: flex; border-radius: 6px; }
-.modal-header button:hover { color: var(--color-text-primary); background: var(--color-bg-input-focus); }
-
-.modal-body { padding: 22px; max-height: 60vh; overflow-y: auto; }
-.catalog-category { margin-bottom: 24px; }
-.cat-header { font-size: 10px; font-weight: 800; color: var(--color-text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
-.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.event-tile { min-height: 72px; padding: 12px; color: var(--color-text-primary); font-size: 13px; cursor: pointer; text-align: center; }
-.event-tile:hover { color: var(--color-text-primary); }
-
-.btn-xs { background: var(--color-bg-card); border: 1px solid var(--color-border); padding: 8px 11px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--color-text-muted); display: flex; align-items: center; gap: 6px; transition: border-color 0.2s, background-color 0.2s, color 0.2s; }
-.btn-xs:hover { border-color: var(--color-border-hover); color: var(--color-text-primary); }
-.active-mode { background: var(--color-betika-yellow); color: #151515; border-color: var(--color-betika-yellow); font-weight: 700; }
-
-@media (max-width: 700px) {
- .ds-panel { padding: 24px; }
-.header-row { flex-direction: column; align-items: stretch; gap: 14px; }
-.sh-actions, .btn-xs { width: 100%; justify-content: center; }
-.rule-item { align-items: flex-start; }
-.rule-content { flex-wrap: wrap; }
-.param-label { min-width: auto; }
-.op-mini-wrapper { width: 100%; min-width: 100%; }
-.val-mini, .trigger-input { width: 100%; flex-basis: 100%; }
-.add-condition-section, .channel-warning { margin-left: 0; }
-.cat-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 440px) {
- .ds-panel { padding: 20px; }
-.modal-overlay { padding: 12px; }
-.modal-body { padding: 16px; }
-.cat-grid { grid-template-columns: 1fr; }
-.trigger-header, .rules-list { padding-left: 14px; padding-right: 14px; }
-.rule-badge { display: none; }
-}
-                
-                .advanced-editor { background: #000; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 13px; line-height: 1.6; color: #ccc; min-height: 400px; } 
-                .kwd { color: #c678dd; font-weight: bold; }
-                .str { color: #98c379; }
-                .prop { color: #e06c75; }
-                .op { color: #56b6c2; }
-                .val { color: #d19a66; }
-                .block-sep { margin: 10px 0; color: #facc15; }
-            `}</style>
         </div>
     );
 }
