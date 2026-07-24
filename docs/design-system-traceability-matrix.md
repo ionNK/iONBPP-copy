@@ -256,3 +256,14 @@ Player360's static local `<style jsx>` rules were moved to the scoped `.p360` se
 **Explicit boundary:** `PlayerTabs.tsx` is an adjacent conditional-tab consumer and is deliberately untouched. Its selectors and its dynamic timeline/bonus colors and progress widths are not part of the `.p360` contract. No ARIA or keyboard-semantic changes are introduced in this visual-only turn.
 
 **Dedicated coverage:** `frontend/tests/player-360.spec.ts` covers resolved and not-found detail paths, hero identity, tab switching, action-to-recent-actions reactivity, notes persistence in the local UI state, and peer navigation.
+
+## 17. Adoption record — Phase 4, Wave 3, PlayerTabs
+
+**Validation date:** July 24, 2026
+**Approved surface:** `frontend/src/components/crm/PlayerTabs.tsx` within `/admin/crm/[id]`
+
+PlayerTabs static local `<style jsx>` presentation was moved to the canonical `design-system.css` layer under the distinct `.p-tabs` namespace. Its overview, financial, campaign, timeline, and bonus/offer tab content keeps the existing DOM and is driven by Player360's local tab state without changes to tab definitions, state transitions, content, or handlers. The `.p-tabs` scope is intentionally separate from the committed `.p360` section, so adjacent Player360 styling remains outside this component's selector contract.
+
+**Preserved inline contracts:** dynamic timeline event-dot colors and dynamic bonus status colors remain inline; calculated bonus wagering progress widths remain inline. All other static visual rules now use the scoped canonical layer and existing `--ds-*` tokens where suitable. No ARIA or keyboard-semantic changes are introduced in this visual-only adoption.
+
+**Validation:** dedicated `frontend/tests/player-tabs.spec.ts` passed **2/2** with serialized Playwright execution, covering Player360-driven tab switching and the retained timeline/progress inline state. The serialized Wave 3 regression selection (`country-switcher`, `customer-header`, `match-card`, and `player-tabs`) passed **11/11**. Production build and `git diff --check` passed; the build emitted only pre-existing Recharts zero-dimension prerender warnings. The known untracked, failing `frontend/tests/player-360.spec.ts` was not changed or run as part of this adoption.
