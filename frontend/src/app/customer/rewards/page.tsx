@@ -257,7 +257,7 @@ export default function RewardsHubPage() {
                ) : (
                   <>
                      <div className="modal-header">
-                        <h2 style={{ fontSize: '24px', fontWeight: 900 }}>Confirm Redemption</h2>
+                        <h2 className="modal-title">Confirm Redemption</h2>
                         <button className="close-btn" onClick={() => setSelectedReward(null)}><X size={24} /></button>
                      </div>
                      <div className="modal-body">
@@ -275,7 +275,7 @@ export default function RewardsHubPage() {
                               <span>Points to Spend:</span>
                               <strong>{selectedReward.pointPrice.toLocaleString()} PTS</strong>
                            </div>
-                           <div className="pc-item" style={{ textAlign: 'right' }}>
+                           <div className="pc-item pc-item-balance">
                               <span>Balance After:</span>
                               <strong>{(points - selectedReward.pointPrice).toLocaleString()} PTS</strong>
                            </div>
@@ -296,123 +296,6 @@ export default function RewardsHubPage() {
             </div>
          </div>
       )}
-
-      <style jsx>{`
-        .rewards-hub-container {
-          max-width: 1400px; margin: 0 auto; padding: 40px; color: #fff;
-        }
-        .rewards-hero {
-          background: linear-gradient(135deg, rgba(105, 153, 81, 0.15) 0%, rgba(0,0,0,0) 100%);
-          border: 1px solid var(--color-border); border-radius: 24px; padding: 32px; margin-bottom: 40px;
-        }
-        .hero-content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
-        
-        .player-badge { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
-        .avatar-initials { width: 60px; height: 60px; background: var(--color-betika-green); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 22px; box-shadow: 0 8px 16px rgba(105, 153, 81, 0.3); }
-        .badge-details .welcome { font-size: 14px; opacity: 0.6; }
-        .badge-details .player-name { font-size: 32px; font-weight: 900; margin: 0; letter-spacing: -0.5px; }
-
-        .tier-progress-card { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 24px; border: 1px solid var(--color-border); }
-        .tp-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .cur-tier { display: flex; align-items: center; gap: 8px; font-weight: 900; text-transform: uppercase; color: var(--color-betika-yellow); font-size: 14px; }
-        .pts-count { font-size: 14px; color: var(--color-text-secondary); }
-        .pts-count strong { font-size: 24px; color: #fff; }
-
-        .progress-track { height: 10px; background: rgba(0,0,0,0.4); border-radius: 5px; overflow: hidden; margin-bottom: 12px; }
-        .progress-fill { height: 100%; background: var(--color-betika-green); box-shadow: 0 0 15px rgba(105, 153, 81, 0.5); transition: width 1s ease-out; }
-        .tp-footer { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--color-text-muted); }
-        .expiry { color: #ef4444; display: flex; align-items: center; gap: 4px; }
-
-        .hero-quick-stats { display: flex; flex-direction: column; gap: 12px; }
-        .stat-card { background: rgba(255,255,255,0.03); border: 1px solid var(--color-border); border-radius: 16px; padding: 20px; text-align: center; }
-        .stat-val { font-size: 24px; font-weight: 900; display: block; margin-bottom: 4px; }
-        .stat-lbl { font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; font-weight: 800; }
-
-        .section-header { margin-bottom: 30px; }
-        .section-title { font-size: 24px; font-weight: 900; display: flex; align-items: center; gap: 12px; margin: 0; }
-        .section-desc { font-size: 14px; color: var(--color-text-muted); margin-top: 5px; }
-
-        .tier-ladder-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 60px; }
-        .tier-node { background: var(--color-bg-panel); border: 1px solid var(--color-border); border-radius: 20px; padding: 24px; text-align: center; position: relative; transition: 0.3s; }
-        .tier-node.active { border-color: var(--color-betika-yellow); background: rgba(242, 214, 65, 0.05); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .tier-node.locked { opacity: 0.5; filter: grayscale(1); }
-        .tier-icon { width: 36px; height: 36px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-weight: 900; }
-        .tier-node.active .tier-icon { background: var(--color-betika-yellow); color: #000; }
-        .tier-name { font-size: 18px; font-weight: 900; margin: 0 0 4px 0; }
-        .tier-range { font-size: 12px; color: var(--color-text-muted); margin-bottom: 20px; font-weight: 700; }
-        .tier-perks { list-style: none; padding: 0; margin: 0; text-align: left; }
-        .tier-perks li { font-size: 11px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; color: var(--color-text-secondary); font-weight: 600; }
-        .current-marker { position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); background: var(--color-betika-yellow); color: #000; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; white-space: nowrap; }
-
-        .main-rewards-grid { display: grid; grid-template-columns: 1fr 340px; gap: 40px; }
-        .store-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
-        .store-filters { display: flex; gap: 8px; }
-        .store-filters button { background: var(--color-bg-input); border: 1px solid var(--color-border); color: #fff; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: 800; transition: 0.2s; }
-        .store-filters button.active { background: var(--color-betika-yellow); color: #000; border-color: var(--color-betika-yellow); }
-
-        .rewards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
-        .reward-card { background: var(--color-bg-panel); border: 1px solid var(--color-border); border-radius: 24px; padding: 24px; position: relative; display: flex; flex-direction: column; transition: 0.3s; }
-        .reward-card:hover:not(.tier-locked) { border-color: var(--color-betika-green); transform: translateY(-5px); }
-        .reward-card.unaffordable { opacity: 0.7; }
-        .locked-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 10; border-radius: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; color: var(--color-betika-yellow); font-weight: 900; text-transform: uppercase; font-size: 14px; }
-        
-        .reward-badge-type { font-size: 10px; font-weight: 950; background: rgba(105, 153, 81, 0.15); color: var(--color-betika-green); padding: 5px 10px; border-radius: 8px; align-self: flex-start; margin-bottom: 16px; letter-spacing: 0.5px; }
-        .reward-name { font-size: 20px; font-weight: 900; margin: 0 0 10px 0; }
-        .reward-desc { font-size: 14px; color: var(--color-text-secondary); line-height: 1.5; flex: 1; margin-bottom: 24px; }
-        
-        .reward-footer { display: flex; justify-content: space-between; align-items: center; }
-        .price-tag { display: flex; flex-direction: column; }
-        .price-tag .price { font-size: 24px; font-weight: 950; color: #fff; line-height: 1; }
-        .price-tag .lbl { font-size: 11px; color: var(--color-betika-yellow); font-weight: 800; margin-top: 4px; }
-
-        .redeem-btn { background: var(--color-betika-green); color: #fff; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 900; cursor: pointer; transition: 0.2s; }
-        .redeem-btn:disabled { background: rgba(255,255,255,0.05); color: var(--color-text-muted); cursor: not-allowed; }
-
-        .rewards-sidebar { background: rgba(255,255,255,0.02); border: 1px solid var(--color-border); border-radius: 24px; padding: 24px; height: fit-content; }
-        .sidebar-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--color-border); }
-        .transaction-list { display: flex; flex-direction: column; gap: 16px; }
-        .tx-item { display: flex; align-items: center; gap: 12px; }
-        .tx-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .tx-icon.earn { background: rgba(105, 153, 81, 0.1); color: var(--color-betika-green); }
-        .tx-icon.redeem { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-        .tx-details { flex: 1; }
-        .tx-desc { display: block; font-size: 13px; font-weight: 700; color: #fff; }
-        .tx-date { font-size: 11px; color: var(--color-text-muted); }
-        .tx-points { font-weight: 900; font-size: 14px; }
-        .tx-points.earn { color: var(--color-betika-green); }
-        .tx-points.redeem { color: #ef4444; }
-        .empty-history { text-align: center; color: var(--color-text-muted); padding: 40px 0; font-size: 14px; }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-        .redemption-modal { background: var(--color-bg-panel); border: 1px solid var(--color-border); border-radius: 32px; width: 100%; max-width: 500px; padding: 40px; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .close-btn { background: transparent; border: none; color: var(--color-text-muted); cursor: pointer; padding: 5px; }
-        .reward-summary-card { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 24px; display: flex; gap: 20px; align-items: center; margin-bottom: 30px; border: 1px solid var(--color-border); }
-        .summ-icon { width: 64px; height: 64px; background: rgba(242, 214, 65, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--color-betika-yellow); }
-        .summ-text h3 { margin: 0 0 5px 0; font-size: 22px; font-weight: 900; }
-        .summ-text p { margin: 0; font-size: 14px; color: var(--color-text-secondary); }
-        
-        .price-confirm-row { display: flex; justify-content: space-between; margin-bottom: 40px; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 16px; border: 1px solid var(--color-border); }
-        .pc-item span { font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 5px; font-weight: 800; text-transform: uppercase; }
-        .pc-item strong { font-size: 20px; color: var(--color-betika-yellow); font-weight: 950; }
-
-        .modal-footer { display: flex; gap: 15px; }
-        .btn-cancel { flex: 1; background: transparent; border: 1px solid var(--color-border); color: #fff; padding: 16px; border-radius: 16px; font-weight: 800; cursor: pointer; }
-        .btn-confirm-redeem { flex: 2; background: var(--color-betika-green); color: #fff; border: none; padding: 16px; border-radius: 16px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
-        .success-state { text-align: center; }
-        .success-icon-wrap { margin-bottom: 24px; }
-        .success-state h2 { font-size: 28px; font-weight: 950; margin-bottom: 10px; }
-        .success-footer { font-size: 12px; color: var(--color-text-muted); margin-top: 20px; }
-
-        .spin-anim { animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        @media (max-width: 1100px) {
-           .main-rewards-grid { grid-template-columns: 1fr; }
-           .tier-ladder-row { grid-template-columns: repeat(3, 1fr); }
-        }
-      `}</style>
     </div>
   );
 }

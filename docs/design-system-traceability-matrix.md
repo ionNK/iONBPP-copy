@@ -267,3 +267,14 @@ PlayerTabs static local `<style jsx>` presentation was moved to the canonical `d
 **Preserved inline contracts:** dynamic timeline event-dot colors and dynamic bonus status colors remain inline; calculated bonus wagering progress widths remain inline. All other static visual rules now use the scoped canonical layer and existing `--ds-*` tokens where suitable. No ARIA or keyboard-semantic changes are introduced in this visual-only adoption.
 
 **Validation:** dedicated `frontend/tests/player-tabs.spec.ts` passed **2/2** with serialized Playwright execution, covering Player360-driven tab switching and the retained timeline/progress inline state. The serialized Wave 3 regression selection (`country-switcher`, `customer-header`, `match-card`, and `player-tabs`) passed **11/11**. Production build and `git diff --check` passed; the build emitted only pre-existing Recharts zero-dimension prerender warnings. The known untracked, failing `frontend/tests/player-360.spec.ts` was not changed or run as part of this adoption.
+
+## 18. Adoption record — Phase 4, Wave 3, Rewards Hub
+
+**Validation date:** July 24, 2026
+**Approved surface:** `frontend/src/app/customer/rewards/page.tsx` within `/customer/rewards`
+
+Rewards Hub static local styling was moved to the canonical `design-system.css` layer under the dedicated `.rewards-hub-container` namespace. Static presentation now uses the existing design-system surface, text, border, accent, success, danger, spacing, radius, shadow, opacity, and transition tokens where suitable. The page's rewards context subscription, tier calculations, filters, redemption flow, modal state, transaction rendering, responsive layout, and handlers remain unchanged.
+
+**Preserved inline contract:** the calculated `.progress-fill` width remains inline because it is runtime state. No static styling remains inline after replacing the two modal alignment declarations with the scoped `.modal-title` and `.pc-item-balance` selectors. The Rewards Hub namespace is page-owned and does not collide with the adjacent `.p360` or `.p-tabs` contracts. No ARIA or keyboard-semantic changes are introduced in this visual-only adoption.
+
+**Dedicated coverage:** `frontend/tests/rewards-hub.spec.ts` covers the rendered loyalty/store surface, calculated inline progress width, store filtering, redemption modal opening, and cancellation.

@@ -2696,3 +2696,96 @@ display: none;
 .p-tabs .k.action { color: var(--ds-accent); }
 .p-tabs .list p { font-size: var(--ds-font-size-body); }
 @media (max-width: 720px) { .p-tabs .cols { grid-template-columns: 1fr; } }
+
+/* Phase 4 Wave 3: Rewards Hub retains the customer-surface layout contract. */
+.rewards-hub-container { max-width: 1400px; margin: 0 auto; padding: 40px; color: var(--ds-text-static); }
+.rewards-hub-container .rewards-hero { padding: 32px; margin-bottom: 40px; border: 1px solid var(--color-border); border-radius: 24px; background: linear-gradient(135deg, color-mix(in srgb, var(--ds-success) 15%, transparent) 0%, transparent 100%); }
+.rewards-hub-container .hero-content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+.rewards-hub-container .player-badge { display: flex; gap: var(--ds-space-4); align-items: center; margin-bottom: var(--ds-space-6); }
+.rewards-hub-container .avatar-initials { display: flex; width: 60px; height: 60px; align-items: center; justify-content: center; border-radius: var(--ds-radius-control); background: var(--ds-success); box-shadow: 0 8px 16px color-mix(in srgb, var(--ds-success) 30%, transparent); font-size: 22px; font-weight: 900; }
+.rewards-hub-container .badge-details .welcome { font-size: var(--ds-font-size-body); opacity: var(--ds-opacity-muted); }
+.rewards-hub-container .badge-details .player-name { margin: 0; font-size: 32px; font-weight: 900; letter-spacing: -.5px; }
+.rewards-hub-container .tier-progress-card { padding: var(--ds-space-6); border: 1px solid var(--color-border); border-radius: var(--ds-radius-panel); background: color-mix(in srgb, var(--ds-text-static) 3%, transparent); }
+.rewards-hub-container .tp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--ds-space-4); }
+.rewards-hub-container .cur-tier { display: flex; gap: var(--ds-space-2); align-items: center; color: var(--ds-accent); font-size: var(--ds-font-size-body); font-weight: 900; text-transform: uppercase; }
+.rewards-hub-container .pts-count { color: var(--ds-text-secondary); font-size: var(--ds-font-size-body); }
+.rewards-hub-container .pts-count strong { color: var(--ds-text-static); font-size: 24px; }
+.rewards-hub-container .progress-track { height: 10px; overflow: hidden; margin-bottom: var(--ds-space-3); border-radius: 5px; background: color-mix(in srgb, var(--ds-canvas) 40%, transparent); }
+.rewards-hub-container .progress-fill { height: 100%; background: var(--ds-success); box-shadow: 0 0 15px color-mix(in srgb, var(--ds-success) 50%, transparent); transition: width 1s ease-out; }
+.rewards-hub-container .tp-footer { display: flex; justify-content: space-between; color: var(--ds-text-muted); font-size: 12px; font-weight: 700; }
+.rewards-hub-container .expiry { display: flex; gap: var(--ds-space-1); align-items: center; color: var(--ds-danger); }
+.rewards-hub-container .hero-quick-stats { display: flex; flex-direction: column; gap: var(--ds-space-3); }
+.rewards-hub-container .stat-card { padding: var(--ds-space-5); border: 1px solid var(--color-border); border-radius: var(--ds-radius-lg); background: color-mix(in srgb, var(--ds-text-static) 3%, transparent); text-align: center; }
+.rewards-hub-container .stat-val { display: block; margin-bottom: var(--ds-space-1); font-size: 24px; font-weight: 900; }
+.rewards-hub-container .stat-lbl { color: var(--ds-text-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.rewards-hub-container .section-header { margin-bottom: 30px; }
+.rewards-hub-container .section-title { display: flex; gap: var(--ds-space-3); align-items: center; margin: 0; font-size: 24px; font-weight: 900; }
+.rewards-hub-container .section-desc { margin-top: 5px; color: var(--ds-text-muted); font-size: var(--ds-font-size-body); }
+.rewards-hub-container .tier-ladder-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--ds-space-4); margin-bottom: 60px; }
+.rewards-hub-container .tier-node { position: relative; padding: var(--ds-space-6); border: 1px solid var(--color-border); border-radius: var(--ds-radius-panel); background: var(--color-bg-panel); text-align: center; transition: var(--ds-transition); }
+.rewards-hub-container .tier-node.active { border-color: var(--ds-accent); background: color-mix(in srgb, var(--ds-accent) 5%, transparent); box-shadow: var(--ds-shadow-md); transform: translateY(-5px); }
+.rewards-hub-container .tier-node.locked { filter: grayscale(1); opacity: var(--ds-opacity-muted); }
+.rewards-hub-container .tier-icon { display: flex; width: 36px; height: 36px; align-items: center; justify-content: center; margin: 0 auto var(--ds-space-4); border-radius: 50%; background: color-mix(in srgb, var(--ds-text-static) 5%, transparent); font-weight: 900; }
+.rewards-hub-container .tier-node.active .tier-icon { background: var(--ds-accent); color: var(--ds-accent-foreground); }
+.rewards-hub-container .tier-name { margin: 0 0 var(--ds-space-1); font-size: 18px; font-weight: 900; }
+.rewards-hub-container .tier-range { margin-bottom: var(--ds-space-5); color: var(--ds-text-muted); font-size: 12px; font-weight: 700; }
+.rewards-hub-container .tier-perks { margin: 0; padding: 0; color: var(--ds-text-secondary); font-size: 11px; font-weight: 600; list-style: none; text-align: left; }
+.rewards-hub-container .tier-perks li { display: flex; gap: var(--ds-space-1-5, 6px); align-items: center; margin-bottom: var(--ds-space-2); }
+.rewards-hub-container .current-marker { position: absolute; bottom: -12px; left: 50%; padding: var(--ds-space-1) var(--ds-space-2-5, 10px); border-radius: var(--ds-radius-control); background: var(--ds-accent); color: var(--ds-accent-foreground); font-size: 10px; font-weight: 900; text-transform: uppercase; white-space: nowrap; transform: translateX(-50%); }
+.rewards-hub-container .main-rewards-grid { display: grid; grid-template-columns: 1fr 340px; gap: 40px; }
+.rewards-hub-container .store-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 30px; }
+.rewards-hub-container .store-filters { display: flex; gap: var(--ds-space-2); }
+.rewards-hub-container .store-filters button { padding: var(--ds-space-2-5, 10px) 18px; border: 1px solid var(--color-border); border-radius: var(--ds-radius-control); background: var(--color-bg-input); color: var(--ds-text-static); cursor: pointer; font-size: 12px; font-weight: 800; transition: var(--ds-transition); }
+.rewards-hub-container .store-filters button.active { border-color: var(--ds-accent); background: var(--ds-accent); color: var(--ds-accent-foreground); }
+.rewards-hub-container .rewards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--ds-space-6); }
+.rewards-hub-container .reward-card { position: relative; display: flex; flex-direction: column; padding: var(--ds-space-6); border: 1px solid var(--color-border); border-radius: 24px; background: var(--color-bg-panel); transition: var(--ds-transition); }
+.rewards-hub-container .reward-card:hover:not(.tier-locked) { border-color: var(--ds-success); transform: translateY(-5px); }
+.rewards-hub-container .reward-card.unaffordable { opacity: .7; }
+.rewards-hub-container .locked-overlay { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; gap: var(--ds-space-3-5, 14px); align-items: center; justify-content: center; border-radius: 24px; background: color-mix(in srgb, var(--ds-canvas) 85%, transparent); backdrop-filter: blur(4px); color: var(--ds-accent); font-size: var(--ds-font-size-body); font-weight: 900; text-transform: uppercase; }
+.rewards-hub-container .reward-badge-type { align-self: flex-start; padding: 5px var(--ds-space-2-5, 10px); margin-bottom: var(--ds-space-4); border-radius: var(--ds-radius-sm); background: color-mix(in srgb, var(--ds-success) 15%, transparent); color: var(--ds-success); font-size: 10px; font-weight: 950; letter-spacing: .5px; }
+.rewards-hub-container .reward-name { margin: 0 0 var(--ds-space-2-5, 10px); font-size: 20px; font-weight: 900; }
+.rewards-hub-container .reward-desc { flex: 1; margin-bottom: var(--ds-space-6); color: var(--ds-text-secondary); font-size: var(--ds-font-size-body); line-height: 1.5; }
+.rewards-hub-container .reward-footer, .rewards-hub-container .price-confirm-row { display: flex; align-items: center; justify-content: space-between; }
+.rewards-hub-container .price-tag { display: flex; flex-direction: column; }
+.rewards-hub-container .price-tag .price { color: var(--ds-text-static); font-size: 24px; font-weight: 950; line-height: 1; }
+.rewards-hub-container .price-tag .lbl { margin-top: var(--ds-space-1); color: var(--ds-accent); font-size: 11px; font-weight: 800; }
+.rewards-hub-container .redeem-btn { padding: var(--ds-space-3) var(--ds-space-5); border: 0; border-radius: var(--ds-radius-control); background: var(--ds-success); color: var(--ds-text-static); cursor: pointer; font-weight: 900; transition: var(--ds-transition); }
+.rewards-hub-container .redeem-btn:disabled { background: color-mix(in srgb, var(--ds-text-static) 5%, transparent); color: var(--ds-text-muted); cursor: not-allowed; }
+.rewards-hub-container .rewards-sidebar { height: fit-content; padding: var(--ds-space-6); border: 1px solid var(--color-border); border-radius: 24px; background: color-mix(in srgb, var(--ds-text-static) 2%, transparent); }
+.rewards-hub-container .sidebar-header { padding-bottom: var(--ds-space-4); margin-bottom: var(--ds-space-6); border-bottom: 1px solid var(--color-border); }
+.rewards-hub-container .transaction-list { display: flex; flex-direction: column; gap: var(--ds-space-4); }
+.rewards-hub-container .tx-item { display: flex; gap: var(--ds-space-3); align-items: center; }
+.rewards-hub-container .tx-icon { display: flex; width: 36px; height: 36px; align-items: center; justify-content: center; border-radius: 50%; }
+.rewards-hub-container .tx-icon.earn { background: color-mix(in srgb, var(--ds-success) 10%, transparent); color: var(--ds-success); }
+.rewards-hub-container .tx-icon.redeem { background: color-mix(in srgb, var(--ds-danger) 10%, transparent); color: var(--ds-danger); }
+.rewards-hub-container .tx-details { flex: 1; }
+.rewards-hub-container .tx-desc { display: block; color: var(--ds-text-static); font-size: 13px; font-weight: 700; }
+.rewards-hub-container .tx-date { color: var(--ds-text-muted); font-size: 11px; }
+.rewards-hub-container .tx-points { font-size: var(--ds-font-size-body); font-weight: 900; }
+.rewards-hub-container .tx-points.earn { color: var(--ds-success); }
+.rewards-hub-container .tx-points.redeem { color: var(--ds-danger); }
+.rewards-hub-container .empty-history { padding: 40px 0; color: var(--ds-text-muted); font-size: var(--ds-font-size-body); text-align: center; }
+.rewards-hub-container .modal-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--ds-canvas) 85%, transparent); backdrop-filter: blur(10px); }
+.rewards-hub-container .redemption-modal { width: 100%; max-width: 500px; padding: 40px; border: 1px solid var(--color-border); border-radius: 32px; background: var(--color-bg-panel); }
+.rewards-hub-container .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+.rewards-hub-container .modal-title { font-size: 24px; font-weight: 900; }
+.rewards-hub-container .close-btn { padding: var(--ds-space-1); border: 0; background: transparent; color: var(--ds-text-muted); cursor: pointer; }
+.rewards-hub-container .reward-summary-card { display: flex; gap: var(--ds-space-5); align-items: center; padding: var(--ds-space-6); margin-bottom: 30px; border: 1px solid var(--color-border); border-radius: var(--ds-radius-panel); background: color-mix(in srgb, var(--ds-text-static) 3%, transparent); }
+.rewards-hub-container .summ-icon { display: flex; width: 64px; height: 64px; align-items: center; justify-content: center; border-radius: var(--ds-radius-control); background: color-mix(in srgb, var(--ds-accent) 10%, transparent); color: var(--ds-accent); }
+.rewards-hub-container .summ-text h3 { margin: 0 0 5px; font-size: 22px; font-weight: 900; }
+.rewards-hub-container .summ-text p { margin: 0; color: var(--ds-text-secondary); font-size: var(--ds-font-size-body); }
+.rewards-hub-container .price-confirm-row { padding: var(--ds-space-5); margin-bottom: 40px; border: 1px solid var(--color-border); border-radius: var(--ds-radius-lg); background: color-mix(in srgb, var(--ds-canvas) 20%, transparent); }
+.rewards-hub-container .pc-item span { display: block; margin-bottom: var(--ds-space-1); color: var(--ds-text-muted); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+.rewards-hub-container .pc-item strong { color: var(--ds-accent); font-size: 20px; font-weight: 950; }
+.rewards-hub-container .pc-item-balance { text-align: right; }
+.rewards-hub-container .modal-footer { display: flex; gap: var(--ds-space-4); }
+.rewards-hub-container .btn-cancel, .rewards-hub-container .btn-confirm-redeem { padding: var(--ds-space-4); border-radius: var(--ds-radius-lg); cursor: pointer; }
+.rewards-hub-container .btn-cancel { flex: 1; border: 1px solid var(--color-border); background: transparent; color: var(--ds-text-static); font-weight: 800; }
+.rewards-hub-container .btn-confirm-redeem { display: flex; flex: 2; gap: var(--ds-space-2-5, 10px); align-items: center; justify-content: center; border: 0; background: var(--ds-success); color: var(--ds-text-static); font-weight: 900; }
+.rewards-hub-container .success-state { text-align: center; }
+.rewards-hub-container .success-icon-wrap { margin-bottom: var(--ds-space-6); }
+.rewards-hub-container .success-state h2 { margin-bottom: var(--ds-space-2-5, 10px); font-size: 28px; font-weight: 950; }
+.rewards-hub-container .success-footer { margin-top: var(--ds-space-5); color: var(--ds-text-muted); font-size: 12px; }
+.rewards-hub-container .spin-anim { animation: rewards-hub-spin 1s linear infinite; }
+@keyframes rewards-hub-spin { 100% { transform: rotate(360deg); } }
+@media (max-width: 1100px) { .rewards-hub-container .main-rewards-grid { grid-template-columns: 1fr; } .rewards-hub-container .tier-ladder-row { grid-template-columns: repeat(3, 1fr); } }
