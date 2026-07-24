@@ -14,7 +14,7 @@ const plannedGoLive = schedule.startDate
 : 'a date to be scheduled';
 
 return (
-        <div className="step-container">
+        <div className="step-container wizard-review">
             <div className="review-layout">
 
 {/* Pre-flight Check Banner */}
@@ -239,81 +239,6 @@ return (
                     </label>
                 </div>
             </div>
-
-            <style jsx>{`
-                .step-container { max-width: 1000px; margin: 0 auto; animation: slideIn 0.3s ease-out; padding-bottom: 40px; }
-                @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-.ds-notice {
-margin-bottom: 32px;
-}
-
-.review-notice-content {
-display: flex;
-flex-wrap: wrap;
-align-items: baseline;
-gap: 4px 8px;
-}
-
-.review-notice-content strong {
-font-size: 13px;
-}
-
-.review-notice-content span {
-font-size: 12px;
-}
-
-.summary-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 16px;
-                    margin-bottom: 32px;
-                }
-
-                .summary-card { padding: 20px; border-radius: 12px; height: 100%; display: flex; flex-direction: column; background: var(--ds-surface-raised); border: 1px solid var(--color-border); box-shadow: var(--shadow-sm); }
-                .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; }
-                .header-left { display: flex; align-items: center; gap: 12px; }
-                .edit-link { font-size: 11px; font-weight: 600; color: var(--color-betika-green); background: transparent; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; }
-                .edit-link:hover { background: rgba(105, 153, 81, 0.1); text-decoration: underline; }
-                
-                .step-num { font-size: 10px; font-weight: 700; color: var(--color-bg-app); background: var(--color-text-muted); padding: 2px 6px; border-radius: 4px; }
-                .card-header h4 { margin: 0; font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
-
-                .card-body { font-size: 13px; display: flex; flex-direction: column; gap: 12px; }
-                .data-row { display: flex; justify-content: space-between; align-items: center; }
-                .label { color: var(--color-text-muted); }
-                .value { color: var(--color-text-primary); font-weight: 500; text-align: right; }
-                .text-yellow { color: var(--color-betika-yellow); }
-                .text-xs { font-size: 11px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-                
-                .tags { display: flex; gap: 4px; }
-                .tag { font-size: 10px; background: var(--color-bg-input); padding: 2px 6px; border-radius: 4px; color: var(--color-text-secondary); }
-
-                /* Rule Engine Preview */
-                .rule-engine-preview { display: flex; flex-direction: column; gap: 12px; }
-                .trigger-group { background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 8px; padding: 12px; }
-                .trigger-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-                .type-label { font-size: 9px; font-weight: 800; color: var(--color-text-muted); text-transform: uppercase; }
-                .event-id { font-size: 11px; font-weight: 700; color: var(--color-accent-cyan); background: rgba(6, 182, 212, 0.1); padding: 2px 6px; border-radius: 4px; }
-                .rule-list { display: flex; flex-direction: column; gap: 4px; padding-left: 8px; border-left: 2px solid var(--color-border); }
-                .rule-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-family: monospace; }
-                .rule-op { color: var(--color-text-muted); font-weight: 700; font-size: 9px; }
-                .rule-param { color: var(--color-accent-purple); font-weight: 600; }
-                .rule-sign { color: var(--color-text-primary); font-weight: 800; }
-                .rule-val { color: var(--color-betika-yellow); font-weight: 700; }
-                .rule-connector { font-size: 9px; font-weight: 900; color: var(--color-betika-yellow); text-align: center; margin: 4px 0; letter-spacing: 1px; }
-
-                /* Reward */
-                .reward-highlight { display: flex; gap: 12px; align-items: center; font-size: 14px; font-weight: 700; color: var(--color-text-primary); background: var(--color-bg-input); padding: 12px; border-radius: 8px; justify-content: center; border: 1px solid var(--color-border); }
-                .mt-4 { margin-top: 16px; }
-                
-                .banner-thumb-area { width: 100%; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid var(--color-border); background: var(--color-bg-input); }
-                .banner-thumb { width: 100%; height: 100%; object-fit: cover; }
-
-                .confirmation-area { display: flex; justify-content: center; margin-top: 16px; }
-                .checkbox-container { display: flex; gap: 12px; align-items: center; cursor: pointer; }
-                .check-text { font-size: 14px; color: var(--color-text-secondary); }
-            `}</style>
         </div>
     );
 }

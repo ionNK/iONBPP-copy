@@ -311,3 +311,14 @@ OnboardingTour static presentation was migrated from its component-local global 
 **Preserved overlay/state contracts:** the backdrop remains fixed at `z-index: 99999` and retains default pointer events; the non-interactive spotlight remains at `z-index: 100000` with `pointer-events: none`; and the fixed tour card remains at `z-index: 100001`. The backdrop click and close button continue to use the same `finishTour` path, so dismissal still persists suppression and schedules the same video follow-up. No ARIA or keyboard-semantic changes are introduced in this visual-only adoption.
 
 **Dedicated coverage:** `frontend/tests/onboarding-tour.spec.ts` covers portal overlay visibility, backdrop/card/spotlight stacking and pointer-event contracts, step advancement to the spotlight state, persisted dismissal across reload, and suppression when the tour was previously completed. An unused `AppShell` import was also removed from the root layout without changing the root provider/component mount order.
+
+## 22. Adoption record — Phase 4, Wave 3, wizard support batch
+
+**Validation date:** July 24, 2026  
+**Approved surfaces:** `frontend/src/components/wizard/WizardStepper.tsx`, `frontend/src/components/wizard/steps/Step6Display.tsx`, and `frontend/src/components/wizard/steps/Step7Review.tsx`
+
+Static presentation for the wizard support batch was moved from three component-local `<style jsx>` blocks into `design-system.css`. The stepper retains its seven-step current/completed class contract and responsive overflow behavior. Step 6 remains under its existing `.display-step` namespace, retaining its tabbed editor and sticky responsive preview. Step 7 receives the intentionally added `.wizard-review` root scope so its otherwise generic card, row, label, tag, and utility selectors cannot leak outside the review surface.
+
+**Preserved behavior and test contracts:** wizard state, navigation, upload refs/FileReader paths, tab/device/channel/badge interactions, previews, summaries, planned-date formatting, Edit callbacks, ARIA labels, and the review confirmation control are unchanged. The four Step 7 inline `textTransform: 'capitalize'` declarations remain intentional runtime markup. Existing checks continue to target **Banner image URL**, **Promotion banner preview**, the **Promotion Summary Overview** region, and seven `button.edit-link` controls.
+
+**Validation:** local `<style jsx>` blocks were reduced from **1/1/1 to 0/0/0** for WizardStepper, Step6Display, and Step7Review; inline-style counts are **0/0/4**, preserving Step 7’s four declared transforms. Serialized promotion-flow and light-mode coverage, production build, and `git diff --check` are recorded with this batch. The known untracked, failing `frontend/tests/player-360.spec.ts` was not changed or run.
