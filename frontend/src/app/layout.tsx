@@ -25,9 +25,10 @@ export default function RootLayout({
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider>
-          <AIProvider>
-            {children}
-          </AIProvider>
+ <AIProvider>
+ {children}
+ <GlobalAssistantWidget />
+ </AIProvider>
         </ThemeProvider>
       </body>
     </html>
