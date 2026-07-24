@@ -407,7 +407,7 @@ export default function StepEligibility() {
 
     // Presence operators (is_set / is_empty) take no value at all.
     if (ZERO_ARITY_OPS.has(rule.operator)) {
-      return <span className="val-mini" style={{ opacity: 0.5 }}>— no value —</span>;
+      return <span className="val-mini no-value">— no value —</span>;
     }
 
     if (rule.type === 'boolean') {
@@ -467,7 +467,7 @@ export default function StepEligibility() {
 
 
     return (
-        <div className="step-container">
+        <div className="step-container step-eligibility">
             <div className="split-layout">
 
                 {/* LEFT COLUMN: Scope */}
@@ -495,11 +495,11 @@ export default function StepEligibility() {
                     <div className="section">
                         <label className="section-label">Markets</label>
                         {isLoading ? (
-                            <div style={{ padding: '20px', textAlign: 'center', color: '#888', fontSize: '13px' }}>Loading markets...</div>
+                            <div className="eligibility-loading">Loading markets...</div>
                         ) : (
                             <div className="grid-options">
                                 {availableMarkets.length === 0 ? (
-                                    <div style={{ padding: '20px', textAlign: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '13px', color: '#ccc' }}>
+                                    <div className="eligibility-empty">
                                         No countries configured. <br /> Please go to Settings to add markets.
                                     </div>
                                 ) : availableMarkets.map((m) => {
@@ -525,7 +525,7 @@ export default function StepEligibility() {
                         <div className="platform-toggles">
                             {['web', 'mobile', 'app', 'ussd'].map(c => (
                                 <div key={c} className={`p-toggle ${channels.includes(c) ? 'active' : ''}`} onClick={() => toggleChannel(c)}>
-                                    <span style={{ textTransform: 'capitalize' }}>{c}</span>
+                                    <span className="channel-label">{c}</span>
                                 </div>
                             ))}
                         </div>
@@ -601,7 +601,7 @@ export default function StepEligibility() {
                                             {idx > 0 && <div className="kwd block-sep">OR</div>}
                                             <div><span className="kwd">WHEN</span> EVENT <span className="str">"{getEventLabel(trigger.eventId)}"</span></div>
                                             {trigger.rules.map((rule) => (
-                                                <div key={rule.id} style={{ paddingLeft: 20 }}>
+                                                <div key={rule.id} className="code-rule-line">
                                                     <span className="kwd">AND</span> <span className="prop">{rule.param}</span> <span className="op">{rule.operator}</span> <span className="val">"{rule.value}"</span>
                                                 </div>
                                             ))}
@@ -703,218 +703,6 @@ export default function StepEligibility() {
                 )}
             </div>
 
-            <style jsx>{`
-                .step-container { max-width: 1200px; margin: 0 auto; animation: fadeUp 0.3s ease; }
-                @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-                .split-layout { display: flex; gap: 24px; align-items: flex-start; }
-                .glass-panel { background: var(--color-bg-panel); border: 1px solid var(--color-border); border-radius: 12px; padding: 24px; }
-                .column-panel { flex: 1; min-height: 400px; }
-                .flex-grow { flex: 1.6; }
-                .relative-container { position: relative; }
-
-                .form-scrollable { overflow-y: auto; flex: 1; scrollbar-width: thin; scrollbar-color: var(--color-border) transparent; }
-                .form-scrollable::-webkit-scrollbar { width: 6px; }
-                .form-scrollable::-webkit-scrollbar-thumb { background-color: var(--color-border); border-radius: 3px; }
-
-                .panel-title { color: var(--color-text-primary); font-size: 16px; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
-                .panel-subtitle { color: var(--color-text-muted); font-size: 12px; margin: 0; }
-                .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--color-border); }
-
-                .text-cyan { color: var(--color-accent-cyan); }
-                .text-yellow { color: var(--color-betika-yellow); }
-
-                /* Common Inputs */
-                .section { margin-bottom: 24px; }
-                .section-label { display: block; font-size: 11px; font-weight: 700; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; }
-                .chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-                .chip { background: var(--color-bg-card); padding: 8px 16px; border-radius: 6px; font-size: 13px; color: var(--color-text-muted); cursor: pointer; border: 1px solid transparent; }
-                .chip.active { background: rgba(6,182,212,0.15); color: var(--color-accent-cyan); border-color: rgba(6,182,212,0.3); }
-                
-                .platform-toggles { display: flex; gap: 8px; }
-                .p-toggle { flex: 1; padding: 10px; background: var(--color-bg-card); border-radius: 6px; text-align: center; font-size: 12px; color: var(--color-text-muted); cursor: pointer; border: 1px solid transparent; }
-                .p-toggle.active { background: var(--color-bg-input-focus); color: var(--color-text-primary); border-color: var(--color-border); }
-                .form-select { width: 100%; padding: 10px; background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 6px; color: var(--color-text-primary); font-size: 13px; }
-
-                /* Trigger Cards */
-                .triggers-container { display: flex; flex-direction: column; gap: 16px; }
-                .trigger-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 10px; overflow: hidden; }
-                
-                .trigger-header { padding: 12px 16px; background: var(--color-bg-input); border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; }
-                .trigger-title { display: flex; align-items: center; gap: 10px; }
-                .trigger-badge { font-size: 10px; font-weight: 800; background: #facc15; color: #000; padding: 2px 6px; border-radius: 4px; }
-                .trigger-name { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
-
-                .rules-list { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-                .rule-item { display: flex; align-items: center; gap: 8px; }
-                .rule-badge { font-size: 9px; font-weight: 700; color: var(--color-text-muted); width: 24px; text-align: right; }
-                .rule-content { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--color-bg-input); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--color-border); }
-                .param-label { font-size: 12px; color: var(--color-accent-cyan); font-weight: 500; min-width: 80px; }
-                
-                .op-mini, .val-mini { background: transparent; border: none; font-size: 12px; color: var(--color-text-secondary); padding: 4px; }
-                .op-mini { width: 110px; color: var(--color-text-muted); }
-                .val-mini { flex: 1; border-bottom: 1px dashed var(--color-border); color: var(--color-text-primary); }
-                .val-mini:focus { outline: none; border-bottom-color: var(--color-accent-cyan); }
-        .val-range { flex: 1; display: flex; align-items: center; gap: 6px; }
-        .val-range .val-mini { flex: 1; min-width: 0; }
-        .range-sep { font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; }
-
-                
-                .icon-btn { background: transparent; border: none; color: var(--color-text-muted); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-                .icon-btn:hover { color: var(--color-text-primary); background: var(--color-bg-input-focus); }
-                .icon-btn.danger:hover { color: #f87171; background: rgba(248,113,113,0.1); }
-
-                /* Add Condition Area */
-                .add-condition-section { margin-left: 32px; margin-top: 4px; }
-                .add-condition-btn { background: transparent; border: 1px dashed var(--color-border); color: var(--color-text-muted); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
-                .add-condition-btn:hover { border-color: #facc15; color: #facc15; background: rgba(250,204,21,0.05); }
-
-                .param-selector-inline { background: var(--color-bg-panel); border: 1px solid var(--color-border); border-radius: 6px; width: fit-content; min-width: 200px; animation: fadeIn 0.1s; }
-                .param-picker-header { padding: 8px 12px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; }
-                .param-options { padding: 4px; display: flex; flex-direction: column; }
-                .param-opt { background: transparent; border: none; text-align: left; padding: 6px 12px; color: var(--color-text-secondary); font-size: 12px; cursor: pointer; border-radius: 4px; }
-                .param-opt:hover { background: var(--color-accent-cyan); color: #000; }
-
-                .logic-connector { text-align: center; font-size: 10px; font-weight: 800; color: var(--color-text-muted); margin: 4px 0; position: relative; }
-                .logic-connector::before, .logic-connector::after { content: ''; display: block; height: 8px; width: 1px; background: var(--color-border); margin: 0 auto; }
-
-                .add-trigger-btn { width: 100%; background: var(--color-bg-card); border: 1px dashed var(--color-border); padding: 12px; border-radius: 8px; color: var(--color-text-muted); font-size: 13px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-                .add-trigger-btn:hover { background: var(--color-bg-input); color: var(--color-text-primary); border-color: var(--color-text-secondary); }
-
-                /* Modal */
-                .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; }
-                .event-modal { background: var(--color-bg-panel); width: 600px; border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-                .modal-header { padding: 16px 24px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: var(--color-bg-card); }
-                .modal-header h3 { margin: 0; font-size: 16px; color: var(--color-text-primary); }
-                .modal-header button { background: transparent; border: none; color: var(--color-text-muted); cursor: pointer; }
-                
-                .modal-body { padding: 24px; max-height: 60vh; overflow-y: auto; }
-                .catalog-category { margin-bottom: 24px; }
-                .cat-header { font-size: 11px; font-weight: 700; color: var(--color-text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-                .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-                .event-tile { background: var(--color-bg-card); border: 1px solid var(--color-border); padding: 12px; border-radius: 8px; color: var(--color-text-primary); font-size: 13px; cursor: pointer; text-align: center; transition: all 0.2s; }
-                .event-tile:hover { background: var(--color-accent-cyan); color: #000; border-color: var(--color-accent-cyan); transform: translateY(-2px); }
-
-                /* Segment Creator */
-                .form-control { margin-bottom: 16px; }
-                .form-control label { display: block; font-size: 12px; color: var(--color-text-muted); margin-bottom: 8px; }
-                .form-control input, .form-control textarea { width: 100%; background: var(--color-bg-input); border: 1px solid var(--color-border); color: var(--color-text-primary); padding: 10px; border-radius: 6px; font-size: 13px; outline: none; }
-                .form-control input:focus, .form-control textarea:focus { border-color: var(--color-accent-cyan); }
-                .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
-                .btn-cancel { background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-                .btn-primary { background: var(--color-accent-cyan); border: none; color: #000; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
-                .btn-primary:hover { background: #22d3ee; }
-
-                .btn-xs { background: var(--color-bg-card); border: 1px solid var(--color-border); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; color: var(--color-text-muted); display: flex; align-items: center; gap: 6px; }
-                .active-mode { background: var(--color-accent-cyan); color: #000; border-color: var(--color-accent-cyan); font-weight: 600; }
-                
-                .advanced-editor { background: #000; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 13px; line-height: 1.6; color: #ccc; min-height: 400px; } 
-                .kwd { color: #c678dd; font-weight: bold; }
-                .str { color: #98c379; }
-                .prop { color: #e06c75; }
-                .op { color: #56b6c2; }
-                .val { color: #d19a66; }
-                .block-sep { margin: 10px 0; color: #facc15; }
-
-                /* Market Card Styles */
-                .grid-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-                .option-card {
-                    background: var(--color-bg-card);
-                    border: 1px solid var(--color-border);
-                    border-radius: 8px;
-                    padding: 12px;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    position: relative;
-                }
-                .option-card:hover { background: var(--color-bg-input-focus); }
-                .option-card.active {
-                    background: rgba(6, 182, 212, 0.1);
-                    border-color: var(--color-accent-cyan);
-                }
-                .flag-large { font-size: 32px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
-                .name { font-size: 12px; font-weight: 500; color: var(--color-text-muted); }
-                .check-icon { position: absolute; top: 6px; right: 6px; color: var(--color-accent-cyan); }
-                /* Button Refinements */
-                .btn-save-seg {
-                    background: transparent;
-                    color: var(--color-betika-yellow);
-                    border: 1px solid var(--color-betika-yellow);
-                    padding: 6px 12px;
-                    border-radius: 6px;
-                    font-size: 12px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    transition: all 0.2s;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                }
-                .btn-save-seg:hover {
-                    background: var(--color-betika-yellow);
-                    color: #000;
-                    box-shadow: 0 0 8px rgba(250, 204, 21, 0.4);
-                }
-
-                .btn-add-trigger {
-                    width: 100%;
-                    padding: 14px;
-                    border: 1px dashed var(--color-border);
-                    border-radius: 12px;
-                    background: rgba(255, 255, 255, 0.02);
-                    color: var(--color-text-muted);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    margin-top: 16px;
-                    font-size: 13px;
-                    font-weight: 500;
-                }
-                .btn-add-trigger:hover {
-                    border-color: var(--color-accent-cyan);
-                    color: var(--color-accent-cyan);
-                    background: rgba(6, 182, 212, 0.05);
-                    transform: translateY(-1px);
-                }
-
-        /* CRM Handoff Banner */
-        .crm-handoff-banner {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          background: rgba(6, 182, 212, 0.08);
-          border: 1px solid rgba(6, 182, 212, 0.3);
-          border-radius: 8px;
-          padding: 12px 14px;
-          margin-bottom: 20px;
-          animation: fadeUp 0.3s ease;
-        }
-        .handoff-icon { color: var(--color-accent-cyan); flex-shrink: 0; }
-        .handoff-text { display: flex; flex-direction: column; gap: 2px; }
-        .handoff-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-accent-cyan); }
-        .handoff-detail { font-size: 13px; color: var(--color-text-secondary); }
-        .handoff-detail strong { color: var(--color-text-primary); }
-
-        @media (max-width: 900px) {
-          .split-layout { flex-direction: column; }
-                    .column-panel { width: 100%; min-height: auto; }
-                    .grid-options { grid-template-columns: repeat(2, 1fr); }
-                    .cat-grid { grid-template-columns: repeat(2, 1fr); }
-                }
-                @media (max-width: 600px) {
-                    .header-row { flex-direction: column; gap: 12px; align-items: flex-start; }
-                    .cat-grid { grid-template-columns: 1fr; }
-                }
-            `}</style>
         </div >
     );
 }
