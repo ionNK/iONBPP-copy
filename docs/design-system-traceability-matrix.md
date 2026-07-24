@@ -300,3 +300,14 @@ GlobalAssistantWidget static presentation was migrated from the component-local 
 **Preserved overlay/state contracts:** `.assistant-widget` remains fixed with `z-index: 99999`; the open window remains above the trigger at `z-index: 100001`; no scrim or pointer-event interception was introduced; and the existing minimize and close controls continue to close the same `isOpen` state. No ARIA or keyboard-semantic changes are introduced in this visual-only adoption.
 
 **Dedicated coverage:** `frontend/tests/global-assistant-widget.spec.ts` covers root mount visibility, fixed positioning and stacking order, pointer-event behavior, open/close flow, controlled input/send enablement, immediate user-message rendering, and typing state.
+
+## 21. Adoption record — Phase 4, Wave 3, OnboardingTour
+
+**Validation date:** July 24, 2026
+**Approved surface:** `frontend/src/components/onboarding/OnboardingTour.tsx`, portaled to `document.body`
+
+OnboardingTour static presentation was migrated from its component-local global style block into the canonical `design-system.css` layer under the `.onboarding-tour` namespace. The portal content now carries this wrapper solely to scope the centralized selectors; the portal destination, element hierarchy, class contracts, Framer Motion keys and animations, tour steps, target lookup and measurement flow, scroll timing, restart event listener, `hasSeenTour` persistence, and ExplainerVideo handoff remain unchanged.
+
+**Preserved overlay/state contracts:** the backdrop remains fixed at `z-index: 99999` and retains default pointer events; the non-interactive spotlight remains at `z-index: 100000` with `pointer-events: none`; and the fixed tour card remains at `z-index: 100001`. The backdrop click and close button continue to use the same `finishTour` path, so dismissal still persists suppression and schedules the same video follow-up. No ARIA or keyboard-semantic changes are introduced in this visual-only adoption.
+
+**Dedicated coverage:** `frontend/tests/onboarding-tour.spec.ts` covers portal overlay visibility, backdrop/card/spotlight stacking and pointer-event contracts, step advancement to the spotlight state, persisted dismissal across reload, and suppression when the tour was previously completed. An unused `AppShell` import was also removed from the root layout without changing the root provider/component mount order.

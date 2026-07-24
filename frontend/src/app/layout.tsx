@@ -1,7 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import AppShell from '@/components/layout/AppShell';
 import { AIProvider } from '@/context/AIContext';
 import GlobalAssistantWidget from '@/components/layout/GlobalAssistantWidget';
 
