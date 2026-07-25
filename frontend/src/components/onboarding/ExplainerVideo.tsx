@@ -27,14 +27,15 @@ export default function ExplainerVideo({ isOpen, onClose }: ExplainerVideoProps)
             {isOpen && (
                 <>
                     <motion.div
-                        className="video-backdrop"
+                        className="ds-explainer-video video-backdrop"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
                     />
-<motion.div
-className="video-modal"
+                    <motion.div
+                        className="ds-explainer-video video-modal"
+
 role="dialog"
 aria-modal="true"
 aria-labelledby="explainer-video-title"
@@ -80,139 +81,9 @@ initial={{ opacity: 0, scale: 0.9, y: 20 }}
                                 Get Started
                             </button>
                         </div>
-                    </motion.div>
+ </motion.div>
+ </>
 
-                    <style jsx global>{`
-                        .video-backdrop {
-                            position: fixed;
-                            inset: 0;
-background: var(--ds-scrim);
-z-index: 100000;
-backdrop-filter: blur(8px);
-                        }
-                        [data-theme='dark'] .video-backdrop { background: var(--ds-opacity-inverse-90); }
-                        
-                        .video-modal {
-                            position: fixed;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%) !important;
-                            width: 100%;
-                            max-width: 800px;
-background: var(--ds-surface);
-border: 1px solid var(--ds-border);
-border-radius: var(--ds-radius-lg);
-padding: var(--ds-space-8);
-z-index: 100001;
-box-shadow: var(--ds-shadow-md);
-                        }
-
-                        .close-btn {
-                            position: absolute;
-                            top: 20px;
-                            right: 20px;
-background: var(--ds-surface-raised);
-border: 1px solid var(--ds-border-subtle);
-color: var(--ds-text-secondary);
-padding: var(--ds-space-2);
-border-radius: var(--ds-radius-pill);
-                            cursor: pointer;
-                            transition: all 0.2s;
-                        }
-                        .close-btn:hover { background: var(--ds-surface-hover); color: var(--ds-text-primary); }
-
-                        .video-header { margin-bottom: 24px; text-align: center; }
-.video-header h2 { font-size: 24px; font-weight: 700; color: var(--ds-text-primary); margin: 0 0 var(--ds-space-2) 0; }
-.video-header p { color: var(--ds-text-secondary); font-size: 15px; margin: 0; }
-
-                        .video-player {
-                            width: 100%;
-                            aspect-ratio: 16/9;
-                            background: #000;
-                            border-radius: 12px;
-                            overflow: hidden;
-                            position: relative;
-                            margin-bottom: 24px;
-border: 1px solid var(--ds-border);
-}
-
-.video-placeholder {
-                            width: 100%;
-                            height: 100%;
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            cursor: pointer;
-                        }
-
-                        .video-poster {
-                            width: 100%;
-                            height: 100%;
-                            object-fit: cover;
-                            opacity: 0.6;
-                            transition: opacity 0.3s;
-                        }
-                        .video-placeholder:hover .video-poster { opacity: 0.4; }
-
-                        .play-icon {
-                            position: absolute;
-                            z-index: 2;
-                            width: 80px;
-                            height: 80px;
-                            background: var(--ds-accent, #F2D641);
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            color: #000;
-                            box-shadow: 0 0 40px rgba(242, 214, 65, 0.4);
-                            transition: transform 0.2s;
-                        }
-                        .video-placeholder:hover .play-icon { transform: scale(1.1); }
-
-                        .duration {
-                            position: absolute;
-                            bottom: 16px;
-                            right: 16px;
-                            background: rgba(0,0,0,0.8);
-                            color: #fff;
-                            padding: 4px 8px;
-                            border-radius: 4px;
-                            font-size: 12px;
-                            font-weight: 600;
-                            z-index: 2;
-                        }
-
-                        .video-footer {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                        }
-
-.btn-skip {
-background: transparent;
-border: 1px solid transparent;
-color: var(--ds-text-secondary);
-                            font-size: 14px;
-                            font-weight: 500;
-                            cursor: pointer;
-                            display: flex;
-                            align-items: center;
-                            gap: 8px;
-                            padding: 8px 16px;
-                            border-radius: 8px;
-                            transition: all 0.2s;
-                        }
-                        .btn-skip:hover { color: var(--ds-text-primary); background: var(--ds-surface-raised); border-color: var(--ds-border-subtle); }
-
-                        [data-theme='light'] .btn-primary {
-                             background: var(--color-betika-yellow);
-                             color: #000;
-                             border: 1px solid rgba(0,0,0,0.1);
-                        }
-                    `}</style>
-                </>
             )}
         </AnimatePresence>
     );

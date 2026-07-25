@@ -3458,3 +3458,231 @@ display: none;
 .ds-app-header .name { font-size: 13px; font-weight: 600; }
 .ds-app-header .role { font-size: 11px; color: var(--color-text-secondary); }
 
+/* ==========================================================================
+   Phase 5.4 — Explainer video modal (components/onboarding/ExplainerVideo.tsx)
+   Lifted verbatim from the component-local <style jsx global> block; the
+   `global` escape hatch is dropped. The component portals two fixed-position
+   siblings (backdrop + modal) into document.body, so the `.ds-explainer-video`
+   scope class is applied to BOTH roots rather than to a shared wrapper (a
+   wrapper would break AnimatePresence exit animations). Inner class names
+   (`.video-backdrop`, `.video-modal`, `.close-btn`, `.video-header`,
+   `.video-player`, `.video-placeholder`, `.video-poster`, `.play-icon`,
+   `.duration`, `.video-footer`, `.btn-skip`, `.btn-primary`) are unchanged.
+   ========================================================================== */
+.ds-explainer-video.video-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--ds-scrim);
+  z-index: 100000;
+  backdrop-filter: blur(8px);
+}
+[data-theme='dark'] .ds-explainer-video.video-backdrop { background: var(--ds-opacity-inverse-90); }
+
+.ds-explainer-video.video-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) !important;
+  width: 100%;
+  max-width: 800px;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-space-8);
+  z-index: 100001;
+  box-shadow: var(--ds-shadow-md);
+}
+
+.ds-explainer-video .close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--ds-surface-raised);
+  border: 1px solid var(--ds-border-subtle);
+  color: var(--ds-text-secondary);
+  padding: var(--ds-space-2);
+  border-radius: var(--ds-radius-pill);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ds-explainer-video .close-btn:hover { background: var(--ds-surface-hover); color: var(--ds-text-primary); }
+
+.ds-explainer-video .video-header { margin-bottom: 24px; text-align: center; }
+.ds-explainer-video .video-header h2 { font-size: 24px; font-weight: 700; color: var(--ds-text-primary); margin: 0 0 var(--ds-space-2) 0; }
+.ds-explainer-video .video-header p { color: var(--ds-text-secondary); font-size: 15px; margin: 0; }
+
+.ds-explainer-video .video-player {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 24px;
+  border: 1px solid var(--ds-border);
+}
+
+.ds-explainer-video .video-placeholder {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ds-explainer-video .video-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+.ds-explainer-video .video-placeholder:hover .video-poster { opacity: 0.4; }
+
+.ds-explainer-video .play-icon {
+  position: absolute;
+  z-index: 2;
+  width: 80px;
+  height: 80px;
+  background: var(--ds-accent, #F2D641);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  box-shadow: 0 0 40px rgba(242, 214, 65, 0.4);
+  transition: transform 0.2s;
+}
+.ds-explainer-video .video-placeholder:hover .play-icon { transform: scale(1.1); }
+
+.ds-explainer-video .duration {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.ds-explainer-video .video-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ds-explainer-video .btn-skip {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--ds-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+.ds-explainer-video .btn-skip:hover { color: var(--ds-text-primary); background: var(--ds-surface-raised); border-color: var(--ds-border-subtle); }
+
+[data-theme='light'] .ds-explainer-video .btn-primary {
+  background: var(--color-betika-yellow);
+  color: #000;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* ==========================================================================
+   Phase 5.5 — Churn prediction page (admin/predictions/churn/page.tsx)
+   Lifted verbatim from the page-local <style jsx> block. The root element
+   keeps `.prediction-container` for markup stability and gains the
+   `.ds-predict-churn` scope class; every inner class name is byte-identical
+   (`.page-header`, `.page-title`, `.page-subtitle`, `.stats-row`,
+   `.glass-panel`, `.stat-card`, `.stat-icon`, `.stat-value`, `.stat-label`,
+   `.content-grid`, `.main-panel`, `.panel-header`, `.risk-table`,
+   `.font-medium`, `.risk-badge`, `.action-group`, `.action-btn`,
+   `.side-column`, `.chart-panel`, `.legend`, `.legend-item`, `.dot`,
+   `.text-right`). The inline `background` on `.dot` is data-driven and stays
+   in the component.
+   ========================================================================== */
+.ds-predict-churn.prediction-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  color: var(--color-text-primary);
+}
+.ds-predict-churn .page-header { margin-bottom: 32px; }
+.ds-predict-churn .page-title { font-size: 28px; font-weight: 700; margin: 0 0 8px 0; color: var(--color-text-primary); }
+.ds-predict-churn .page-subtitle { color: var(--color-text-secondary); margin: 0; font-size: 14px; }
+
+/* Stats Row */
+.ds-predict-churn .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px; }
+.ds-predict-churn .glass-panel {
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+.ds-predict-churn .stat-card { display: flex; align-items: center; gap: 16px; }
+.ds-predict-churn .stat-icon {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: var(--color-bg-input);
+  display: flex; align-items: center; justify-content: center;
+}
+.ds-predict-churn .stat-value { font-size: 28px; font-weight: 700; line-height: 1.1; color: var(--color-text-primary); }
+.ds-predict-churn .stat-label { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+
+/* Content Grid */
+.ds-predict-churn .content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+
+.ds-predict-churn .main-panel { padding: 0; overflow: hidden; }
+.ds-predict-churn .panel-header { padding: 20px 24px; border-bottom: 1px solid var(--color-border); }
+.ds-predict-churn .panel-header h3 { margin: 0; font-size: 18px; font-weight: 600; color: var(--color-text-primary); }
+
+/* Table */
+.ds-predict-churn .risk-table { width: 100%; border-collapse: collapse; }
+.ds-predict-churn .risk-table th {
+  text-align: left; padding: 16px 24px;
+  font-size: 11px; text-transform: uppercase; color: var(--color-text-muted);
+  background: var(--color-bg-sidebar);
+  border-bottom: 1px solid var(--color-border);
+}
+.ds-predict-churn .risk-table td { padding: 16px 24px; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+.ds-predict-churn .font-medium { font-weight: 500; color: var(--color-text-primary); }
+
+.ds-predict-churn .risk-badge {
+  padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+}
+.ds-predict-churn .risk-badge.high { background: rgba(248, 113, 113, 0.1); color: #ef4444; border: 1px solid rgba(248, 113, 113, 0.2); }
+.ds-predict-churn .risk-badge.critical { background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
+.ds-predict-churn .risk-badge.medium { background: rgba(242, 214, 65, 0.15); color: #ca8a04; border: 1px solid rgba(242, 214, 65, 0.3); }
+
+.ds-predict-churn .action-group { display: flex; gap: 8px; justify-content: flex-end; }
+.ds-predict-churn .action-btn {
+  display: flex; align-items: center; justify-content: center;gap: 6px;
+  width: 32px; height: 32px; border-radius: 6px;
+  background: var(--color-bg-input); border: 1px solid var(--color-border);
+  color: var(--color-text-secondary); cursor: pointer; transition: all 0.2s;
+}
+.ds-predict-churn .action-btn:hover { background: var(--color-bg-input-focus); color: var(--color-text-primary); }
+.ds-predict-churn .action-btn.primary { width: auto; padding: 0 12px; background: var(--color-betika-yellow); color: #000; border: none; font-size: 12px; font-weight: 600; }
+.ds-predict-churn .action-btn.primary:hover { opacity: 0.9; box-shadow: var(--shadow-sm); }
+
+/* Side Column */
+.ds-predict-churn .side-column { display: flex; flex-direction: column; gap: 24px; }
+.ds-predict-churn .chart-panel h3 { margin: 0 0 16px 0; font-size: 16px; font-weight: 600; color: var(--color-text-primary); }
+
+.ds-predict-churn .legend { display: flex; justify-content: center; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
+.ds-predict-churn .legend-item { font-size: 11px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px; }
+.ds-predict-churn .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.ds-predict-churn .text-right { text-align: right; }
+
+

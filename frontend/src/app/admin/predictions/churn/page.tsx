@@ -34,7 +34,7 @@ const RISK_DISTRIBUTION = [
 
 export default function ChurnPredictionPage() {
     return (
-        <div className="prediction-container">
+        <div className="ds-predict-churn prediction-container">
             {/* Header */}
             <div className="page-header">
                 <div>
@@ -177,81 +177,6 @@ export default function ChurnPredictionPage() {
                 </div>
             </div>
 
-            <style jsx>{`
-        .prediction-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px;
-            color: var(--color-text-primary);
-        }
-        .page-header { margin-bottom: 32px; }
-        .page-title { font-size: 28px; font-weight: 700; margin: 0 0 8px 0; color: var(--color-text-primary); }
-        .page-subtitle { color: var(--color-text-secondary); margin: 0; font-size: 14px; }
-
-        /* Stats Row */
-        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px; }
-        .glass-panel {
-            background: var(--color-bg-panel);
-            border: 1px solid var(--color-border);
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: var(--shadow-sm);
-        }
-        .stat-card { display: flex; align-items: center; gap: 16px; }
-        .stat-icon { 
-            width: 56px; height: 56px; border-radius: 16px; 
-            background: var(--color-bg-input);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .stat-value { font-size: 28px; font-weight: 700; line-height: 1.1; color: var(--color-text-primary); }
-        .stat-label { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
-
-        /* Content Grid */
-        .content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
-        
-        .main-panel { padding: 0; overflow: hidden; }
-        .panel-header { padding: 20px 24px; border-bottom: 1px solid var(--color-border); }
-        .panel-header h3 { margin: 0; font-size: 18px; font-weight: 600; color: var(--color-text-primary); }
-
-        /* Table */
-        .risk-table { width: 100%; border-collapse: collapse; }
-        .risk-table th { 
-            text-align: left; padding: 16px 24px; 
-            font-size: 11px; text-transform: uppercase; color: var(--color-text-muted);
-            background: var(--color-bg-sidebar);
-            border-bottom: 1px solid var(--color-border);
-        }
-        .risk-table td { padding: 16px 24px; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
-        .font-medium { font-weight: 500; color: var(--color-text-primary); }
-        
-        .risk-badge { 
-            padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase;
-        }
-        .risk-badge.high { background: rgba(248, 113, 113, 0.1); color: #ef4444; border: 1px solid rgba(248, 113, 113, 0.2); }
-        .risk-badge.critical { background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .risk-badge.medium { background: rgba(242, 214, 65, 0.15); color: #ca8a04; border: 1px solid rgba(242, 214, 65, 0.3); }
-        
-        .action-group { display: flex; gap: 8px; justify-content: flex-end; }
-        .action-btn { 
-            display: flex; align-items: center; justify-content: center;gap: 6px;
-            width: 32px; height: 32px; border-radius: 6px;
-            background: var(--color-bg-input); border: 1px solid var(--color-border);
-            color: var(--color-text-secondary); cursor: pointer; transition: all 0.2s;
-        }
-        .action-btn:hover { background: var(--color-bg-input-focus); color: var(--color-text-primary); }
-        .action-btn.primary { width: auto; padding: 0 12px; background: var(--color-betika-yellow); color: #000; border: none; font-size: 12px; font-weight: 600; }
-        .action-btn.primary:hover { opacity: 0.9; box-shadow: var(--shadow-sm); }
-
-        /* Side Column */
-        .side-column { display: flex; flex-direction: column; gap: 24px; }
-        .chart-panel h3 { margin: 0 0 16px 0; font-size: 16px; font-weight: 600; color: var(--color-text-primary); }
-        
-        .legend { display: flex; justify-content: center; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
-        .legend-item { font-size: 11px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; }
-        
-        .text-right { text-align: right; }
-      `}</style>
-        </div>
+    </div>
     );
 }
