@@ -375,3 +375,40 @@ BetSlipWidget static presentation was migrated from its component-local `<style 
 **Kenya product-review finding:** the placement summary presents a hard-coded **“KRA Excise Duty”** line and calculation as a product-facing wagering charge. The visual migration preserves that existing commercial/tax behavior without asserting regulatory correctness. Product, finance, and legal/compliance owners must verify the applicable Kenya tax type, rate, calculation basis, disclosure wording, and receipt/audit obligations before the flow is relied upon in production or marketed as compliant.
 
 **Dedicated coverage:** `frontend/tests/betslip-widget.spec.ts` exercises selection from the existing MatchCard, opening the bet slip, stake increment, review, placement summary, successful placement, My Bets visibility, cash-out, and the resulting Settled-history state. Validation results for the focused and regression gates are recorded after execution. This adoption is intentionally uncommitted for human review.
+
+## 27. Phase 4, Wave 3 wrap-up ledger — July 24, 2026
+
+**Review state:** Phase 4 Wave 3 is complete at `3d4e71e` (BetSlipWidget). The working tree has only this traceability-ledger update pending human review; no commit was created for this wrap-up.
+
+| Delivery / approved surface | Commit | Preserved inline-style count | Recorded validation outcome |
+| --- | --- | ---: | --- |
+| Wave 2 preflight / baseline | `836030e` | n/a | Baseline/preflight recorded before Wave 3 work. |
+| ExplainerVideo | `a607f9b` | 0 | Dedicated open/close coverage and light mode 5/5. |
+| CountrySwitcher | `1c69f82` | 0 | Dedicated country-switcher coverage recorded. |
+| CustomerHeader | `e1a1164` | 0 | Dedicated customer-header coverage recorded. |
+| MatchCard | `41af4ed` | 0 | Dedicated MatchCard coverage recorded. |
+| Player360 | `bf7df1c` | 4 | Dynamic data-driven color/width contracts retained inline; player-tab coverage recorded. |
+| PlayerTabs | `38860f8` | 5 | Dynamic activity/engagement/progress contracts retained inline; player-tab coverage recorded. |
+| Rewards Hub | `ded23c3` | 1 | Dynamic rewards-progress width retained inline; dedicated coverage recorded. |
+| Customer home | `a304b36` | 3 | Dynamic nudge/game presentation contracts retained inline; dedicated coverage recorded. |
+| GlobalAssistantWidget | `9cb22b1` | 0 | Dedicated overlay/state coverage recorded. |
+| OnboardingTour | `0476174` | 2 | Runtime target measurement/positioning retained inline; dedicated portal/overlay coverage recorded. |
+| Wizard supports: WizardStepper / Step6Display / Step7Review | `f546c30` | 0 / 0 / 4 | Serialized promotion-flow and light-mode coverage, build, and diff check recorded. |
+| Wizard steps batch 1: Step1Basics / Step4Rewards / Step5Schedule | `ffe8421` | 0 / 0 / 0 | Serialized promotion-flow + schedule-step passed 2/2; build and diff check passed. |
+| Step3Triggers | `e3b311a` | 0 | Focused serialized wizard regression, build, and diff check recorded. |
+| Final wizard batch: CreatePromotionWizard / Step2Eligibility / Step2Scope | `a7895bf` | 10 / 0 / 1 | Combined light-mode + promotion-flow passed 6/6; build and diff check passed. CreatePromotionWizard's 10 retained declarations are verified dynamic/modal/control contracts. |
+| BetSlipWidget | `3d4e71e` | 49 | Dedicated full-lifecycle BetSlip coverage added; the 49 retained expressions support financial, funding, and state-dependent UI. |
+
+**Full serialized Wave 2 + Wave 3 suite:** invoked with `--workers=1` across the 16 Wave 2/Wave 3 spec files. The final run completed **59 tests: 53 passed, 6 failed**. All six failures were the documented long-run development-server flake: two CustomerHeader, two Customer Home, and two GlobalAssistantWidget tests each timed out at `page.goto('/customer')` with `net::ERR_ABORTED` / “maybe frame was detached.” The remaining 53 tests passed, including all governance, wizard, sports, tour, rewards, player-tabs, light-mode, and UI/link coverage. This is reported as a non-green aggregate validation outcome, not masked as a product regression.
+
+### Consolidated deferred / product-review docket
+
+1. **Keyboard gaps:** custom dropdown/listbox and modal keyboard navigation, Escape dismissal, and focus restoration remain deferred for Step 3, Step 5, and the Step 2/wizard modal controls.
+2. **Sports/Live overlap:** resolve the product/navigation overlap between the Sports and Live In-Play experiences before broadening customer navigation behavior.
+3. **Inert controls:** audit and either implement, disable with explanation, or remove non-functional customer/admin controls; do not treat visual migration as an interaction implementation.
+4. **Fractional odds:** product must decide whether fractional odds are supported and define formatting, conversion, validation, and localization rules before offering them.
+5. **Dead Step2Eligibility variant:** the unreachable/legacy Step2Eligibility variant remains identified for product/engineering cleanup rather than activation by this visual migration.
+6. **KRA market-specificity:** product, finance, and legal/compliance must verify Kenya tax type/rate/basis, copy, disclosures, receipts, and audit obligations for BetSlip's excise/withholding presentation before production/compliance claims.
+7. **Parallel-suite flake:** the full serial suite exposed development-server `page.goto('/customer')` frame-detach/`ERR_ABORTED` failures under sustained execution; stabilize the test-server lifecycle before relying on parallel or long-run aggregate results.
+8. **Light-mode scrim review:** design/product review is required for scrim/backdrop opacity and contrast in light mode across modal/tour overlays.
+9. **CreatePromotionWizard 10-count verification:** completed in this ledger: all ten remaining inline declarations were rechecked and remain intentionally dynamic or modal/control-specific, not stray static presentation.
