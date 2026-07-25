@@ -3686,3 +3686,93 @@ display: none;
 .ds-predict-churn .text-right { text-align: right; }
 
 
+/* ===== Phase 5.6: admin/predictions/promotions ===== */
+.ds-predict-promotions.promotions-container { max-width: 1400px; margin: 0 auto; padding: 24px; color: var(--color-text-primary); }
+.ds-predict-promotions .page-header { margin-bottom: 24px; }
+.ds-predict-promotions .page-title { font-size: 28px; font-weight: 700; margin: 0 0 8px 0; color: var(--color-text-primary); }
+.ds-predict-promotions .page-subtitle { color: var(--color-text-secondary); margin: 0; font-size: 14px; }
+.ds-predict-promotions .text-secondary { color: var(--color-text-secondary); }
+.ds-predict-promotions .mb-4 { margin-bottom: 16px; }
+.ds-predict-promotions .tabs-nav { display: flex; gap: 24px; border-bottom: 1px solid var(--color-border); margin-bottom: 24px; }
+.ds-predict-promotions .tabs-nav button { background: transparent; border: none; color: var(--color-text-secondary); padding: 12px 4px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.ds-predict-promotions .tabs-nav button.active { color: var(--color-betika-yellow); border-bottom-color: var(--color-betika-yellow); }
+.ds-predict-promotions .tabs-nav button:hover { color: var(--color-text-primary); }
+.ds-predict-promotions .recommendations-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; height: calc(100vh - 200px); }
+.ds-predict-promotions .players-sidebar { display: flex; flex-direction: column; overflow: hidden; height: 100%; border: 1px solid var(--color-border); }
+.ds-predict-promotions .sidebar-header { padding: 16px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: var(--color-bg-sidebar); }
+.ds-predict-promotions .sidebar-header h3 { margin: 0; font-size: 14px; display: flex; align-items: center; gap: 8px; color: var(--color-text-primary); }
+.ds-predict-promotions .count-badge { background: var(--color-bg-input); color: var(--color-text-secondary); padding: 2px 8px; border-radius: 10px; font-size: 11px; border: 1px solid var(--color-border); }
+.ds-predict-promotions .player-list { overflow-y: auto; flex: 1; padding: 8px; background: var(--color-bg-panel); }
+.ds-predict-promotions .player-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px; border: 1px solid transparent; background: transparent; border-radius: 8px; cursor: pointer; transition: all 0.2s; color: var(--color-text-primary); text-align: left; }
+.ds-predict-promotions .player-item:hover { background: var(--color-bg-input); }
+.ds-predict-promotions .player-item.active { background: var(--color-bg-input-focus); border-color: var(--color-border); box-shadow: var(--shadow-sm); }
+.ds-predict-promotions .avatar { width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; }
+.ds-predict-promotions .info { flex: 1; display: flex; flex-direction: column; }
+.ds-predict-promotions .pid { font-size: 13px; font-weight: 600; }
+.ds-predict-promotions .seg { font-size: 11px; color: var(--color-text-muted); }
+.ds-predict-promotions .arrow { opacity: 0; transition: 0.2s; color: var(--color-text-muted); }
+.ds-predict-promotions .player-item.active .arrow { opacity: 1; color: var(--color-betika-yellow); }
+.ds-predict-promotions .mini-dot { width: 8px; height: 8px; border-radius: 50%; }
+.ds-predict-promotions .mini-dot.block { background: #ef4444; }
+.ds-predict-promotions .mini-dot.downgrade { background: #ca8a04; }
+.ds-predict-promotions .rec-content { overflow-y: auto; padding-right: 8px; }
+.ds-predict-promotions .profile-header { display: flex; justify-content: space-between; align-items: center; padding: 24px; margin-bottom: 32px; border: 1px solid var(--color-border); }
+.ds-predict-promotions .profile-left { display: flex; gap: 24px; align-items: center; }
+.ds-predict-promotions .big-avatar { width: 64px; height: 64px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff; box-shadow: var(--shadow-lg); }
+.ds-predict-promotions .profile-left h1 { margin: 0 0 8px 0; font-size: 24px; color: var(--color-text-primary); }
+.ds-predict-promotions .meta-tags { display: flex; gap: 8px; }
+.ds-predict-promotions .tag { font-size: 11px; background: var(--color-bg-input); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--color-border); color: var(--color-text-secondary); }
+.ds-predict-promotions .tag.ltv { color: #22c55e; border-color: rgba(34, 197, 94, 0.2); }
+.ds-predict-promotions .tag.churn { color: #ca8a04; border-color: rgba(202, 138, 4, 0.2); }
+.ds-predict-promotions .risk-indicator { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.ds-predict-promotions .risk-indicator .label { font-size: 10px; text-transform: uppercase; color: var(--color-text-muted); }
+.ds-predict-promotions .risk-badge { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 13px; }
+.ds-predict-promotions .risk-badge.allow { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+.ds-predict-promotions .risk-badge.downgrade { background: rgba(202, 138, 4, 0.1); color: #ca8a04; border: 1px solid rgba(202, 138, 4, 0.2); }
+.ds-predict-promotions .risk-badge.block { background: rgba(220, 38, 38, 0.1); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2); }
+.ds-predict-promotions .section-title { font-size: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: var(--color-betika-yellow); font-weight: 700; }
+.ds-predict-promotions .rec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.ds-predict-promotions .rec-card { padding: 24px; display: flex; flex-direction: column; position: relative; transition: all 0.2s; border: 1px solid var(--color-border); background: var(--color-bg-panel); box-shadow: var(--shadow-sm); }
+.ds-predict-promotions .rec-card:hover { transform: translateY(-4px); border-color: var(--color-betika-yellow); box-shadow: var(--shadow-md); }
+.ds-predict-promotions .card-header { display: flex; justify-content: space-between; margin-bottom: 16px; }
+.ds-predict-promotions .rank { width: 24px; height: 24px; background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--color-text-secondary); }
+.ds-predict-promotions .match-score { font-size: 12px; color: #22c55e; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+.ds-predict-promotions .rec-card h3 { margin: 0 0 16px 0; font-size: 18px; color: var(--color-text-primary); }
+.ds-predict-promotions .reason-box { background: var(--color-bg-sidebar); padding: 12px; border-radius: 6px; margin-bottom: 16px; flex: 1; border: 1px solid var(--color-border); }
+.ds-predict-promotions .reason-box .label { font-size: 10px; text-transform: uppercase; color: var(--color-text-muted); display: block; margin-bottom: 4px; }
+.ds-predict-promotions .reason-box p { margin: 0; font-size: 13px; line-height: 1.4; color: var(--color-text-secondary); }
+.ds-predict-promotions .risk-mod-notice { font-size: 11px; color: #ca8a04; display: flex; align-items: center; gap: 6px; margin-bottom: 16px; background: rgba(202, 138, 4, 0.05); padding: 6px; border-radius: 4px; border: 1px solid rgba(202, 138, 4, 0.1); }
+.ds-predict-promotions .btn-action { background: var(--color-betika-yellow); border: none; color: #000; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s; }
+.ds-predict-promotions .btn-action:hover { opacity: 0.9; box-shadow: var(--shadow-md); }
+.ds-predict-promotions .text-yellow { color: var(--color-betika-yellow); }
+.ds-predict-promotions .model-perf-panel { margin-bottom: 24px; padding: 16px; border: 1px solid var(--color-border); background: var(--color-bg-sidebar); }
+.ds-predict-promotions .mp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.ds-predict-promotions .mp-title { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-text-primary); }
+.ds-predict-promotions .mp-status { font-size: 10px; background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(34, 197, 94, 0.2); font-weight: 600; }
+.ds-predict-promotions .mp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--color-border); }
+.ds-predict-promotions .mp-metric { display: flex; flex-direction: column; }
+.ds-predict-promotions .mp-metric .label { font-size: 10px; color: var(--color-text-muted); text-transform: uppercase; }
+.ds-predict-promotions .mp-metric .value { font-size: 18px; font-weight: 700; color: var(--color-text-primary); }
+.ds-predict-promotions .mp-metric .delta { font-size: 10px; font-weight: 600; }
+.ds-predict-promotions .mp-metric .delta.pos { color: #22c55e; }
+.ds-predict-promotions .mp-metric .delta.neg { color: #dc2626; }
+.ds-predict-promotions .mp-comparison { display: flex; flex-direction: column; gap: 6px; }
+.ds-predict-promotions .mp-comparison .label { font-size: 10px; color: var(--color-text-muted); }
+.ds-predict-promotions .comp-bar { width: 100%; height: 6px; background: var(--color-border); border-radius: 3px; position: relative; overflow: hidden; }
+.ds-predict-promotions .bar-segment { height: 100%; position: absolute; top: 0; left: 0; border-radius: 3px; }
+.ds-predict-promotions .bar-segment.current { background: var(--color-betika-yellow); z-index: 2; opacity: 1; }
+.ds-predict-promotions .bar-segment.prev { background: var(--color-text-muted); z-index: 1; opacity: 0.3; }
+.ds-predict-promotions .conf-bar-89 { width: 89%; }
+.ds-predict-promotions .conf-bar-82 { width: 82%; }
+.ds-predict-promotions .model-details { margin-bottom: 12px; font-size: 11px; }
+.ds-predict-promotions .m-detail-row { display: flex; justify-content: space-between; margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px solid var(--color-border); }
+.ds-predict-promotions .m-detail-row:last-child { border-bottom: none; }
+.ds-predict-promotions .m-detail-row .label { color: var(--color-text-muted); }
+.ds-predict-promotions .m-detail-row .val { color: var(--color-text-primary); font-weight: 600; }
+.ds-predict-promotions .m-detail-row.penalty .val { color: #ca8a04; }
+.ds-predict-promotions .blocked-state { text-align: center; padding: 60px; display: flex; flex-direction: column; align-items: center; gap: 16px; border: 1px solid var(--color-border); }
+.ds-predict-promotions .text-red { color: #dc2626; }
+.ds-predict-promotions .blocked-state h3 { font-size: 24px; margin: 0; color: var(--color-text-primary); }
+.ds-predict-promotions .blocked-state p { max-width: 400px; color: var(--color-text-secondary); line-height: 1.5; margin: 0; }
+.ds-predict-promotions .glass-panel { background: var(--color-bg-panel); border: 1px solid var(--color-border); border-radius: 12px; box-shadow: var(--shadow-sm); }
+/* ===== end Phase 5.6 ===== */
