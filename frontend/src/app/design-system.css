@@ -3344,3 +3344,117 @@ display: none;
 .ds-segment-create .btn { display: inline-flex; align-items: center; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; cursor: pointer; border: 1px solid transparent; }
 .ds-segment-create .btn-secondary { background: var(--color-bg-panel); border: 1px solid var(--color-border); color: var(--color-text-secondary); }
 .ds-segment-create .btn-secondary:hover { border-color: var(--color-text-muted); color: var(--color-text-primary); background: var(--color-bg-input); }
+
+/* ==========================================================================
+   Phase 5.3 — App header (components/layout/Header.tsx)
+   Lifted verbatim from the component-local <style jsx> block. The markup keeps
+   its existing test-facing `.header`, `.search-bar`, `.actions`, `.icon-btn`,
+   `.badge`, `.profile`, `.avatar`, `.info`, `.name`, and `.role` hooks; the
+   `.ds-app-header` root scope is added only so these rules stay page-scoped
+   without styled-jsx. Values are unchanged.
+   ========================================================================== */
+.ds-app-header {
+  height: var(--header-height);
+  background: var(--color-bg-header);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  transition: background-color 0.3s ease;
+}
+
+.ds-app-header .search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 400px;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  padding: 0 12px;
+  border-radius: 8px;
+  transition: border-color 0.2s, background-color 0.3s;
+}
+.ds-app-header .search-bar:focus-within {
+  border-color: var(--color-betika-yellow);
+  background: var(--color-bg-input-focus);
+}
+.ds-app-header .search-icon { color: var(--color-text-secondary); }
+.ds-app-header input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 10px 0;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  outline: none;
+}
+
+.ds-app-header .actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ds-app-header .icon-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  position: relative;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.ds-app-header .icon-btn:hover {
+  background: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.ds-app-header .badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: var(--color-error);
+  border-radius: 50%;
+  border: 2px solid var(--color-bg-app);
+}
+
+.ds-app-header .profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 8px;
+  padding-left: 16px;
+  border-left: 1px solid var(--color-border);
+}
+.ds-app-header .avatar {
+  width: 36px;
+  height: 36px;
+  background: var(--color-betika-green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.ds-app-header .info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.ds-app-header .name { font-size: 13px; font-weight: 600; }
+.ds-app-header .role { font-size: 11px; color: var(--color-text-secondary); }
+
