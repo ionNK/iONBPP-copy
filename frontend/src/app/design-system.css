@@ -3317,3 +3317,30 @@ display: none;
 .betslip-widget .success-pane { display:flex; flex:1; flex-direction:column; align-items:center; justify-content:center; padding:var(--ds-space-8); text-align:center; }.betslip-widget .points-earned-tag { padding:4px 10px; border-radius:var(--ds-radius-sm); color:var(--ds-accent-foreground); background:var(--ds-accent); font-size:var(--ds-font-size-caption); font-weight:900; }.betslip-widget .confirm-pane { display:flex; height:100%; flex-direction:column; }.betslip-widget .receipt { width:100%; padding:var(--ds-space-6); border:1px solid var(--ds-border); border-radius:16px; background:#000; text-align:left; }.betslip-widget .rr { display:flex; justify-content:space-between; margin-bottom:10px; color:var(--ds-text-secondary); font-size:var(--ds-font-size-body); }.betslip-widget .rr.final { margin-top:5px; padding-top:15px; border-top:1px solid var(--ds-opacity-inverse-10); font-size:20px; font-weight:900; }.betslip-widget .points-nudge-confirm { display:flex; align-items:center; gap:var(--ds-space-2); margin-top:var(--ds-space-4); padding:var(--ds-space-3); border:1px solid color-mix(in srgb,var(--ds-accent) 20%,transparent); border-radius:var(--ds-radius-control); background:color-mix(in srgb,var(--ds-accent) 10%,transparent); font-size:var(--ds-font-size-caption); }.betslip-widget .points-nudge-confirm strong { color:var(--ds-accent); }
 .betslip-widget .icon-btn-ghost { display:flex; align-items:center; justify-content:center; padding:var(--ds-space-1); border:0; border-radius:var(--ds-radius-xs); color:var(--ds-text-muted); cursor:pointer; background:transparent; }.betslip-widget .icon-btn-ghost:hover { color:var(--ds-text-static); background:var(--ds-surface-raised); }.betslip-widget .btn-ghost { padding:var(--ds-space-4); border:1px solid var(--ds-border); border-radius:12px; color:var(--ds-text-static); cursor:pointer; background:transparent; font-weight:800; }.betslip-widget .btn-solid { width:100%; margin-top:var(--ds-space-6); padding:var(--ds-space-4); border:0; border-radius:12px; color:var(--ds-text-static); cursor:pointer; background:var(--ds-success-bright); font-weight:800; }.betslip-widget .btn-clear-all { display:flex; align-items:center; gap:var(--ds-space-1); border:0; color:var(--ds-text-muted); cursor:pointer; background:transparent; font-size:11px; font-weight:700; }.betslip-widget .btn-clear-all:hover { color:var(--ds-danger); }.betslip-widget .spin-anim { animation:betslip-spin 1s linear infinite; }
 @keyframes betslip-spin { 100% { transform:rotate(360deg); } }
+
+/* ============================================================
+   Phase 5: final <style jsx> migrations (contiguous region).
+   One sub-section per source file. Class names byte-identical to
+   the removed styled-jsx blocks; only a `ds-*` scoping wrapper is
+   added to each component root.
+   ============================================================ */
+
+/* Phase 5.1: admin/crm/[id]/page.tsx (customer detail shell). */
+.ds-crm-detail { max-width: 1200px; margin: 0 auto; }
+.ds-crm-detail .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--color-text-secondary); text-decoration: none; font-size: 14px; margin-bottom: 20px; }
+.ds-crm-detail .back-link:hover { color: var(--color-text-primary); }
+.ds-crm-detail .empty { padding: 40px; text-align: center; color: var(--color-text-muted); }
+
+/* Phase 5.2: admin/segments/create/page.tsx (under-construction placeholder).
+   The original block also carried a `:root { --color-betika-yellow }` rule that
+   styled-jsx scoped to `:root.jsx-*` and therefore never applied; the token is
+   already defined in globals.css, so it is intentionally not carried over. */
+.ds-segment-create { background-color: var(--color-bg-app); }
+.ds-segment-create .text-primary { color: var(--color-text-primary); }
+.ds-segment-create .text-secondary { color: var(--color-text-secondary); }
+.ds-segment-create .text-betika-yellow { color: var(--color-betika-yellow); }
+.ds-segment-create .bg-yellow-soft { background-color: rgba(242, 214, 65, 0.1); }
+.ds-segment-create .glass-panel { background: var(--color-bg-panel); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--shadow-lg); }
+.ds-segment-create .btn { display: inline-flex; align-items: center; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; cursor: pointer; border: 1px solid transparent; }
+.ds-segment-create .btn-secondary { background: var(--color-bg-panel); border: 1px solid var(--color-border); color: var(--color-text-secondary); }
+.ds-segment-create .btn-secondary:hover { border-color: var(--color-text-muted); color: var(--color-text-primary); background: var(--color-bg-input); }
