@@ -183,7 +183,7 @@ export default function ReportsPage() {
 
 
     return (
-        <div className="reports-container">
+        <div className="ds-reports reports-container">
             {/* Header */}
         <div className="page-header">
           <div className="header-top">
@@ -531,137 +531,6 @@ export default function ReportsPage() {
         )}
 
 
-      <style jsx>{`
-        .reports-container {
-
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-            color: var(--color-text-primary);
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 32px;
-        }
-        .header-content { display: flex; align-items: center; gap: 32px; }
-        .page-title { font-size: 28px; font-weight: 700; margin: 0; color: var(--color-text-primary); }
-        .scope-indicator {
-          display: inline-flex; align-items: center; gap: 6px;
-          margin-top: 6px; font-size: 12px; font-weight: 500;
-          color: var(--color-betika-yellow);
-          background: rgba(242, 214, 65, 0.1);
-          border: 1px solid rgba(242, 214, 65, 0.25);
-          padding: 3px 10px; border-radius: 20px;
-        }
-
-        
-        .tab-switcher { display: flex; background: var(--color-bg-input); padding: 4px; border-radius: 8px; border: 1px solid var(--color-border); }
-        .tab-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 6px; border: none; background: transparent; color: var(--color-text-secondary); cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: 500; }
-        .tab-btn:hover { color: var(--color-text-primary); }
-        .tab-btn.active { background: var(--color-bg-panel); color: var(--color-text-primary); font-weight: 600; box-shadow: var(--shadow-sm); }
-        
-        .header-actions { display: flex; gap: 12px; }
-        
-        .date-picker {
-            display: flex; align-items: center; gap: 8px;
-            background: var(--color-bg-panel);
-            border: 1px solid var(--color-border);
-            padding: 8px 16px; border-radius: 8px;
-            font-size: 13px; color: var(--color-text-primary); cursor: pointer;
-            transition: all 0.2s;
-        }
-        .date-picker:hover { border-color: var(--color-text-muted); }
-        
-        .btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 10px 20px; border-radius: 8px;
-            font-size: 13px; font-weight: 600; cursor: pointer;
-            transition: all 0.2s; border: none;
-        }
- .btn-primary { background: var(--color-betika-yellow); color: #000; }
- .btn-secondary { background: var(--color-bg-input); color: var(--color-text-primary); border: 1px solid var(--color-border); }
-
- /* KPI Cards */
- .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
- .glass-panel {
- background: var(--color-bg-elevated);
- border: 1px solid var(--color-border);
- border-radius: 12px;
- backdrop-filter: blur(10px);
- }
-        .kpi-card { padding: 20px; display: flex; align-items: center; gap: 16px; }
-        .kpi-icon {
-            width: 48px; height: 48px; border-radius: 12px;
-            background: var(--color-bg-input);
-            display: flex; align-items: center; justify-content: center;
-            border: 1px solid var(--color-border);
-        }
-        .kpi-value { font-size: 24px; font-weight: 700; line-height: 1.2; margin-bottom: 2px; color: var(--color-text-primary); }
-        .kpi-label { font-size: 12px; color: var(--color-text-secondary); text-transform: uppercase; }
-
-        /* Charts Grid */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-        }
-        .col-span-1 { grid-column: span 1; }
-        .col-span-2 { grid-column: span 2; }
-        .col-span-3 { grid-column: span 3; }
-        
-        .chart-card { padding: 24px; display: flex; flex-direction: column; }
-        .card-header { display: flex; justify-content: space-between; margin-bottom: 24px; }
-        .card-header h3 { margin: 0; font-size: 16px; font-weight: 600; color: var(--color-text-primary); }
-        
-        .icon-btn { background: transparent; border: 1px solid var(--color-border); color: var(--color-text-secondary); padding: 6px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
-        .icon-btn:hover { color: var(--color-text-primary); border-color: var(--color-text-muted); }
-        
-        .chart-area { flex: 1; min-height: 300px; position: relative; }
-        .medium-height { min-height: 350px; }
-        
-        .donut-chart { display: flex; align-items: center; justify-content: center; }
-        .center-text { position: absolute; top: 45%; left: 0; right: 0; text-align: center; pointer-events: none; }
-        .total { font-size: 14px; font-weight: 600; color: var(--color-text-secondary); }
-
-        /* --- BUILDER STYLES --- */
-        .builder-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; min-height: 600px; }
-        .config-panel { padding: 24px; display: flex; flex-direction: column; gap: 24px; }
-        .panel-section h3 { font-size: 12px; text-transform: uppercase; color: var(--color-text-secondary); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-        
-        .checklist { display: flex; flex-direction: column; gap: 8px; }
-        .check-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 13px; color: var(--color-text-secondary); }
-        .check-item:hover { background: var(--color-bg-input); color: var(--color-text-primary); }
-        .check-item.checked { background: rgba(6, 182, 212, 0.1); color: var(--color-accent-cyan); font-weight: 500; }
-        .check-icon { opacity: 0.5; }
-        .check-item.checked .check-icon { opacity: 1; color: var(--color-accent-cyan); }
-        .filter-hint { font-size: 12px; color: var(--color-text-muted); font-style: italic; padding: 4px 8px; }
-
-
-        .date-selector select { width: 100%; background: var(--color-bg-panel); border: 1px solid var(--color-border); padding: 10px; border-radius: 6px; color: var(--color-text-primary); outline: none; transition: border-color 0.2s; }
-        .date-selector select:focus { border-color: var(--color-accent-purple); }
-        
-        .btn-generate { margin-top: auto; padding: 12px; background: var(--color-accent-cyan); color: #000; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: all 0.2s; }
-        .btn-generate:hover { opacity: 0.9; transform: translateY(-1px); }
-
-        .preview-panel { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
-        .preview-header { padding: 20px 24px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: var(--color-bg-input); }
-        .preview-title h2 { font-size: 18px; margin: 0 0 4px 0; color: var(--color-text-primary); }
-        .meta-text { font-size: 12px; color: var(--color-text-muted); }
-        .preview-actions { display: flex; gap: 12px; }
-
-        .table-container { padding: 0; overflow-x: auto; flex: 1; }
-        .report-table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        .report-table th { padding: 12px 24px; text-align: left; font-size: 11px; text-transform: uppercase; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); background: var(--color-bg-input); white-space: nowrap; }
-        .report-table td { padding: 16px 24px; font-size: 13px; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
-        .report-table tr:hover td { background: var(--color-bg-input); color: var(--color-text-primary); }
-        
-        .text-right { text-align: right; }
-        .table-footer { padding: 12px 24px; border-top: 1px solid var(--color-border); font-size: 12px; color: var(--color-text-muted); text-align: right; background: var(--color-bg-input); }
-
-      `}</style>
         </div>
     );
 }
