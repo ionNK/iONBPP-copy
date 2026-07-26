@@ -3776,3 +3776,130 @@ display: none;
 .ds-predict-promotions .blocked-state p { max-width: 400px; color: var(--color-text-secondary); line-height: 1.5; margin: 0; }
 .ds-predict-promotions .glass-panel { background: var(--color-bg-panel); border: 1px solid var(--color-border); border-radius: 12px; box-shadow: var(--shadow-sm); }
 /* ===== end Phase 5.6 ===== */
+
+/* ===== Phase 5.7: admin/predictions/responsible-gambling ===== */
+.ds-predict-rg.rg-container { max-width: 1200px; margin: 0 auto; padding: 24px; color: var(--color-text-primary); }
+.ds-predict-rg .page-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px; }
+.ds-predict-rg .page-title { font-size: 28px; font-weight: 700; margin: 0 0 8px 0; color: var(--color-text-primary); }
+.ds-predict-rg .page-subtitle { color: var(--color-text-secondary); margin: 0; font-size: 14px; }
+.ds-predict-rg .header-actions { display: flex; gap: 12px; }
+.ds-predict-rg .btn-primary, .ds-predict-rg .btn-secondary { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+.ds-predict-rg .btn-primary { background: var(--color-betika-yellow); color: #000; }
+.ds-predict-rg .btn-secondary { background: var(--color-bg-input); color: var(--color-text-primary); border: 1px solid var(--color-border); }
+.ds-predict-rg .btn-secondary:hover { background: var(--color-bg-input-focus); border-color: var(--color-betika-yellow); }
+.ds-predict-rg .tabs-nav { display: flex; gap: 24px; border-bottom: 1px solid var(--color-border); margin-bottom: 24px; }
+.ds-predict-rg .tabs-nav button { background: transparent; border: none; color: var(--color-text-secondary); padding: 12px 4px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.ds-predict-rg .tabs-nav button.active { color: var(--color-betika-yellow); border-bottom-color: var(--color-betika-yellow); }
+.ds-predict-rg .tabs-nav button:hover { color: var(--color-text-primary); }
+.ds-predict-rg .glass-panel { background: var(--color-bg-panel); border: 1px solid var(--color-border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm); }
+.ds-predict-rg .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.ds-predict-rg .kpi-card { display: flex; align-items: center; gap: 16px; padding: 24px; }
+.ds-predict-rg .kpi-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: var(--color-bg-input); }
+.ds-predict-rg .kpi-icon.red { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+.ds-predict-rg .kpi-icon.yellow { color: #ca8a04; background: rgba(250, 204, 21, 0.1); }
+.ds-predict-rg .kpi-icon.green { color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+.ds-predict-rg .kpi-data { display: flex; flex-direction: column; }
+.ds-predict-rg .kpi-data .value { font-size: 24px; font-weight: 700; color: var(--color-text-primary); }
+.ds-predict-rg .kpi-data .label { font-size: 12px; color: var(--color-text-muted); text-transform: uppercase; }
+.ds-predict-rg .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.ds-predict-rg .chart-panel h3 { margin: 0 0 16px 0; font-size: 16px; font-weight: 600; color: var(--color-text-primary); }
+.ds-predict-rg .legend-item { font-size: 12px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.ds-predict-rg .dot { width: 8px; height: 8px; border-radius: 50%; }
+.ds-predict-rg .simulator-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+.ds-predict-rg .control-group { margin-bottom: 24px; }
+.ds-predict-rg .control-group label { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: var(--color-text-secondary); }
+.ds-predict-rg .control-group input { width: 100%; -webkit-appearance: none; height: 4px; background: var(--color-border); border-radius: 2px; outline: none; }
+.ds-predict-rg .control-group input::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--color-betika-yellow); border-radius: 50%; cursor: pointer; box-shadow: var(--shadow-sm); }
+.ds-predict-rg .range-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--color-text-muted); margin-top: 6px; }
+.ds-predict-rg .result-card { background: var(--color-bg-input); border-radius: 16px; padding: 40px; text-align: center; border: 1px solid var(--color-border); transition: all 0.3s; }
+.ds-predict-rg .result-card.block { border-color: #ef4444; box-shadow: 0 0 30px rgba(239, 68, 68, 0.05); }
+.ds-predict-rg .result-card.downgrade { border-color: #facc15; box-shadow: 0 0 30px rgba(250, 204, 21, 0.05); }
+.ds-predict-rg .result-card.allow { border-color: #4ade80; box-shadow: 0 0 30px rgba(74, 222, 128, 0.05); }
+.ds-predict-rg .score-circle { width: 120px; height: 120px; border-radius: 50%; background: var(--color-bg-panel); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 24px auto; border: 4px solid currentColor; box-shadow: var(--shadow-md); }
+.ds-predict-rg .block .score-circle { color: #ef4444; }
+.ds-predict-rg .downgrade .score-circle { color: #ca8a04; }
+.ds-predict-rg .allow .score-circle { color: #22c55e; }
+.ds-predict-rg .score-val { font-size: 42px; font-weight: 800; line-height: 1; }
+.ds-predict-rg .score-label { font-size: 10px; text-transform: uppercase; opacity: 0.7; margin-top: 4px; }
+.ds-predict-rg .action-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 16px; margin-bottom: 16px; }
+.ds-predict-rg .block .action-badge { background: #ef4444; color: #fff; }
+.ds-predict-rg .downgrade .action-badge { background: #facc15; color: #000; }
+.ds-predict-rg .allow .action-badge { background: #4ade80; color: #000; }
+.ds-predict-rg .outcome-text { color: var(--color-text-secondary); font-size: 14px; line-height: 1.5; max-width: 300px; margin: 0 auto; }
+.ds-predict-rg .panel-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.ds-predict-rg .search-box { background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 6px; padding: 6px 12px; display: flex; align-items: center; gap: 8px; }
+.ds-predict-rg .search-box input { background: transparent; border: none; color: var(--color-text-primary); outline: none; font-size: 13px; }
+.ds-predict-rg .icon-btn { background: var(--color-bg-input); border: 1px solid var(--color-border); color: var(--color-text-secondary); width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.ds-predict-rg .icon-btn:hover { color: var(--color-text-primary); border-color: var(--color-border-hover); }
+.ds-predict-rg .rg-table { width: 100%; border-collapse: collapse; }
+.ds-predict-rg .rg-table th { text-align: left; padding: 12px; font-size: 11px; text-transform: uppercase; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+.ds-predict-rg .rg-table td { padding: 12px; border-bottom: 1px solid var(--color-border); font-size: 13px; color: var(--color-text-secondary); }
+.ds-predict-rg .font-mono { font-family: monospace; opacity: 0.8; }
+.ds-predict-rg .text-red { color: #dc2626; font-weight: 600; }
+.ds-predict-rg .score-pill { padding: 2px 8px; border-radius: 10px; font-weight: 700; font-size: 12px; }
+.ds-predict-rg .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.ds-predict-rg .block.score-pill { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+.ds-predict-rg .downgrade.score-pill { color: #ca8a04; background: rgba(250, 204, 21, 0.1); }
+.ds-predict-rg .allow.score-pill { color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+.ds-predict-rg .block.status-badge { background: #ef4444; color: #fff; }
+.ds-predict-rg .downgrade.status-badge { background: #facc15; color: #000; }
+.ds-predict-rg .allow.status-badge { background: #4ade80; color: #000; }
+.ds-predict-rg .players-tab-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; animation: ds-predict-rg-slide-in 0.3s ease; }
+@keyframes ds-predict-rg-slide-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.ds-predict-rg .player-table-panel { min-height: 500px; display: flex; flex-direction: column; }
+.ds-predict-rg .rg-table tbody tr { cursor: pointer; transition: background 0.2s; }
+.ds-predict-rg .rg-table tbody tr:hover { background: var(--color-bg-sidebar); }
+.ds-predict-rg .selected-row { background: var(--color-bg-input) !important; border-left: 3px solid var(--color-betika-yellow); }
+.ds-predict-rg .detail-panel { border: 1px solid var(--color-border); box-shadow: var(--shadow-md); }
+.ds-predict-rg .selected-row { border-left-color: var(--color-betika-yellow); }
+.ds-predict-rg .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.ds-predict-rg .detail-header h3 { margin: 0; color: var(--color-text-primary); }
+.ds-predict-rg .player-badge { background: var(--color-bg-input); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-weight: 700; color: var(--color-text-secondary); border: 1px solid var(--color-border); }
+.ds-predict-rg .formula-box { background: var(--color-bg-sidebar); padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 24px; border: 1px dashed var(--color-border); }
+.ds-predict-rg .formula-box code { font-family: monospace; color: var(--color-betika-yellow); font-size: 14px; }
+.ds-predict-rg .metrics-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.ds-predict-rg .metric-item { background: var(--color-bg-input); padding: 16px; border-radius: 8px; border: 1px solid var(--color-border); }
+.ds-predict-rg .m-label { font-size: 11px; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 4px; }
+.ds-predict-rg .m-value { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--color-text-primary); }
+.ds-predict-rg .m-score { font-size: 12px; color: #22c55e; font-weight: 600; }
+.ds-predict-rg .m-weight { font-size: 10px; color: var(--color-text-muted); margin-top: 4px; }
+.ds-predict-rg .total-calc { border-top: 1px solid var(--color-border); padding-top: 20px; }
+.ds-predict-rg .calc-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; color: var(--color-text-secondary); }
+.ds-predict-rg .calc-row strong { font-size: 18px; color: var(--color-betika-yellow); }
+.ds-predict-rg .methodology-panel { max-width: 900px; margin: 0 auto; color: var(--color-text-secondary); }
+.ds-predict-rg .math-header { text-align: center; margin-bottom: 40px; }
+.ds-predict-rg .math-header h2 { font-size: 24px; color: var(--color-text-primary); margin-bottom: 8px; }
+.ds-predict-rg .math-header p { color: var(--color-text-secondary); max-width: 600px; margin: 0 auto; }
+.ds-predict-rg .formula-display { background: var(--color-bg-panel); padding: 32px; border-radius: 12px; margin-bottom: 40px; text-align: center; border: 1px solid var(--color-border); box-shadow: var(--shadow-sm); }
+.ds-predict-rg .formula-display h3 { margin: 0 0 16px 0; font-size: 14px; text-transform: uppercase; color: var(--color-text-muted); }
+.ds-predict-rg .math-block { font-family: monospace; font-size: 20px; background: var(--color-bg-input); padding: 20px; border-radius: 8px; display: inline-block; margin-bottom: 24px; color: var(--color-text-primary); border: 1px solid var(--color-border); }
+.ds-predict-rg .var { font-weight: 700; padding: 0 4px; }
+.ds-predict-rg .w-40 { color: #f87171; }
+.ds-predict-rg .w-30 { color: #ca8a04; }
+.ds-predict-rg .w-15 { color: #2563eb; }
+.ds-predict-rg .legend { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; }
+.ds-predict-rg .l-item { font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.ds-predict-rg .dot.w-40 { background: #f87171; }
+.ds-predict-rg .dot.w-30 { background: #ca8a04; }
+.ds-predict-rg .dot.w-15 { background: #2563eb; }
+.ds-predict-rg .logic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 40px; }
+.ds-predict-rg .logic-card { background: var(--color-bg-panel); padding: 24px; border-radius: 12px; border: 1px solid var(--color-border); }
+.ds-predict-rg .logic-card h4 { margin: 0 0 8px 0; color: var(--color-text-primary); font-size: 16px; }
+.ds-predict-rg .logic-card p { margin: 0 0 16px 0; font-size: 13px; color: var(--color-text-secondary); }
+.ds-predict-rg .logic-card ul { margin: 0; padding-left: 20px; font-size: 13px; }
+.ds-predict-rg .logic-card li { margin-bottom: 6px; }
+.ds-predict-rg .threshold-logic h3 { text-align: center; margin-bottom: 24px; font-size: 18px; color: var(--color-text-primary); }
+.ds-predict-rg .decision-flow { display: flex; justify-content: center; align-items: center; gap: 16px; }
+.ds-predict-rg .d-step { background: var(--color-bg-input); padding: 24px; border-radius: 12px; text-align: center; width: 220px; border: 1px solid var(--color-border); transition: all 0.2s; }
+.ds-predict-rg .d-step:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+.ds-predict-rg .d-step.safe { border-color: rgba(34, 197, 94, 0.2); }
+.ds-predict-rg .d-step.warn { border-color: rgba(202, 138, 4, 0.2); }
+.ds-predict-rg .d-step.danger { border-color: rgba(220, 38, 38, 0.2); }
+.ds-predict-rg .d-step .range { font-size: 12px; color: var(--color-text-muted); margin-bottom: 4px; }
+.ds-predict-rg .d-step .outcome { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+.ds-predict-rg .d-step.safe .outcome { color: #22c55e; }
+.ds-predict-rg .d-step.warn .outcome { color: #ca8a04; }
+.ds-predict-rg .d-step.danger .outcome { color: #dc2626; }
+.ds-predict-rg .d-step p { font-size: 12px; margin: 0; line-height: 1.4; color: var(--color-text-secondary); }
+.ds-predict-rg .arrow { font-size: 24px; color: var(--color-text-muted); opacity: 0.5; }
+/* ===== end Phase 5.7 ===== */
