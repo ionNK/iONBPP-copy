@@ -412,3 +412,56 @@ BetSlipWidget static presentation was migrated from its component-local `<style 
 7. **Parallel-suite flake:** the full serial suite exposed development-server `page.goto('/customer')` frame-detach/`ERR_ABORTED` failures under sustained execution; stabilize the test-server lifecycle before relying on parallel or long-run aggregate results.
 8. **Light-mode scrim review:** design/product review is required for scrim/backdrop opacity and contrast in light mode across modal/tour overlays.
 9. **CreatePromotionWizard 10-count verification:** completed in this ledger: all ten remaining inline declarations were rechecked and remain intentionally dynamic or modal/control-specific, not stray static presentation.
+## Phase 5 — Style-JSX Elimination Ledger
+
+Objective: migrate every remaining `<style jsx>` block into scoped sections of
+`frontend/src/app/design-system.css` (contiguous Phase 5 region at file end, one
+`/* Phase 5.x: <file> */` banner per surface). Root elements carry the scope class
+alongside their original class (`.ds-<scope>.<root-class>` compound). Dynamic
+`style={{...}}` expressions remain inline by policy.
+
+| Turn | Surface | Scope class | Commit(s) |
+|---|---|---|---|
+| T1 (retro) | `admin/reports/loading.tsx`, `admin/predictions/promotions/loading.tsx` | `.ds-loading-state` (shared) | `2ea67b9` |
+| 5.1 | `admin/crm/[id]/page.tsx` | `.ds-crm-detail` | `aeea716` |
+| 5.2 | `admin/segments/create/page.tsx` | `.ds-segment-create` | `aeea716` |
+| 5.3 | `components/layout/Header.tsx` | `.ds-app-header` | `380ce94` |
+| 5.4 | `components/onboarding/ExplainerVideo.tsx` | `.ds-explainer-video` | `e731572` |
+| 5.5 | `admin/predictions/churn/page.tsx` | `.ds-predict-churn` | `e731572` |
+| 5.6 | `admin/predictions/promotions/page.tsx` | `.ds-predict-promotions` | `1c798c5` + fix `898d987` |
+| 5.7 | `admin/predictions/responsible-gambling/page.tsx` | `.ds-predict-rg` | `d066106` |
+| 5.8 | `admin/crm/page.tsx` | `.ds-crm-home` | `1c2a229` |
+| 5.9 | `admin/reports/page.tsx` | `.ds-reports` | `4825d4f` |
+
+**Retro-entry note (T1):** commit message for `2ea67b9` claimed a matrix update that
+was not written at the time; this ledger row is that entry, recorded retroactively.
+
+**Deliberate drops (no visual change):**
+- 5.2: dead `:root { --color-betika-yellow }` declaration dropped (documented in CSS comment).
+- 5.8: `:global(.crm-new*)` rules and `@keyframes spin` dropped as duplicates of existing
+  design-system rules (`spin` = `ds-crm-players-spin`); markup keeps `.crm-new` class names.
+- 5.6: static 89%/82% confidence-bar widths hoisted to `.conf-bar-89` / `.conf-bar-82`.
+- 5.7: keyframe renamed page-unique (`ds-predict-rg-slide-in`); dynamic `.dot` inlines preserved.
+
+**Incidents:**
+- 5.6: blind append to design-system.css failed silently — page committed unstyled in
+  `1c798c5`; section landed by hand-paste in `898d987`. Grep count on the scope class
+  added to the standing verify ritual as a result.
+- 5.7: agent falsely reported page-side edits complete (CSS landed, page untouched);
+  caught by verify ritual, corrected in a follow-up task before commit.
+- 5.9: scoped CSS accidentally pasted into `admin/crm/page.tsx` in addition to the
+  stylesheet; caught immediately by build parse error, reverted via `git restore`
+  (5.8 already committed, no loss).
+
+**Permanent exclusion:** `admin/login/page.tsx` — under rebuild; sole expected
+`style jsx` residual repo-wide.
+
+**Closing gates (at `4825d4f`):** production build green (36/36 routes; 5 known
+Recharts width(-1)/height(-1) prerender warnings, pre-existing); serialized Playwright
+quartet (ui-ux-links, light-mode, governance-approvals, onboarding-tour, --workers=1)
+34/34 passed; repo-wide `style jsx` grep returns login only; `git diff --check` clean.
+
+**Deferred to manual janitorial:** Step3Test.tsx removal (dead usage; still imported at
+`CreatePromotionWizard.tsx:12` — remove import first), Sidebar's 7 static inline styles.
+**Deferred to Phase 6:** design-system.css module split, style-jsx enforcement guard,
+full validation sweep, product decisions docket.
