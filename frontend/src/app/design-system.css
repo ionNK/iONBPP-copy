@@ -3903,3 +3903,65 @@ display: none;
 .ds-predict-rg .d-step p { font-size: 12px; margin: 0; line-height: 1.4; color: var(--color-text-secondary); }
 .ds-predict-rg .arrow { font-size: 24px; color: var(--color-text-muted); opacity: 0.5; }
 /* ===== end Phase 5.7 ===== */
+/* Phase 5.8: admin/crm/page.tsx */
+.ds-crm-home.page-container { max-width: 1400px; margin: 0 auto; }
+.ds-crm-home .page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
+.ds-crm-home .page-title { font-size: 28px; font-weight: 700; color: var(--color-text-primary); margin: 0 0 4px 0; }
+.ds-crm-home .page-subtitle { font-size: 14px; color: var(--color-text-secondary); margin: 0; }
+.ds-crm-home .header-actions { display: flex; gap: 12px; }
+.ds-crm-home .crm-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.ds-crm-home .kpi { display: flex; align-items: center; gap: 14px; padding: 18px 20px; }
+.ds-crm-home .kpi-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--color-bg-input); color: var(--color-accent-purple, #a855f7);
+}
+.ds-crm-home .kpi-label { font-size: 12px; color: var(--color-text-muted); margin: 0 0 2px 0; text-transform: uppercase; }
+.ds-crm-home .kpi-value { font-size: 22px; font-weight: 700; color: var(--color-text-primary); margin: 0; }
+.ds-crm-home .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.ds-crm-home .panel { padding: 20px; }
+.ds-crm-home .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.ds-crm-home .panel-title { font-size: 15px; font-weight: 600; color: var(--color-text-primary); margin: 0; }
+.ds-crm-home .panel-link { font-size: 12px; color: var(--color-betika-yellow, #F2D641); display: inline-flex; align-items: center; gap: 4px; text-decoration: none; }
+.ds-crm-home .panel-link:hover { text-decoration: underline; }
+.ds-crm-home .seg-list { display: flex; flex-direction: column; gap: 10px; }
+.ds-crm-home .seg-row { display: grid; grid-template-columns: 90px 1fr 40px; align-items: center; gap: 12px; }
+.ds-crm-home .seg-label { font-size: 12px; font-weight: 600; text-transform: uppercase; }
+.ds-crm-home .seg-bar-track { height: 8px; border-radius: 4px; background: var(--color-bg-input); overflow: hidden; }
+.ds-crm-home .seg-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+.ds-crm-home .seg-count { font-size: 13px; font-weight: 600; color: var(--color-text-primary); text-align: right; }
+.ds-crm-home .market-list { display: flex; flex-direction: column; }
+.ds-crm-home .market-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+.ds-crm-home .market-row:last-child { border-bottom: none; }
+.ds-crm-home .market-name { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
+.ds-crm-home .market-meta { font-size: 12px; color: var(--color-text-muted); }
+.ds-crm-home .market-ltv { font-size: 13px; font-weight: 600; color: var(--color-text-secondary); }
+.ds-crm-home .empty { color: var(--color-text-muted); font-size: 13px; }
+.ds-crm-home .risk-flag { display: inline-flex; align-items: center; gap: 4px; color: #ef4444; font-weight: 600; font-size: 13px; }
+.ds-crm-home .grid-container { display: flex; flex-direction: column; }
+.ds-crm-home .data-table { width: 100%; border-collapse: collapse; }
+.ds-crm-home .data-table th {
+  text-align: left; padding: 16px 24px; font-size: 12px; font-weight: 600;
+  text-transform: uppercase; color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border); background: var(--color-bg-input);
+}
+.ds-crm-home .data-table td { padding: 16px 24px; border-bottom: 1px solid var(--color-border); font-size: 14px; color: var(--color-text-secondary); vertical-align: middle; }
+.ds-crm-home .data-table tr:hover td { background: var(--color-bg-input); color: var(--color-text-primary); }
+.ds-crm-home .data-table tr:last-child td { border-bottom: none; }
+.ds-crm-home .text-mono { font-family: 'Fira Code', monospace; font-size: 12px; }
+.ds-crm-home .text-muted { color: var(--color-text-muted); }
+.ds-crm-home .text-secondary { color: var(--color-text-secondary); }
+.ds-crm-home .text-sm { font-size: 13px; }
+.ds-crm-home .cell-primary { display: flex; flex-direction: column; }
+.ds-crm-home .cell-title { color: var(--color-text-primary); font-weight: 600; margin-bottom: 2px; text-decoration: none; }
+.ds-crm-home .cell-title:hover { color: var(--color-betika-yellow, #F2D641); }
+.ds-crm-home .cell-subtitle { font-size: 11px; color: var(--color-text-muted); display: flex; align-items: center; gap: 4px; }
+.ds-crm-home .type-badge { background: var(--color-bg-input); border: 1px solid var(--color-border); padding: 4px 8px; border-radius: 4px; font-size: 11px; color: var(--color-text-primary); font-weight: 500; }
+/* Phase 5.8 note: :global(.crm-new*) rules and @keyframes spin deliberately dropped — already provided by existing design-system.css crm rules (spin = ds-crm-players-spin). Markup keeps .crm-new class names. */
+@media (max-width: 900px) { .ds-crm-home .crm-kpis { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) {
+  .ds-crm-home .page-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .ds-crm-home .toolbar { flex-direction: column; }
+  .ds-crm-home .search-group { width: 100%; }
+  .ds-crm-home .tabs { width: 100%; overflow-x: auto; }
+}

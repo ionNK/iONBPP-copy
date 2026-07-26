@@ -74,7 +74,7 @@ export default function CrmOverviewPage() {
 
 
   return (
-    <div className="page-container">
+    <div className="ds-crm-home page-container">
       <div className="page-header">
         <div>
           <h1 className="page-title">CRM Overview</h1>
@@ -213,85 +213,7 @@ export default function CrmOverviewPage() {
       </div>
 
 
-      <style jsx>{`
-        .page-container { max-width: 1400px; margin: 0 auto; }
-        .page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
-        .page-title { font-size: 28px; font-weight: 700; color: var(--color-text-primary); margin: 0 0 4px 0; }
-        .page-subtitle { font-size: 14px; color: var(--color-text-secondary); margin: 0; }
-        .header-actions { display: flex; gap: 12px; }
 
-        .crm-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-        .kpi { display: flex; align-items: center; gap: 14px; padding: 18px 20px; }
-        .kpi-icon {
-          width: 40px; height: 40px; border-radius: 10px;
-          display: flex; align-items: center; justify-content: center;
-          background: var(--color-bg-input); color: var(--color-accent-purple, #a855f7);
-        }
-        .kpi-label { font-size: 12px; color: var(--color-text-muted); margin: 0 0 2px 0; text-transform: uppercase; }
-        .kpi-value { font-size: 22px; font-weight: 700; color: var(--color-text-primary); margin: 0; }
-
-        .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-        .panel { padding: 20px; }
-        .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .panel-title { font-size: 15px; font-weight: 600; color: var(--color-text-primary); margin: 0; }
-        .panel-link { font-size: 12px; color: var(--color-betika-yellow, #F2D641); display: inline-flex; align-items: center; gap: 4px; text-decoration: none; }
-        .panel-link:hover { text-decoration: underline; }
-
-        .seg-list { display: flex; flex-direction: column; gap: 10px; }
-        .seg-row { display: grid; grid-template-columns: 90px 1fr 40px; align-items: center; gap: 12px; }
-        .seg-label { font-size: 12px; font-weight: 600; text-transform: uppercase; }
-        .seg-bar-track { height: 8px; border-radius: 4px; background: var(--color-bg-input); overflow: hidden; }
-        .seg-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
-        .seg-count { font-size: 13px; font-weight: 600; color: var(--color-text-primary); text-align: right; }
-
-        .market-list { display: flex; flex-direction: column; }
-        .market-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
-        .market-row:last-child { border-bottom: none; }
-        .market-name { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
-        .market-meta { font-size: 12px; color: var(--color-text-muted); }
-        .market-ltv { font-size: 13px; font-weight: 600; color: var(--color-text-secondary); }
-        .empty { color: var(--color-text-muted); font-size: 13px; }
-        .risk-flag { display: inline-flex; align-items: center; gap: 4px; color: #ef4444; font-weight: 600; font-size: 13px; }
-
-        .grid-container { display: flex; flex-direction: column; }
-
-        .data-table { width: 100%; border-collapse: collapse; }
-        .data-table th {
-          text-align: left; padding: 16px 24px; font-size: 12px; font-weight: 600;
-          text-transform: uppercase; color: var(--color-text-muted);
-          border-bottom: 1px solid var(--color-border); background: var(--color-bg-input);
-        }
-        .data-table td { padding: 16px 24px; border-bottom: 1px solid var(--color-border); font-size: 14px; color: var(--color-text-secondary); vertical-align: middle; }
-        .data-table tr:hover td { background: var(--color-bg-input); color: var(--color-text-primary); }
-        .data-table tr:last-child td { border-bottom: none; }
-
-        .text-mono { font-family: 'Fira Code', monospace; font-size: 12px; }
-        .text-muted { color: var(--color-text-muted); }
-        .text-secondary { color: var(--color-text-secondary); }
-        .text-sm { font-size: 13px; }
-        .cell-primary { display: flex; flex-direction: column; }
-        .cell-title { color: var(--color-text-primary); font-weight: 600; margin-bottom: 2px; text-decoration: none; }
-        .cell-title:hover { color: var(--color-betika-yellow, #F2D641); }
-        .cell-subtitle { font-size: 11px; color: var(--color-text-muted); display: flex; align-items: center; gap: 4px; }
-        .type-badge { background: var(--color-bg-input); border: 1px solid var(--color-border); padding: 4px 8px; border-radius: 4px; font-size: 11px; color: var(--color-text-primary); font-weight: 500; }
-
-        :global(.crm-new) {
-          background: transparent !important; color: var(--color-betika-yellow, #F2D641) !important;
-          border: 1px solid var(--color-betika-yellow, #F2D641) !important;
-        }
-        :global(.crm-new:hover) { background: var(--color-betika-yellow, #F2D641) !important; color: #000 !important; }
-        :global(.crm-new .spin) { animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-
-        @media (max-width: 900px) { .crm-kpis { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) {
-          .page-header { flex-direction: column; align-items: flex-start; gap: 16px; }
-          .toolbar { flex-direction: column; }
-          .search-group { width: 100%; }
-          .tabs { width: 100%; overflow-x: auto; }
-        }
-      `}</style>
     </div>
   );
 }
