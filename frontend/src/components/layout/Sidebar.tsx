@@ -152,37 +152,28 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       {/* Mobile Overlay */}
       <div className={`mobile-overlay ${isOpen ? 'open' : ''}`} onClick={onClose} />
 
-      <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <aside className={`ds-sidebar sidebar ${isOpen ? 'open' : ''}`}>
         {/* Brand */}
         <div className="logo-area">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              gap: '12px',
-              width: '100%',
-              flexWrap: 'nowrap',
-            }}
-          >
-            <img
-              src="/assets/logo.png"
-              alt="Betika"
-              style={{ height: '36px', width: 'auto', objectFit: 'contain', display: 'block', flexShrink: 0 }}
-            />
-            <span className="logo-text" style={{ color: 'var(--color-text-primary)' }}>
+<div className="logo-row">
+<img
+src="/assets/logo.png"
+alt="Betika"
+className="logo-img"
+/>
+            <span className="logo-text">
               Betika<span className="text-yellow">.</span>
             </span>
           </div>
           {/* Mobile Close Button */}
-          <button className="mobile-close-btn" onClick={onClose} style={{ color: 'var(--color-text-primary)' }}>
+          <button className="mobile-close-btn" onClick={onClose}>
             <X size={20} />
           </button>
         </div>
 
         {/* Navigation */}
         <nav className="nav-container">
-          <p className="nav-title" style={{ marginTop: 0 }}>MAIN MENU</p>
+          <p className="nav-title nav-title-first">MAIN MENU</p>
           <div className="nav-list">
  {[dashboardItem].filter(isNavigationItemEnabled).map((item) => {
  const isActive = pathname === item.path;
@@ -195,7 +186,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   onClick={onClose}
                 >
                   <item.icon size={20} />
-                  <span style={{ flex: 1 }}>{item.name}</span>
+                  <span className="nav-item-label">{item.name}</span>
                   {isActive && <ChevronRight size={16} />}
                 </Link>
               );
@@ -216,7 +207,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   aria-expanded={!collapsed}
                   onClick={() => toggleSection(section.title)}
                 >
-                  <span style={{ flex: 1, textAlign: 'left' }}>{section.title}</span>
+                  <span className="nav-section-label">{section.title}</span>
                   {hasActiveChild && collapsed && <span className="nav-group-dot" aria-hidden />}
                   {collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
                 </button>
@@ -233,7 +224,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                           onClick={onClose}
                         >
                           <item.icon size={20} />
-                          <span style={{ flex: 1 }}>{item.name}</span>
+                          <span className="nav-item-label">{item.name}</span>
                           {isActive && <ChevronRight size={16} />}
                         </Link>
                       );

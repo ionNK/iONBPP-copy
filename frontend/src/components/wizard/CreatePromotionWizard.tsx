@@ -9,7 +9,6 @@ import WizardStepper from '@/components/wizard/WizardStepper';
 import Step1Basics from '@/components/wizard/steps/Step1Basics';
 import Step2Scope from '@/components/wizard/steps/Step2Scope';
 import Step3Triggers from '@/components/wizard/steps/Step3Triggers';
-import Step3Test from '@/components/wizard/steps/Step3Test';
 import Step4Rewards from '@/components/wizard/steps/Step4Rewards';
 import Step5Schedule from '@/components/wizard/steps/Step5Schedule';
 import Step6Display from '@/components/wizard/steps/Step6Display';
