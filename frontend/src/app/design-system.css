@@ -4071,6 +4071,7 @@ display: none;
 .ds-reports .report-table tr:hover td { background: var(--color-bg-input); color: var(--color-text-primary); }
 .ds-reports .text-right { text-align: right; }
 .ds-reports .table-footer { padding: 12px 24px; border-top: 1px solid var(--color-border); font-size: 12px; color: var(--color-text-muted); text-align: right; background: var(--color-bg-input); }
+
 /* Phase 6A: components/layout/Sidebar.tsx static inline hoists */
 .ds-sidebar .logo-row {
  display: flex;
@@ -4086,3 +4087,123 @@ display: none;
 .ds-sidebar .nav-title-first { margin-top: 0; }
 .ds-sidebar .nav-item-label { flex: 1; }
 .ds-sidebar .nav-section-label { flex: 1; text-align: left; }
+
+/* Admin login: fixed, mode-invariant presentation. */
+.ds-login {
+  align-items: stretch;
+  background: #fafafa;
+  color: #262626;
+  display: grid;
+  font-family: Inter, Arial, sans-serif;
+  grid-template-columns: 52% 48%;
+  height: 100dvh;
+  overflow: hidden;
+  width: 100%;
+}
+
+.ds-login__campaign {
+  background: #FFD91B;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.ds-login__hero {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  object-position: left top;
+  width: 100%;
+}
+
+.ds-login__flags {
+  align-items: center;
+  bottom: 24px;
+  display: flex;
+  gap: 6px;
+  left: 24px;
+  position: absolute;
+}
+
+.ds-login__flags img {
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  display: block;
+  height: 20px;
+  width: auto;
+}
+
+.ds-login__authentication {
+  align-items: center;
+  background: #fafafa;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  padding: 32px;
+}
+
+.ds-login__form {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 369px;
+  text-align: center;
+  width: 100%;
+}
+
+.ds-login__intro { padding-bottom: 12px; }
+.ds-login__intro h1 { color: #262626; font-size: 20px; font-weight: 700; letter-spacing: 0; line-height: 25px; margin: 0 0 8px; }
+.ds-login__intro p { color: #6b7280; font-size: 14px; letter-spacing: -0.2px; line-height: 21px; margin: 0; }
+
+.ds-login__google-button {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  color: #262626;
+  cursor: pointer;
+  display: flex;
+  font: 700 15px/19px Inter, Arial, sans-serif;
+  gap: 10px;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  width: 100%;
+}
+
+.ds-login__google-button:hover:not(:disabled) { box-shadow: 0 2px 6px rgba(16, 24, 40, 0.12); transform: translateY(-1px); }
+.ds-login__google-button:active:not(:disabled) { box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05); transform: translateY(0); }
+.ds-login__google-button:focus-visible { outline: 3px solid #ffde24; outline-offset: 3px; }
+.ds-login__google-button:disabled { background: #ffffff; border-color: #e5e7eb; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05); color: #262626; cursor: wait; opacity: 0.7; }
+.ds-login__google-button img { height: 24px; width: 24px; }
+.ds-login__notice { color: #888888; font-size: 12px; letter-spacing: 0.17px; line-height: 16.8px; margin: -3px 0 0; }
+
+[data-theme='dark'] .ds-login,
+[data-theme='dark'] .ds-login__authentication,
+[data-theme-family='ionix'][data-theme='dark'] .ds-login,
+[data-theme-family='ionix'][data-theme='dark'] .ds-login__authentication { background: #fafafa; color: #262626; }
+[data-theme='dark'] .ds-login__intro h1,
+[data-theme-family='ionix'][data-theme='dark'] .ds-login__intro h1 { color: #262626; }
+[data-theme='dark'] .ds-login__intro p,
+[data-theme-family='ionix'][data-theme='dark'] .ds-login__intro p { color: #6b7280; }
+[data-theme='dark'] .ds-login__notice,
+[data-theme-family='ionix'][data-theme='dark'] .ds-login__notice { color: #888888; }
+[data-theme='dark'] .ds-login__google-button,
+[data-theme='dark'] .ds-login__google-button:disabled,
+[data-theme-family='ionix'][data-theme='dark'] .ds-login__google-button,
+[data-theme-family='ionix'][data-theme='dark'] .ds-login__google-button:disabled { background: #ffffff; border-color: #e5e7eb; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05); color: #262626; }
+
+@media (max-width: 900px) {
+  .ds-login { display: block; height: auto; }
+  .ds-login__campaign { display: none; }
+  .ds-login__authentication { min-height: 100dvh; }
+}
+
+@media (max-width: 480px) {
+  .ds-login__authentication { padding: 24px; }
+  .ds-login__form { max-width: 100%; }
+}

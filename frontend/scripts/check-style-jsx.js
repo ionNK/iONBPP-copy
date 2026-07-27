@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..', 'src');
-const ALLOW = [path.join('src', 'app', 'admin', 'login', 'page.tsx')];
+const ALLOW = [];
 const hits = [];
 
 function walk(dir) {
