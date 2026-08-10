@@ -13,8 +13,9 @@ import {
  type FeatureGroupConfiguration,
  type FeatureId,
 } from '@/lib/feature-config';
+import { features } from '@/config/features';
 
-type NavItem = { name: string; path: string; icon: LucideIcon; id: string };
+type NavItem = { name: string; path: string; icon: LucideIcon; id: string; flag?: keyof typeof features };
 type NavSection = { title: string; items: NavItem[] };
 
 const dashboardItem: NavItem = { name: 'Dashboard', path: '/admin', icon: LayoutGrid, id: 'nav-dashboard' };
@@ -53,16 +54,16 @@ const navSections: NavSection[] = [
     title: 'CUSTOMERS',
     items: [
       { name: 'Overview', path: '/admin/crm', icon: Contact, id: 'nav-crm' },
-      { name: 'Player 360', path: '/admin/crm/players', icon: Users, id: 'nav-crm-players' },
-      { name: 'Segments', path: '/admin/crm/segments', icon: Layers, id: 'nav-crm-segments' },
-      { name: 'Intelligence', path: '/admin/crm/intelligence', icon: Brain, id: 'nav-crm-intelligence' },
+{ name: 'Player 360', path: '/admin/crm/players', icon: Users, id: 'nav-crm-players', flag: 'play360' },
+{ name: 'Segments', path: '/admin/crm/segments', icon: Layers, id: 'nav-crm-segments', flag: 'segments' },
+{ name: 'Intelligence', path: '/admin/crm/intelligence', icon: Brain, id: 'nav-crm-intelligence', flag: 'intelligence' },
       { name: 'Responsible Gaming', path: '/admin/crm/responsible-gaming', icon: HeartPulse, id: 'nav-crm-rg' },
     ],
   },
   {
     title: 'INSIGHTS',
     items: [
-      { name: 'CRM Analytics', path: '/admin/crm/analytics', icon: PieChart, id: 'nav-crm-analytics' },
+      { name: 'CRM Analytics', path: '/admin/crm/analytics', icon: PieChart, id: 'nav-crm-analytics', flag: 'dashboardAnalytics' },
       { name: 'Reports', path: '/admin/reports', icon: BarChart3, id: 'nav-reports' },
       { name: 'Churn Prediction', path: '/admin/predictions/churn', icon: TrendingUp, id: 'nav-pred-churn' },
       { name: 'Promo Prediction', path: '/admin/predictions/promotions', icon: Brain, id: 'nav-pred-promotions' },
@@ -175,7 +176,7 @@ className="logo-img"
         <nav className="nav-container">
           <p className="nav-title nav-title-first">MAIN MENU</p>
           <div className="nav-list">
- {[dashboardItem].filter(isNavigationItemEnabled).map((item) => {
+ {[dashboardItem].filter((item) => !item.flag || features[item.flag]).filter(isNavigationItemEnabled).map((item) => {
  const isActive = pathname === item.path;
               return (
                 <Link
@@ -194,7 +195,7 @@ className="logo-img"
           </div>
 
  {navSections.map((section) => {
- const visibleItems = section.items.filter(isNavigationItemEnabled);
+ const visibleItems = section.items.filter((item) => !item.flag || features[item.flag]).filter(isNavigationItemEnabled);
  if (visibleItems.length === 0) return null;
 
  const collapsed = collapsedSections[section.title] ?? false;
