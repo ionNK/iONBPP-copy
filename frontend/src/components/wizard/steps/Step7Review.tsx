@@ -71,12 +71,12 @@ return (
                                     {eligibility.markets.map(m => m.toUpperCase()).join(', ')}
                                 </div>
                             </div>
-                            <div className="data-row">
-                                <span className="label">Platforms</span>
-                                <span className="value" style={{ textTransform: 'capitalize' }}>
-                                    {eligibility.channels.join(', ')}
-                                </span>
-                            </div>
+<div className="data-row">
+<span className="label">Channels</span>
+<span className="value" style={{ textTransform: 'capitalize' }}>
+{eligibility.channels.join(', ')}
+</span>
+</div>
                             <div className="data-row">
                                 <span className="label">Audience</span>
                                 <span className="value" style={{ textTransform: 'capitalize' }}>{eligibility.segment}</span>

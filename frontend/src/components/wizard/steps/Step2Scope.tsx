@@ -307,12 +307,12 @@ export default function StepScope() {
                     )}
                 </div>
 
-                {/* Platform Section */}
-                <div className="form-section">
-                    <div className="section-header">
-                        <label className="section-label wizard-section-label"><Smartphone size={16} /> Platforms</label>
-                    </div>
- <div className="platform-options" role="group" aria-label="Promotion platforms">
+{/* Channels Section */}
+<div className="form-section">
+<div className="section-header">
+<label className="section-label wizard-section-label"><Smartphone size={16} /> Channels</label>
+</div>
+<div className="platform-options" role="group" aria-label="Promotion channels">
  <button
  type="button"
  className={`option-card ds-choice ${platformIds.every((platform) => platforms.includes(platform)) ? 'active is-selected' : ''}`}
