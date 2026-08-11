@@ -23,16 +23,15 @@ const container = {
 
 export default function LoginPage() {
  const router = useRouter();
- const { setTheme, setThemeFamily } = useTheme();
+ const { setTheme } = useTheme();
  const [isLoading, setIsLoading] = useState(false);
 
  const handleGoogleSignIn = () => {
  setIsLoading(true);
 
- // Post-login default: Ionix dark. Routed through ThemeContext so React
- // state, localStorage (betika-theme / betika-theme-family), and the
- // <html> data attributes stay in sync across client-side navigation.
- setThemeFamily('ionix');
+ // Post-login default: dark. Routed through ThemeContext so React state,
+ // localStorage (betika-theme), and the <html> data attributes stay in sync
+ // across client-side navigation.
  setTheme('dark');
 
  window.setTimeout(() => router.push('/'), 800);

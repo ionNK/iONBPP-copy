@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
     Settings, Users, Shield, Bell, Database, Save, CheckCircle2, Power,
- CreditCard, Globe, Key, Webhook, Mail, Plus, Trash2, Sun, Moon, Monitor, Sparkles,
+ CreditCard, Globe, Key, Webhook, Mail, Plus, Trash2, Sun, Moon,
  Book, FileCode, ExternalLink, HelpCircle, FileText, PlayCircle, Activity, SlidersHorizontal // Added icons
 } from 'lucide-react';
 import ExplainerVideo from '@/components/onboarding/ExplainerVideo';
@@ -248,7 +248,7 @@ export default function SettingsPage() {
     const [successMsg, setSuccessMsg] = useState('');
     const [showVideo, setShowVideo] = useState(false);
 
- const { theme, themeFamily, setTheme, setThemeFamily } = useTheme();
+ const { theme, setTheme } = useTheme();
 
  // API State
     const [countries, setCountries] = useState<CountryConfig[]>([]);
@@ -290,10 +290,6 @@ export default function SettingsPage() {
 
  const handleThemeChange = (colorMode: 'light' | 'dark') => {
  setTheme(colorMode);
- };
-
- const handleThemeFamilyChange = (family: 'default' | 'ionix') => {
- setThemeFamily(family);
  };
 
     const handleCountrySelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -426,26 +422,6 @@ return (
 
                             {/* ... (Existing General Content) */}
 
-
- <div className="form-group mb-8">
- <label>Theme Family</label>
- <div className="theme-options">
- <button
- className={`theme-card ds-choice ${themeFamily === 'default' ? 'active is-selected' : ''}`}
- onClick={() => handleThemeFamilyChange('default')}
- >
- <Monitor size={24} />
- <span>Default</span>
- </button>
- <button
- className={`theme-card ds-choice ${themeFamily === 'ionix' ? 'active is-selected' : ''}`}
- onClick={() => handleThemeFamilyChange('ionix')}
- >
- <Sparkles size={24} />
- <span>Ionix Theme</span>
- </button>
- </div>
- </div>
 
  <div className="form-group mb-8">
  <label>Color Mode</label>
