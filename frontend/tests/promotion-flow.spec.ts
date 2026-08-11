@@ -9,25 +9,17 @@ test('create promotion wizard flow', async ({ page }) => {
     await expect(page).toHaveTitle(/Betika Promotions Platform/i);
 
     // 2. Basics
- await page.getByPlaceholder('e.g. Welcome Bonus 2024').first().fill('Playwright Auto-Test Promo');
+ await page.getByRole('textbox', { name: 'Promotion Name', exact: true }).fill('Playwright Auto-Test Promo');
  await page.getByPlaceholder('Description for internal team...').first().fill('Created by Playwright E2E Test');
  await page.locator('.type-card').filter({ hasText: 'Cashback' }).first().click();
  await page.getByRole('button', { name: 'Next Step' }).first().click();
+await expect(page.getByRole('main', { name: 'Step 2 of 7' })).toBeVisible();
 
     // 3. Scope
- // A plain create flow must not inherit an audience from a seed template,
- // a previously edited promotion, or descriptive CRM query metadata.
- const audiencePicker = page.locator('.seg-trigger');
- await expect(audiencePicker).toContainText('Select Segment (Optional)');
- await expect(audiencePicker).not.toContainText(/Sportsbook (Users|Players)/i);
-const marketTrigger = page.locator('button.market-trigger');
-await expect(marketTrigger).toBeVisible();
-if (!(await marketTrigger.textContent())?.includes('Kenya')) {
- await marketTrigger.click();
- const marketListbox = page.getByRole('listbox', { name: 'Target Market' });
- await expect(marketListbox).toBeVisible();
- await marketListbox.getByRole('option', { name: /Kenya/i }).click();
-}
+ // multiCountry and segmentTargeting flags are off: the market and audience
+ // pickers are hidden, and state defaults (ZM / no segment) keep the flow valid.
+ await expect(page.locator('.seg-trigger')).toHaveCount(0);
+ await expect(page.locator('button.market-trigger')).toHaveCount(0);
 const allPlatforms = page.getByRole('button', { name: 'All', exact: true });
  await expect(allPlatforms).toHaveAttribute('aria-pressed', 'false');
  await allPlatforms.click();

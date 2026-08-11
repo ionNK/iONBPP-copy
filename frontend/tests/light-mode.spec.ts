@@ -28,15 +28,9 @@ test.describe('Light Mode & Promotion Wizard Audit', () => {
     await page.locator('.type-card').filter({ hasText: 'Cashback' }).click({ force: true });
     await page.getByRole('button', { name: 'Next Step' }).click();
 
-// Step 2 — Scope (market required)
-const marketTrigger = page.locator('button.market-trigger');
-await expect(marketTrigger).toBeVisible();
-if (!(await marketTrigger.textContent())?.includes('Kenya')) {
- await marketTrigger.click();
- const marketListbox = page.getByRole('listbox', { name: 'Target Market' });
- await expect(marketListbox).toBeVisible();
- await marketListbox.getByRole('option', { name: /Kenya/i }).click();
-}
+// Step 2 — Scope (Day-1 flags hide market and audience targeting).
+await expect(page.locator('button.market-trigger')).toHaveCount(0);
+await expect(page.locator('.seg-trigger')).toHaveCount(0);
 await page.getByRole('button', { name: 'Next Step' }).click();
 
     // Steps 3, 4, 5 — defaults are valid, just advance to Step 6 (Display)
@@ -63,15 +57,9 @@ await expect(previewImg).toHaveAttribute('src', bannerUrl);
     await page.locator('.type-card').filter({ hasText: 'Cashback' }).click({ force: true });
     await page.getByRole('button', { name: 'Next Step' }).click();
 
-// Step 2 — Scope (market required)
-const marketTrigger = page.locator('button.market-trigger');
-await expect(marketTrigger).toBeVisible();
-if (!(await marketTrigger.textContent())?.includes('Kenya')) {
- await marketTrigger.click();
- const marketListbox = page.getByRole('listbox', { name: 'Target Market' });
- await expect(marketListbox).toBeVisible();
- await marketListbox.getByRole('option', { name: /Kenya/i }).click();
-}
+// Step 2 — Scope (Day-1 flags hide market and audience targeting).
+await expect(page.locator('button.market-trigger')).toHaveCount(0);
+await expect(page.locator('.seg-trigger')).toHaveCount(0);
 await page.getByRole('button', { name: 'Next Step' }).click();
 
     // Steps 3, 4, 5, 6 — advance with valid defaults to reach Step 7 (Review)

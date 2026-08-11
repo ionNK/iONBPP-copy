@@ -15,6 +15,7 @@ import Step6Display from '@/components/wizard/steps/Step6Display';
 import Step7Review from '@/components/wizard/steps/Step7Review';
 import { Save, Rocket, ChevronRight, ChevronLeft, Code, Sun, Moon, X, AlertTriangle, CheckCircle2, Eye } from 'lucide-react';
 import { getMissingRequiredFields } from '@/data/promotionTemplates';
+import { features } from '@/config/features';
 
 
 export default function CreatePromotionWizard() {
@@ -78,7 +79,7 @@ export default function CreatePromotionWizard() {
     } else {
       resetWizard();
       // Arriving from a CRM segment "Target" action: pre-attach the audience.
-      if (targetSegment) {
+      if (targetSegment && features.segmentTargeting) {
         updateEligibility({
           segment: targetSegment,
           customSegments: [targetSegment],
@@ -237,7 +238,7 @@ export default function CreatePromotionWizard() {
       }
 
       case 2: // Scope
-        if (state.eligibility.markets.length === 0) {
+        if (features.multiCountry && state.eligibility.markets.length === 0) {
           setToast({ show: true, message: 'Please select at least one target market.', type: 'error' });
           return false;
         }
@@ -366,7 +367,7 @@ return (
             )}
 
  {/* Template Saving Modal (Global) */}
- {isTemplateModalOpen && (
+ {features.promoTemplatesLegacy && isTemplateModalOpen && (
  <div className="modal-overlay">
  <div className="save-segment-modal">
  <button className="close-btn-abs" onClick={() => setIsTemplateModalOpen(false)}><X size={20} /></button>
@@ -417,6 +418,8 @@ return (
                     >
  <Eye size={16} /> Preview Customer View
  </button>
+{features.promoTemplatesLegacy && (
+
  <button
  className="btn btn-secondary"
  onClick={() => setIsTemplateModalOpen(true)}
@@ -424,6 +427,8 @@ return (
  >
  <Save size={16} /> Save as Template
  </button>
+)}
+
  {currentStep === 3 && <button className="btn btn-secondary text-accent-purple"><Code size={16} /> Compliance Scan</button>}
 
                 </div>

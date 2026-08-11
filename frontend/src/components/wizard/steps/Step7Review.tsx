@@ -1,6 +1,7 @@
 'use client';
 import { CheckCircle2, Gift } from 'lucide-react';
 import { useWizardContext } from '@/context/WizardContext';
+import { features } from '@/config/features';
 
 interface StepReviewProps {
     onEdit: (step: number) => void;
@@ -65,22 +66,30 @@ return (
                             <button className="edit-link" onClick={() => onEdit(2)}>Edit</button>
                         </div>
                         <div className="card-body">
+{features.multiCountry && (
+
                             <div className="data-row">
                                 <span className="label">Markets</span>
                                 <div className="value">
                                     {eligibility.markets.map(m => m.toUpperCase()).join(', ')}
                                 </div>
                             </div>
+)}
+
 <div className="data-row">
 <span className="label">Channels</span>
 <span className="value" style={{ textTransform: 'capitalize' }}>
 {eligibility.channels.join(', ')}
 </span>
 </div>
+{features.segmentTargeting && (
+
                             <div className="data-row">
                                 <span className="label">Audience</span>
                                 <span className="value" style={{ textTransform: 'capitalize' }}>{eligibility.segment}</span>
                             </div>
+)}
+
                         </div>
                     </div>
 

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useWizardContext } from '@/context/WizardContext';
 import { useTemplates } from '@/context/TemplatesContext';
 import { getTemplateMeta } from '@/data/promotionTemplates';
+import { features } from '@/config/features';
 
 
 export default function StepBasics() {
@@ -52,7 +53,7 @@ return (
  <div className="form-panel ds-panel">
  <h2 className="panel-title">Basic Information</h2>
 
- {templates.length > 0 && (
+ {features.promoTemplatesLegacy && templates.length > 0 && (
  <div className="template-picker ds-add-action">
  <button
  type="button"

@@ -4,6 +4,7 @@ import { useWizardContext } from '@/context/WizardContext';
 import { useState, useEffect, useRef } from 'react';
 import { getSegments, newSegmentDraft, Segment } from '@/data/segments';
 import SegmentBuilder from '@/components/crm/SegmentBuilder';
+import { features } from '@/config/features';
 
 // Robust flag emoji generator
 const getFlagEmoji = (countryCode: string) => {
@@ -77,6 +78,16 @@ export default function StepScope() {
         window.addEventListener('storage', loadMarkets);
         return () => window.removeEventListener('storage', loadMarkets);
     }, []);
+
+// When multi-country is disabled, keep the wizard pinned to the single
+// instance market so validation and downstream payloads stay valid.
+useEffect(() => {
+if (!features.multiCountry && state.eligibility.markets.length === 0) {
+updateEligibility({ markets: ['ZM'], primaryMarket: 'ZM' });
+}
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
+
 
   // Load segments saved in the CRM Segments builder so they appear in the
   // audience picker. Re-load on focus and on storage events so a segment
@@ -248,6 +259,8 @@ export default function StepScope() {
                 <h2 className="panel-title">Scope & Eligibility</h2>
 
                 {/* Markets Section */}
+{features.multiCountry && (
+
                 <div className="form-section">
                     <div className="section-header">
                         <label className="section-label wizard-section-label"><Globe size={16} /> Target Market</label>
@@ -306,6 +319,8 @@ export default function StepScope() {
                         </div>
                     )}
                 </div>
+)}
+
 
 {/* Channels Section */}
 <div className="form-section">
@@ -364,6 +379,8 @@ export default function StepScope() {
                 </div>
 
                 {/* Segments */}
+{features.segmentTargeting && (
+
                 <div className="form-section">
                     <div className="section-header">
                         <label className="section-label wizard-section-label">
@@ -513,9 +530,11 @@ onClick={() => { setSegmentOpen(false); setIsUploadModalOpen(true); }}
  </div>
                     </div>
                 </div>
+)}
+
 
                 {
-                    state.eligibility.segment === 'custom_csv' && (
+                    features.segmentTargeting && state.eligibility.segment === 'custom_csv' && (
                         <div className="csv-success-badge">
                             <FileText size={14} /> <span>Custom list uploaded successfully (12,405 users)</span>
                             <button className="remove-btn" onClick={() => updateEligibility({ segment: 'all' })}><X size={12} /></button>
