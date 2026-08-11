@@ -63,3 +63,4 @@ frontend/public/docs/*.pdf
 frontend/public/docs/images/
 frontend/*.png
 test-results/
+frontend/screenshots/
