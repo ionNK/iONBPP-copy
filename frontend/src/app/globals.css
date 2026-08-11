@@ -1,7 +1,7 @@
 @import './design-system.css';
 
 :root {
-  /* --- 1. Base Color Scale (Zinc/Slate Neutral) --- */
+  /* Shared structural tokens — used by the ionix theme */
   --gray-0: #ffffff;
   --gray-50: #fafafa;
   --gray-100: #f4f4f5;
@@ -15,91 +15,14 @@
   --gray-900: #18181b;
   --gray-950: #09090b;
 
-  /* --- 2. Brand Colors --- */
+  /* Shared design-system accent calibration; scoped Promotions/Settings modules override it. */
   --color-betika-yellow: #F2D641;
   --color-betika-green: #699951;
   --color-accent-purple: #a855f7;
   --color-accent-cyan: #06b6d4;
 
-  /* --- 3. Dark Theme Mappings (Default) --- */
-  --color-bg-app: #000000;
-  --color-bg-panel: var(--gray-900);
-  /* #18181b */
-  --color-bg-card: var(--gray-900);
-  --color-bg-sidebar: var(--gray-950);
-  /* #09090b */
-  --color-bg-header: rgba(0, 0, 0, 0.8);
---color-bg-input: var(--gray-800);
---color-bg-input-focus: var(--gray-700);
---color-bg-surface: var(--gray-900);
---color-bg-elevated: var(--gray-800);
---color-bg-hover: var(--gray-800);
---color-primary: var(--color-betika-yellow);
-
---color-text-primary: var(--gray-50);
-  --color-text-secondary: var(--gray-400);
-  --color-text-muted: var(--gray-600);
-  --color-text-inverse: var(--gray-950);
-  --color-text-logo: #ffffff;
-
-  --color-border: var(--gray-800);
-  --color-border-hover: var(--gray-700);
-
-  --glass-bg: rgba(24, 24, 27, 0.6);
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-
-  /* Sidebar Specifics */
-  --sidebar-active-bg: var(--color-betika-yellow);
-  --sidebar-active-text: #000000;
-  --sidebar-hover-bg: var(--gray-800);
-  --sidebar-profile-bg: var(--gray-900);
-
   --sidebar-width: 260px;
   --header-height: 70px;
-  --focus-ring: 0 0 0 2px var(--color-bg-app), 0 0 0 4px var(--color-betika-green);
-}
-
-[data-theme='light'] {
-  /* --- 4. Light Theme Mappings (Modern Zinc/Neutral) --- */
-  --color-bg-app: #f9fafb;
-  /* Lighter off-white */
-  --color-bg-panel: var(--gray-0);
-  --color-bg-card: var(--gray-0);
-  --color-bg-sidebar: var(--gray-0);
-  --color-bg-header: rgba(255, 255, 255, 0.9);
---color-bg-input: #f3f4f6;
---color-bg-input-focus: var(--gray-0);
---color-bg-surface: var(--gray-0);
---color-bg-elevated: #eef0f3;
---color-bg-hover: #f3f4f6;
---color-primary: var(--color-betika-yellow);
-
---color-text-primary: #111827;
-  /* Gray-900 */
-  --color-text-secondary: #4b5563;
-  /* Gray-600 - High Contrast */
-  --color-text-muted: #9ca3af;
-  /* Gray-400 */
-  --color-text-inverse: var(--gray-0);
-  --color-text-logo: #111827;
-
-  --color-border: #e5e7eb;
-  /* Gray-200 */
-  --color-border-hover: #d1d5db;
-  /* Gray-300 */
-
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
-  /* Sidebar Specifics */
-  --sidebar-active-bg: var(--color-betika-yellow);
-  --sidebar-active-text: #000000;
-  --sidebar-hover-bg: #f3f4f6;
-  --sidebar-profile-bg: #f9fafb;
-  --focus-ring: 0 0 0 2px var(--color-bg-app), 0 0 0 4px var(--color-betika-green);
 }
 
 /*
@@ -131,6 +54,7 @@
 --glass-bg: rgba(255, 255, 255, 0.76);
 --shadow-sm: 0 1px 2px rgba(23, 33, 47, 0.06);
 --shadow-md: 0 8px 20px rgba(23, 33, 47, 0.08);
+--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
 --sidebar-active-bg: var(--color-betika-yellow);
 --sidebar-active-text: #17212f;
@@ -681,7 +605,7 @@ a {
 
 .legend { display: flex; gap: 12px; font-size: 12px; color: var(--color-text-secondary); align-items: center; }
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
-.dot.yellow { background: #F2D641; }
+.dot.yellow { background: var(--color-betika-yellow); }
 .dot.purple { background: #a855f7; }
 
 .chart-wrapper { flex: 1; width: 100%; min-height: 0; }
@@ -703,8 +627,8 @@ a {
 }
 .feed-content { flex: 1; font-size: 13px; color: var(--color-text-secondary); }
 .feed-msg { margin: 0; line-height: 1.4; }
-.text-white { color: #fff; font-weight: 500; }
-.text-yellow { color: #F2D641; }
+.text-white { color: var(--ds-text-static); font-weight: 500; }
+.text-yellow { color: var(--color-betika-yellow); }
 .feed-time { font-size: 11px; color: var(--color-text-muted); }
 
 .mb-4 { margin-bottom: 16px; }
@@ -718,10 +642,9 @@ a {
 .stat-title { font-size: 13px; color: var(--color-text-secondary); }
 
 /* --------------------------------------------------------------------------
-   Unity / Ionix — Promotions only
-   The route marker is provided by AppShell. These values intentionally never
-   alter Default or any non-Promotions screen.
-   -------------------------------------------------------------------------- */
+   Unity / Ionix — Promotions and Settings
+   The route marker is provided by AppShell.
+    -------------------------------------------------------------------------- */
 [data-theme-family='ionix'] .promotions-module,
 [data-theme-family='ionix'] .settings-module {
   --unity-navy: #001528;
