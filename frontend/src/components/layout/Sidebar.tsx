@@ -144,7 +144,8 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem('admin_session');
+localStorage.removeItem('admin_role');
     window.location.href = '/admin/login';
   };
 
