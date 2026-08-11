@@ -1,11 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import { Brain, TrendingDown, Target, AlertTriangle, ArrowUpRight, ArrowDownRight, Zap, LineChart, ShieldAlert } from 'lucide-react';
 import { Player, getPlayers, riskBand } from '@/data/players';
 import { buildQuadrants, buildOpportunities, buildDrivers, scoreBand, rankNba, buildClvSummary, rankAbuseRisk, Opportunity } from '@/data/intelligence';
 import { useCountry } from '@/context/CountryContext';
+import { features } from '@/config/features';
 
 
 
@@ -25,6 +26,7 @@ const money = (n: number) => {
 };
 
  export default function IntelligencePage() {
+if (!features.intelligence) notFound();
  const router = useRouter();
  const { isInScope, selectedCountry } = useCountry();
  const [allPlayers, setAllPlayers] = useState<Player[]>([]);

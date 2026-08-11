@@ -1,4 +1,4 @@
-export const features = {
+const featureDefaults = {
  play360: false, // Future phase — player 360 view
  segments: false, // Future phase — replaces CSV manual awarding
  intelligence: false, // Future phase
@@ -6,4 +6,6 @@ export const features = {
  promoTemplatesLegacy: false, // Superseded by preset-first flow
  multiCountry: false, // One instance per country (3 Aug decision)
  segmentTargeting: false, // Future phase — with segmentation
-} as const;
+};
+
+export const features: { [K in keyof typeof featureDefaults]: boolean } = featureDefaults;

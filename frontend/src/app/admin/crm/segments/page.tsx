@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { notFound, useRouter, useSearchParams } from 'next/navigation';
 
 import { Users, Zap, Plus, Pencil, Trash2, Filter } from 'lucide-react';
 
@@ -12,8 +12,10 @@ import {
 } from '@/data/segments';
 import SegmentBuilder from '@/components/crm/SegmentBuilder';
 import { useCountry } from '@/context/CountryContext';
+import { features } from '@/config/features';
 
 export default function SegmentsPage() {
+if (!features.segments) notFound();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isInScope, selectedCountry } = useCountry();

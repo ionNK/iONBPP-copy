@@ -1,14 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { DollarSign, Mail, Phone, RefreshCw, Search, TrendingUp, Users } from 'lucide-react';
 import { Player, PlayerLifecycle, getLastSync, getPlayers, LIFECYCLE_META, resyncPlayers, timeAgo, formatCurrency } from '@/data/players';
 import { useCountry } from '@/context/CountryContext';
+import { features } from '@/config/features';
 
 const FILTERS: (PlayerLifecycle | 'all')[] = ['all', 'vip', 'active', 'new', 'reactivated', 'at_risk', 'dormant', 'churned'];
 
 export default function Player360DirectoryPage() {
+if (!features.play360) notFound();
  const { isInScope, selectedCountry } = useCountry();
  const [players, setPlayers] = useState<Player[]>([]);
  const [query, setQuery] = useState('');

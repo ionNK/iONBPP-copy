@@ -10,6 +10,8 @@ import {
   revenueTrend, topPlayers, lifecycleFunnel, DistRow,
 } from '@/data/analytics';
 import { useCountry } from '@/context/CountryContext';
+import { features } from '@/config/features';
+import { notFound } from 'next/navigation';
 
 
 const KPI_ICONS: Record<string, { icon: LucideIcon; tint: string }> = {
@@ -49,6 +51,7 @@ function DistPanel({ title, subtitle, rows, unit, money }: { title: string; subt
 
 
 export default function AnalyticsPage() {
+if (!features.dashboardAnalytics) notFound();
  const { isInScope, selectedCountry } = useCountry();
  const [players, setPlayers] = useState<Player[]>([]);
  useEffect(() => { setPlayers(getPlayers()); }, []);

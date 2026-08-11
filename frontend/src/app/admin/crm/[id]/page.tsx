@@ -1,12 +1,14 @@
 'use client';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Player, getPlayer } from '@/data/players';
 import Player360 from '@/components/crm/Player360';
+import { features } from '@/config/features';
 
 export default function CustomerDetail() {
+if (!features.play360) notFound();
   const params = useParams();
   const id = params?.id as string;
   const [customer, setCustomer] = useState<Player | null | undefined>(undefined);
