@@ -95,7 +95,7 @@ export default function CreatePromotionWizard() {
             id: editId || Date.now(), // Keep ID if editing (string or number)
             name: state.basics.name || 'Untitled Promotion',
             type: state.basics.type,
-            market: state.eligibility.markets[0]?.toUpperCase() || 'KE',
+            market: state.eligibility.markets[0]?.toUpperCase() || 'ZM',
             status: 'Active',
             engagement: '0%',
             segment: state.eligibility.segment,

@@ -284,6 +284,7 @@ export default function StepEligibility() {
                 { id: 'ET', name: 'Ethiopia' },
                 { id: 'TZ', name: 'Tanzania' },
                 { id: 'UG', name: 'Uganda' },
+{ id: 'ZM', name: 'Zambia' },
             ]);
             setIsLoading(false);
         };
