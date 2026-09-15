@@ -1,0 +1,257 @@
+/*
+* Unity UI primitive styles (frontend/src/components/ui/).
+* Layout/typography only — colors, borders and radii are applied inline
+* from the T token object (frontend/src/theme/tokens.ts).
+*/
+
+/* StatChip */
+
+/* StatChip */
+.promo-chips {
+  display: flex;
+  gap: 12px;
+}
+
+.promo-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 10px 16px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+
+.promo-chip__value {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.promo-chip__label {
+  font-size: 12px;
+}
+
+/* Buttons (Primary / Secondary / Ghost / DestructiveGhost) */
+.promo-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.promo-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.promo-btn-ghost--small {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+/* Badge */
+.promo-badge {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.promo-btn-primary:disabled {
+ opacity: 0.5;
+ cursor: not-allowed;
+}
+
+/* Toggle */
+.ui-toggle {
+position: relative;
+width: 36px;
+height: 20px;
+padding: 0;
+border: none;
+cursor: pointer;
+flex: none;
+transition: background-color 0.15s ease;
+}
+
+.ui-toggle:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+
+.ui-toggle__knob {
+position: absolute;
+top: 2px;
+left: 2px;
+width: 16px;
+height: 16px;
+transition: left 0.15s ease;
+}
+
+.ui-toggle__knob--on {
+left: 18px;
+}
+
+/* ZambiaFlag */
+.ui-flag {
+ display: inline-block;
+ flex: none;
+ height: auto;
+ vertical-align: middle;
+}
+
+/* FilterSelect */
+.promo-select {
+  position: relative;
+}
+
+.promo-select__trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.promo-select__menu {
+  position: absolute;
+  z-index: 10;
+  margin-top: 4px;
+  min-width: 100%;
+}
+
+.promo-select__option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  white-space: nowrap;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+/* EvidenceCard */
+.ui-evidence-card {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 16px;
+}
+
+.ui-evidence-card__icon {
+display: inline-flex;
+flex: none;
+}
+
+.ui-evidence-card__body {
+flex: 1;
+min-width: 0;
+}
+
+.ui-evidence-card__title {
+font-size: 14px;
+font-weight: 500;
+}
+
+.ui-evidence-card__meta {
+font-size: 12px;
+margin-top: 2px;
+}
+
+.ui-evidence-card__action {
+flex: none;
+}
+
+/* ComingSoon */
+.ui-coming-soon {
+  width: 100%;
+  max-width: 640px;
+  padding: 24px;
+}
+
+.ui-coming-soon__header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ui-coming-soon__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.ui-coming-soon__description {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.ui-coming-soon__list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ui-coming-soon__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ui-coming-soon__item svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* "Until then" notice — offWhite panel + icon + 12px text. */
+.ui-coming-soon__until {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 12px 16px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ui-coming-soon__until svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.ui-coming-soon__until-label {
+  font-weight: 600;
+}

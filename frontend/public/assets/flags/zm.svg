@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" role="img" aria-label="Zambia">
+  <!-- Flat rendering: green field, fly-side tricolour (red/black/orange) on the
+       lower ~60%, simplified orange eagle block above it. -->
+  <rect width="30" height="20" fill="#198A00"/>
+  <rect x="21" y="8" width="3" height="12" fill="#DE2010"/>
+  <rect x="24" y="8" width="3" height="12" fill="#000000"/>
+  <rect x="27" y="8" width="3" height="12" fill="#EF7D00"/>
+  <rect x="22.5" y="2.5" width="6" height="4" rx="1" fill="#EF7D00"/>
+</svg>

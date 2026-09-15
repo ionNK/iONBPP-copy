@@ -1,0 +1,502 @@
+/*
+ * New Promotion flow styles (/admin/promotions/new).
+ * Layout/typography utilities only — colors, borders and radii come from
+ * frontend/src/theme/tokens.ts through page-level inline styles.
+ * Shared page-skeleton classes (promo-page, promo-topbar, promo-container,
+ * promo-modal__*) come from ../promotions.css.
+ */
+
+/* Template picker — equal cards in one row; stacks below mobile */
+.np-template-grid {
+display: grid;
+grid-template-columns: 1fr;
+gap: 16px;
+margin-top: 12px;
+}
+
+@media (min-width: 640px) {
+.np-template-grid {
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+}
+
+.np-template-card {
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+gap: 8px;
+width: 100%;
+padding: 20px;
+text-align: left;
+font-family: inherit;
+cursor: pointer;
+transition: box-shadow 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.np-template-card__title {
+font-size: 15px;
+font-weight: 600;
+}
+
+.np-template-card__caption {
+font-size: 12px;
+line-height: 1.5;
+}
+
+/* Wizard shell */
+.np-wizard {
+max-width: 880px;
+margin: 0 auto;
+display: flex;
+flex-direction: column;
+gap: 20px;
+}
+
+.np-stepper {
+display: flex;
+align-items: center;
+gap: 8px;
+margin: 0;
+padding: 4px 0 8px;
+list-style: none;
+overflow-x: auto;
+}
+
+.np-stepper__item {
+display: flex;
+align-items: center;
+gap: 8px;
+flex: none;
+}
+
+.np-stepper__circle {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 28px;
+height: 28px;
+font-size: 12px;
+font-weight: 600;
+}
+
+.np-stepper__label {
+font-size: 12px;
+white-space: nowrap;
+}
+
+.np-stepper__line {
+width: 24px;
+height: 1px;
+flex: none;
+}
+
+/* Form card + fields */
+.np-card {
+padding: 24px;
+}
+
+.np-card__heading {
+font-size: 15px;
+font-weight: 600;
+margin: 0;
+}
+
+.np-form-grid {
+display: grid;
+grid-template-columns: 1fr;
+gap: 16px;
+margin-top: 20px;
+}
+
+@media (min-width: 640px) {
+.np-form-grid {
+grid-template-columns: 1fr 1fr;
+}
+}
+
+.np-field {
+display: flex;
+flex-direction: column;
+gap: 6px;
+min-width: 0;
+}
+
+.np-field--full {
+grid-column: 1 / -1;
+}
+
+.np-label {
+font-size: 14px;
+font-weight: 500;
+}
+
+.np-input {
+width: 100%;
+padding: 8px 12px;
+font-size: 14px;
+font-family: inherit;
+}
+
+.np-input:disabled {
+opacity: 0.6;
+cursor: not-allowed;
+}
+
+.np-textarea {
+resize: vertical;
+min-height: 72px;
+line-height: 1.5;
+}
+
+.np-input-wrap {
+position: relative;
+display: flex;
+align-items: center;
+}
+
+.np-input-wrap .np-input {
+padding-right: 56px;
+}
+
+.np-input-suffix {
+position: absolute;
+right: 12px;
+font-size: 12px;
+font-weight: 500;
+pointer-events: none;
+}
+
+.np-hint {
+font-size: 12px;
+line-height: 1.5;
+margin: 0;
+}
+
+.np-error {
+font-size: 12px;
+margin: 0;
+}
+
+/* Radio + toggle rows */
+.np-radio-row {
+display: flex;
+align-items: center;
+gap: 8px;
+font-size: 14px;
+cursor: pointer;
+}
+
+.np-radio-group {
+display: flex;
+flex-wrap: wrap;
+gap: 8px 20px;
+}
+
+.np-toggle-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 12px;
+padding: 10px 0;
+font-size: 14px;
+}
+
+.np-section {
+margin-top: 24px;
+padding-top: 20px;
+}
+
+.np-section__title {
+font-size: 15px;
+font-weight: 500;
+margin: 0 0 4px;
+}
+
+/* Tier matrix */
+.np-tier-table {
+width: 100%;
+border-collapse: collapse;
+}
+
+.np-tier-table th {
+text-align: left;
+font-size: 12px;
+font-weight: 600;
+padding: 8px 8px 8px 0;
+}
+
+.np-tier-table td {
+padding: 4px 8px 4px 0;
+vertical-align: middle;
+}
+
+/* Upload slots */
+.np-slot {
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+gap: 8px;
+padding: 16px;
+cursor: pointer;
+font-family: inherit;
+text-align: left;
+width: 100%;
+transition: background-color 0.15s ease;
+}
+
+.np-slot__label {
+font-size: 14px;
+font-weight: 500;
+}
+
+.np-slot__meta {
+display: flex;
+align-items: center;
+gap: 8px;
+font-size: 12px;
+min-width: 0;
+}
+
+.np-slot__thumb {
+width: 48px;
+height: 32px;
+object-fit: cover;
+flex: none;
+}
+
+.np-slot-grid {
+display: grid;
+grid-template-columns: 1fr;
+gap: 12px;
+margin-top: 12px;
+}
+
+@media (min-width: 640px) {
+.np-slot-grid {
+grid-template-columns: 1fr 1fr;
+}
+}
+
+/* Notices (offWhite panel + icon + Footnote) */
+.np-notice {
+display: flex;
+align-items: flex-start;
+gap: 8px;
+padding: 12px 16px;
+font-size: 14px;
+line-height: 1.5;
+}
+
+.np-notice svg {
+flex: none;
+margin-top: 2px;
+}
+
+/* Footer actions */
+.np-wizard-footer {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 12px;
+}
+
+.np-wizard-footer__group {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+/* Review */
+.np-review-grid {
+display: flex;
+flex-direction: column;
+gap: 16px;
+margin-top: 20px;
+}
+
+.np-review-card__head {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 12px;
+margin-bottom: 12px;
+}
+
+.np-review-rows {
+display: grid;
+grid-template-columns: 1fr;
+gap: 12px 24px;
+}
+
+@media (min-width: 640px) {
+.np-review-rows {
+grid-template-columns: 1fr 1fr;
+}
+}
+
+.np-review-label {
+font-size: 12px;
+margin-bottom: 2px;
+}
+
+.np-review-value {
+font-size: 14px;
+}
+
+.np-link-btn {
+border: none;
+background: none;
+padding: 0;
+font-size: 14px;
+font-weight: 500;
+font-family: inherit;
+cursor: pointer;
+text-decoration: underline;
+}
+
+/* Visibility preview tile (mock player surface) */
+.np-preview-tile {
+padding: 16px;
+max-width: 320px;
+}
+
+.np-preview-tile__name {
+font-size: 14px;
+font-weight: 600;
+margin: 0;
+}
+
+.np-preview-tile__desc {
+font-size: 12px;
+line-height: 1.5;
+margin: 8px 0 0;
+}
+
+.np-preview-tile__more {
+font-size: 12px;
+font-weight: 600;
+margin: 8px 0 0;
+}
+
+/* Advanced conditions — collapsible section + trigger/rule builder (layout only; colors via tokens) */
+.np-collapse-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+.np-collapse-head svg { flex: none; }
+.np-advanced-body { margin-top: 16px; }
+.np-rule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.np-generated-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+.np-advanced-user { margin-top: 16px; }
+.np-trigger-card { padding: 16px; }
+.np-trigger-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.np-trigger-card__title { font-size: 14px; font-weight: 600; }
+.np-rule-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.np-rule-row .np-input { width: auto; }
+.np-rule-prefix { font-size: 12px; font-weight: 600; }
+.np-rule-param { font-size: 14px; font-weight: 500; }
+.np-rule-operator { min-width: 170px; }
+.np-rule-value { max-width: 170px; }
+.np-rule-novalue { font-size: 12px; }
+.np-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.np-param-panel {
+  margin-top: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.np-param-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.np-param-option {
+  padding: 6px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.np-or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+.np-or-divider__line { flex: 1; height: 1px; }
+/* Event picker modal — wider than the standard confirm card */
+.promo-modal__card.np-modal-card--wide {
+  max-width: 640px;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+}
+.np-event-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+.np-event-cat {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.np-event-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+@media (min-width: 640px) {
+  .np-event-grid { grid-template-columns: 1fr 1fr; }
+}
+.np-event-option {
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
