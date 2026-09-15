@@ -1,0 +1,166 @@
+/*
+ * Dashboard module styles.
+ * Layout/typography utilities only — colors, borders and radii come from
+ * frontend/src/theme/tokens.ts through page-level inline styles.
+ * Shared shell classes (top bar, container, chips) come from
+ * ../promotions/promotions.css.
+ */
+
+/* Two-column chart grid; stacks below 1024px. min-width: 0 keeps
+ * ResponsiveContainer from growing the grid track indefinitely. */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 1024px) {
+  .dash-grid {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.dash-card {
+  min-width: 0;
+  padding: 20px 24px;
+}
+
+.dash-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dash-card__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.dash-card__caption {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.dash-card__stat {
+  flex: none;
+  text-align: right;
+}
+
+.dash-card__stat-value {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.dash-card__stat-caption {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+/* Fixed-height host for ResponsiveContainer. */
+.dash-chart {
+  width: 100%;
+  height: 280px;
+}
+
+/* Hand-rolled chart legend — swatch is a 16px line (solid or dashed). */
+.dash-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.dash-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-legend__swatch {
+  display: inline-block;
+  width: 16px;
+  border-top: 2px solid currentColor;
+}
+
+.dash-legend__swatch--dashed {
+  border-top-style: dashed;
+}
+
+/* Custom Recharts tooltip card. */
+.dash-tooltip {
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.dash-tooltip__title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.dash-tooltip__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Budget attention list. */
+.dash-attention__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dash-attention__row {
+  padding: 12px 0;
+}
+
+.dash-attention__row:first-child {
+  padding-top: 0;
+}
+
+.dash-attention__row:last-child {
+  padding-bottom: 0;
+}
+
+.dash-attention__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.dash-attention__name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.dash-attention__id {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.dash-attention__figures {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.dash-empty {
+  margin: 0;
+  font-size: 14px;
+}
