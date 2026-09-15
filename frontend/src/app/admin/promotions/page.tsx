@@ -20,6 +20,9 @@ pending: { label: 'Pending approval', color: T.navy, ghost: true },
 
 const STATUSES = ['All statuses', 'Active', 'Scheduled', 'Expired', 'Draft', 'Pending approval'];
 
+/* Type filter reset option — the type list itself is derived from the data. */
+const ALL_TYPES = 'All types';
+
 /* Table pagination — house style: page size 10. */
 const PAGE_SIZE = 10;
 
@@ -55,6 +58,7 @@ export default function PromotionsList() {
 const router = useRouter();
 const [promos, setPromos] = useState<Promo[]>(PROMO_SEED);
 const [statusSel, setStatusSel] = useState('All statuses');
+const [typeFilter, setTypeFilter] = useState<string | null>(null);
 const [chip, setChip] = useState<PromoStatus | null>(null);
 const [query, setQuery] = useState('');
 const [page, setPage] = useState(1);
@@ -77,21 +81,28 @@ promos.forEach((p) => c[p.status]++);
 return c;
 }, [promos]);
 
+/* Unique promotion types present in the data, sorted — drives the type select. */
+const typeOptions = useMemo(
+() => [ALL_TYPES, ...Array.from(new Set(promos.map((p) => p.type))).sort((a, b) => a.localeCompare(b))],
+[promos],
+);
+
 const filtered = useMemo(
 () =>
 promos.filter((p) => {
 if (chip && p.status !== chip) return false;
 if (statusSel !== 'All statuses' && STATUS[p.status].label !== statusSel) return false;
+if (typeFilter && p.type !== typeFilter) return false;
 if (query && !`${p.id} ${p.name} ${p.type}`.toLowerCase().includes(query.toLowerCase())) return false;
 return true;
 }),
-[chip, statusSel, query, promos],
+[chip, statusSel, typeFilter, query, promos],
 );
 
 /* Re-filtering resets to the first page; deletions clamp via currentPage. */
 useEffect(() => {
 setPage(1);
-}, [chip, statusSel, query]);
+}, [chip, statusSel, typeFilter, query]);
 
 const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 const currentPage = Math.min(page, pageCount);
@@ -159,7 +170,7 @@ onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
 <StatChip label="Total promotions" value={promos.length} active={chip === null} onClick={() => setChip(null)} />
 </div>
 
-{/* Filters — search + status select */}
+{/* Filters — search + status + type selects */}
 <div className="promo-filters" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
 <div className="promo-search" style={{ border: `1px solid ${T.ghostBorder}`, borderRadius: T.radiusSm }}>
 <Search size={16} style={{ color: T.textSecondary }} />
@@ -171,6 +182,11 @@ style={{ color: T.textPrimary }}
 />
 </div>
 <FilterSelect label={statusSel} options={STATUSES} onChange={setStatusSel} />
+<FilterSelect
+label={typeFilter ?? ALL_TYPES}
+options={typeOptions}
+onChange={(value) => setTypeFilter(value === ALL_TYPES ? null : value)}
+/>
 </div>
 
 
