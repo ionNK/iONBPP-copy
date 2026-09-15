@@ -24,6 +24,8 @@ label: string;
 href?: string;
 icon: ReactNode;
 comingSoon?: boolean;
+/** Onboarding anchor — rendered as data-tour for CoachMarks. */
+tour?: string;
 };
 
 type NavGroup = {
@@ -48,12 +50,12 @@ items: [
 {
 label: 'Promotions',
 items: [
-{ label: 'All Promotions', href: '/admin/promotions', icon: <Gift size={16} /> },
-{ label: 'Journeys', href: '/admin/promotions/journeys', icon: <Route size={16} />, comingSoon: true },
+{ label: 'All Promotions', href: '/admin/promotions', icon: <Gift size={16} />, tour: 'nav-promotions' },
+{ label: 'Journeys', href: '/admin/promotions/journeys', icon: <Route size={16} />, comingSoon: true, tour: 'nav-journeys' },
       { label: 'Messaging', href: '/admin/promotions/messaging', icon: <MessageSquare size={16} />, comingSoon: true },
       { label: 'Gamification', href: '/admin/promotions/gamification', icon: <Trophy size={16} />, comingSoon: true },
-      { label: 'Bulk Upload', href: '/admin/promotions/bulk-upload', icon: <Upload size={16} /> },
-{ label: 'Approvals', href: '/admin/promotions/approvals', icon: <ClipboardCheck size={16} /> },
+      { label: 'Bulk Upload', href: '/admin/promotions/bulk-upload', icon: <Upload size={16} />, tour: 'nav-bulk-upload' },
+{ label: 'Approvals', href: '/admin/promotions/approvals', icon: <ClipboardCheck size={16} />, tour: 'nav-approvals' },
 ],
 },
 {
@@ -110,6 +112,7 @@ return (
 href={item.href ?? '/admin'}
 className="ds-sidenav__item ds-sidenav__item--soon"
 aria-current={isActive ? 'page' : undefined}
+data-tour={item.tour}
 >
 <span className="ds-sidenav__icon">{item.icon}</span>
 <span className="ds-sidenav__label">{item.label}</span>
@@ -125,6 +128,7 @@ return (
 href={item.href ?? '/admin'}
 className={`ds-sidenav__item${isActive ? ' ds-sidenav__item--active' : ''}`}
 aria-current={isActive ? 'page' : undefined}
+data-tour={item.tour}
 >
 <span className="ds-sidenav__icon">{item.icon}</span>
 <span className="ds-sidenav__label">{item.label}</span>

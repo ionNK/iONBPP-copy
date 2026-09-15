@@ -4,6 +4,8 @@ export { StatChip } from './StatChip';
 export type { StatChipProps } from './StatChip';
 export { ComingSoon } from './ComingSoon';
 export type { ComingSoonProps } from './ComingSoon';
+export { CoachMarks } from './CoachMarks';
+export type { CoachMarksProps, CoachMarkStep } from './CoachMarks';
 export { PrimaryButton } from './PrimaryButton';
 export type { PrimaryButtonProps } from './PrimaryButton';
 export { SecondaryButton } from './SecondaryButton';

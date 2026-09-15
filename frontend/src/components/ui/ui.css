@@ -255,3 +255,73 @@ flex: none;
 .ui-coming-soon__until-label {
   font-weight: 600;
 }
+
+/* CoachMarks — portal overlay; z-index above the shell (topbar 5, login 10)
+   and the promotions drawer (20/21) / confirm modal (30/31). */
+.ui-coach-marks {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.ui-coach-marks__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+/* Spotlight ring — sits above the scrim, below the card; not interactive. */
+.ui-coach-marks__highlight {
+  position: fixed;
+  z-index: 41;
+  pointer-events: none;
+}
+
+.ui-coach-marks__card {
+  position: fixed;
+  z-index: 42;
+  max-width: 360px;
+  padding: 20px;
+  outline: none;
+}
+
+/* Fallback when the step target is not on the current page. */
+.ui-coach-marks__card--centered {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 48px);
+}
+
+.ui-coach-marks__counter {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.ui-coach-marks__title {
+  margin: 4px 0 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.ui-coach-marks__body {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.ui-coach-marks__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.ui-coach-marks__nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

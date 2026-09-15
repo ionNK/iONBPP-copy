@@ -122,9 +122,12 @@ return (
 <h1 className="promo-title" style={{ color: T.textPrimary }}>Promotions</h1>
 <p className="promo-subtitle" style={{ color: T.textSecondary }}>ionix Boost</p>
 </div>
+{/* data-tour anchor for the onboarding CoachMarks (step 5). */}
+<span data-tour="new-promotion">
 <PrimaryButton onClick={() => router.push('/admin/promotions/new')}>
 <Plus size={16} /> New promotion
 </PrimaryButton>
+</span>
 </div>
 
 <div className="promo-container">
