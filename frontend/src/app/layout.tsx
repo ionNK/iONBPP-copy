@@ -1,9 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { AIProvider } from '@/context/AIContext';
-import GlobalAssistantWidget from '@/components/layout/GlobalAssistantWidget';
-
 import { ThemeProvider } from '@/context/ThemeContext';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -20,15 +17,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-      </head>
       <body className={inter.className} suppressHydrationWarning>
-        <ThemeProvider>
- <AIProvider>
- {children}
- <GlobalAssistantWidget />
- </AIProvider>
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

@@ -1,255 +1,141 @@
 'use client';
+
+import { useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Megaphone, ShieldCheck, BarChart3, LogOut, ChevronRight, ChevronDown, Layers, Users, TrendingUp, Gift, LayoutGrid, FlaskConical, X, Contact, Brain, HeartPulse, PieChart, Search, ScrollText, Settings } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import {
- FEATURE_CONFIGURATION_EVENT,
- getFeatureConfiguration,
- getFeatureGroupConfiguration,
- isFeatureEnabled,
- type FeatureConfiguration,
- type FeatureGroupConfiguration,
- type FeatureId,
-} from '@/lib/feature-config';
-import { features } from '@/config/features';
+  ChartColumn,
+  ChartPie,
+  ClipboardCheck,
+  Crown,
+  Gift,
+  LayoutDashboard,
+  MessageSquare,
+  Route,
+  Search,
+  ShieldCheck,
+  Trophy,
+  Upload,
+  Users,
+} from 'lucide-react';
 
-type NavItem = { name: string; path: string; icon: LucideIcon; id: string; flag?: keyof typeof features };
-type NavSection = { title: string; items: NavItem[] };
-
-const dashboardItem: NavItem = { name: 'Dashboard', path: '/admin', icon: LayoutGrid, id: 'nav-dashboard' };
-
-const featureIdByNavigationId: Record<string, FeatureId> = {
- 'nav-dashboard': 'dashboard',
- 'nav-promotions': 'promotions',
- 'nav-manual-award': 'manual-award',
- 'nav-experiments': 'experiments',
- 'nav-crm': 'crm-overview',
- 'nav-crm-players': 'player-360',
- 'nav-crm-segments': 'segments',
- 'nav-crm-intelligence': 'intelligence',
- 'nav-crm-rg': 'responsible-gaming',
- 'nav-crm-analytics': 'crm-analytics',
- 'nav-reports': 'reports',
- 'nav-pred-churn': 'churn-prediction',
- 'nav-pred-promotions': 'promo-prediction',
- 'nav-governance': 'compliance',
- 'nav-audit': 'audit-trail',
- 'nav-customer-lookup': 'customer-lookup',
- 'nav-settings': 'settings',
+type NavItem = {
+label: string;
+href?: string;
+icon: ReactNode;
+comingSoon?: boolean;
 };
 
-// Logical, task-oriented grouping so users can find things by "what am I trying to do".
-const navSections: NavSection[] = [
-  {
-    title: 'PROMOTIONS',
-    items: [
-      { name: 'All Promotions', path: '/admin/promotions', icon: Megaphone, id: 'nav-promotions' },
-      { name: 'Manual Award', path: '/admin/manual-award', icon: Gift, id: 'nav-manual-award' },
-      { name: 'Experiments', path: '/admin/experiments', icon: FlaskConical, id: 'nav-experiments' },
+type NavGroup = {
+label: string;
+items: NavItem[];
+};
+
+/**
+ * Internal Tool Shell nav (docs/prototype-style-guide.md): flat items under
+ * UPPERCASE 12px/600 textSecondary group labels — no expandable modules, no
+ * chevrons, no accent indicator bars, no brand block, no user identity block
+ * (identity lives in the global top bar).
+ */
+const NAV_GROUPS: NavGroup[] = [
+{
+label: 'Insights',
+items: [
+      { label: 'Dashboard', href: '/admin/dashboard', icon: <LayoutDashboard size={16} /> },
+      { label: 'Analytics', href: '/admin/analytics', icon: <ChartColumn size={16} />, comingSoon: true },
     ],
-  },
-  {
-    title: 'CUSTOMERS',
-    items: [
-      { name: 'Overview', path: '/admin/crm', icon: Contact, id: 'nav-crm' },
-{ name: 'Player 360', path: '/admin/crm/players', icon: Users, id: 'nav-crm-players', flag: 'play360' },
-{ name: 'Segments', path: '/admin/crm/segments', icon: Layers, id: 'nav-crm-segments', flag: 'segments' },
-{ name: 'Intelligence', path: '/admin/crm/intelligence', icon: Brain, id: 'nav-crm-intelligence', flag: 'intelligence' },
-      { name: 'Responsible Gaming', path: '/admin/crm/responsible-gaming', icon: HeartPulse, id: 'nav-crm-rg' },
-    ],
-  },
-  {
-    title: 'INSIGHTS',
-    items: [
-      { name: 'CRM Analytics', path: '/admin/crm/analytics', icon: PieChart, id: 'nav-crm-analytics', flag: 'dashboardAnalytics' },
-      { name: 'Reports', path: '/admin/reports', icon: BarChart3, id: 'nav-reports' },
-      { name: 'Churn Prediction', path: '/admin/predictions/churn', icon: TrendingUp, id: 'nav-pred-churn' },
-      { name: 'Promo Prediction', path: '/admin/predictions/promotions', icon: Brain, id: 'nav-pred-promotions' },
-    ],
-  },
-  {
-    title: 'GOVERNANCE & SUPPORT',
-    items: [
-      { name: 'Compliance', path: '/admin/governance', icon: ShieldCheck, id: 'nav-governance' },
-      { name: 'Audit Trail', path: '/admin/promotions/audit', icon: ScrollText, id: 'nav-audit' },
-      { name: 'Customer Lookup', path: '/admin/promotions/customer-lookup', icon: Search, id: 'nav-customer-lookup' },
-{ name: 'Settings', path: '/admin/settings', icon: Settings, id: 'nav-settings' },
-    ],
-  },
+},
+{
+label: 'Promotions',
+items: [
+{ label: 'All Promotions', href: '/admin/promotions', icon: <Gift size={16} /> },
+{ label: 'Journeys', href: '/admin/promotions/journeys', icon: <Route size={16} />, comingSoon: true },
+      { label: 'Messaging', href: '/admin/promotions/messaging', icon: <MessageSquare size={16} />, comingSoon: true },
+      { label: 'Gamification', href: '/admin/promotions/gamification', icon: <Trophy size={16} />, comingSoon: true },
+      { label: 'Bulk Upload', href: '/admin/promotions/bulk-upload', icon: <Upload size={16} /> },
+{ label: 'Approvals', href: '/admin/promotions/approvals', icon: <ClipboardCheck size={16} /> },
+],
+},
+{
+label: 'CRM',
+items: [
+{ label: 'Players', href: '/admin/crm/players', icon: <Users size={16} />, comingSoon: true },
+{ label: 'Segments', href: '/admin/crm/segments', icon: <ChartPie size={16} />, comingSoon: true },
+      { label: 'VIP', href: '/admin/crm/vip', icon: <Crown size={16} />, comingSoon: true },
+      { label: 'Safer Gambling', href: '/admin/crm/safer-gambling', icon: <ShieldCheck size={16} />, comingSoon: true },
+],
+},
 ];
 
-interface SidebarProps {
-  isOpen?: boolean;
-  onClose?: () => void;
+/**
+ * Admin side navigation — light-surface Internal Tool Shell. Ghost search
+ * field at the top filters the flat nav groups. All styling lives in the
+ * .ds-sidenav section of app/design-system.css.
+ */
+export default function Sidebar() {
+const pathname = usePathname();
+const [query, setQuery] = useState('');
+
+const q = query.trim().toLowerCase();
+const groups = NAV_GROUPS.map((group) => ({
+...group,
+items: group.items.filter((item) => !q || item.label.toLowerCase().includes(q)),
+})).filter((group) => group.items.length > 0);
+
+return (
+<aside className="ds-sidenav">
+<div className="ds-sidenav__search">
+<Search size={16} aria-hidden="true" />
+<input
+value={query}
+onChange={(e) => setQuery(e.target.value)}
+placeholder="Search"
+aria-label="Search navigation"
+/>
+</div>
+
+<nav className="ds-sidenav__nav" aria-label="Admin">
+{groups.map((group) => (
+<div className="ds-sidenav__group" key={group.label}>
+<div className="ds-sidenav__group-label">{group.label}</div>
+<ul className="ds-sidenav__list">
+{group.items.map((item) => {
+const isActive = item.href !== undefined && pathname === item.href;
+
+/* Unreleased items link to a teaser route; reduced emphasis + "Soon" pill kept as-is. */
+if (item.comingSoon) {
+return (
+<li key={item.label}>
+<Link
+href={item.href ?? '/admin'}
+className="ds-sidenav__item ds-sidenav__item--soon"
+aria-current={isActive ? 'page' : undefined}
+>
+<span className="ds-sidenav__icon">{item.icon}</span>
+<span className="ds-sidenav__label">{item.label}</span>
+<span className="ds-sidenav__pill">Soon</span>
+</Link>
+</li>
+);
 }
 
-export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
- const pathname = usePathname();
- const [featureConfiguration, setFeatureConfiguration] =
- useState<FeatureConfiguration>(getFeatureConfiguration);
- const [featureGroupConfiguration, setFeatureGroupConfiguration] =
- useState<FeatureGroupConfiguration>(getFeatureGroupConfiguration);
-
- useEffect(() => {
- const refreshFeatureConfiguration = () => {
- setFeatureConfiguration(getFeatureConfiguration());
- setFeatureGroupConfiguration(getFeatureGroupConfiguration());
- };
-
- refreshFeatureConfiguration();
- window.addEventListener(
- FEATURE_CONFIGURATION_EVENT,
- refreshFeatureConfiguration,
- );
-
- return () =>
- window.removeEventListener(
- FEATURE_CONFIGURATION_EVENT,
- refreshFeatureConfiguration,
- );
- }, []);
-
- const isNavigationItemEnabled = (item: NavItem) =>
- isFeatureEnabled(
- featureIdByNavigationId[item.id],
- featureConfiguration,
- featureGroupConfiguration,
- );
-
- const isItemActive = (href: string) => {
-    if (href === '/' && pathname === '/') return true;
-    if (href !== '/' && pathname?.startsWith(href)) return true;
-    return false;
-  };
-
-  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
-  const toggleSection = (title: string) =>
-    setCollapsedSections((prev) => ({ ...prev, [title]: !prev[title] }));
-
-  // Route-aware active detection. Player 360 owns individual player detail pages
-  // (/admin/crm/[id]) that don't match any other CRM item.
-  const crmPaths = navSections.find((s) => s.title === 'CUSTOMERS')?.items.map((i) => i.path) ?? [];
-  const sectionItemActive = (path: string) => {
-    if (path === '/admin/crm') return pathname === '/admin/crm';
-    if (path === '/admin/crm/players') {
-      const p = pathname ?? '';
-      const isPlayerDetail =
-        p.startsWith('/admin/crm/') &&
-        !crmPaths.some((cp) => cp !== '/admin/crm' && p.startsWith(cp));
-      return p.startsWith('/admin/crm/players') || isPlayerDetail;
-    }
-    return isItemActive(path);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('admin_session');
-localStorage.removeItem('admin_role');
-    window.location.href = '/admin/login';
-  };
-
-  return (
-    <>
-      {/* Mobile Overlay */}
-      <div className={`mobile-overlay ${isOpen ? 'open' : ''}`} onClick={onClose} />
-
-      <aside className={`ds-sidebar sidebar ${isOpen ? 'open' : ''}`}>
-        {/* Brand */}
-        <div className="logo-area">
-<div className="logo-row">
-<img
-src="/assets/logo.png"
-alt="Betika"
-className="logo-img"
-/>
-            <span className="logo-text">
-              Betika<span className="text-yellow">.</span>
-            </span>
-          </div>
-          {/* Mobile Close Button */}
-          <button className="mobile-close-btn" onClick={onClose}>
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Navigation */}
-        <nav className="nav-container">
-          <p className="nav-title nav-title-first">MAIN MENU</p>
-          <div className="nav-list">
- {[dashboardItem].filter((item) => !item.flag || features[item.flag]).filter(isNavigationItemEnabled).map((item) => {
- const isActive = pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  id={item.id}
-                  className={`nav-item ${isActive ? 'active' : ''}`}
-                  onClick={onClose}
-                >
-                  <item.icon size={20} />
-                  <span className="nav-item-label">{item.name}</span>
-                  {isActive && <ChevronRight size={16} />}
-                </Link>
-              );
-            })}
-          </div>
-
- {navSections.map((section) => {
- const visibleItems = section.items.filter((item) => !item.flag || features[item.flag]).filter(isNavigationItemEnabled);
- if (visibleItems.length === 0) return null;
-
- const collapsed = collapsedSections[section.title] ?? false;
- const hasActiveChild = visibleItems.some((it) => sectionItemActive(it.path));
- return (
-              <div key={section.title} className="nav-group">
-                <button
-                  type="button"
-                  className="nav-title nav-title-toggle mt-6"
-                  aria-expanded={!collapsed}
-                  onClick={() => toggleSection(section.title)}
-                >
-                  <span className="nav-section-label">{section.title}</span>
-                  {hasActiveChild && collapsed && <span className="nav-group-dot" aria-hidden />}
-                  {collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
-                </button>
-                {!collapsed && (
-                  <div className="nav-list">
- {visibleItems.map((item) => {
- const isActive = sectionItemActive(item.path);
-                      return (
-                        <Link
-                          key={item.path}
-                          href={item.path}
-                          id={item.id}
-                          className={`nav-item ${isActive ? 'active' : ''}`}
-                          onClick={onClose}
-                        >
-                          <item.icon size={20} />
-                          <span className="nav-item-label">{item.name}</span>
-                          {isActive && <ChevronRight size={16} />}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </nav>
-
-        {/* Footer Profile */}
-        <div className="footer-profile">
-          <div className="profile-bg">
-            <div className="avatar">A</div>
-            <div className="meta">
-              <p className="name">Admin User</p>
-              <p className="role">Super Admin</p>
-            </div>
-            <button className="logout" onClick={handleLogout}><LogOut size={16} /></button>
-          </div>
-        </div>
-      </aside>
-    </>
-  );
+return (
+<li key={item.label}>
+<Link
+href={item.href ?? '/admin'}
+className={`ds-sidenav__item${isActive ? ' ds-sidenav__item--active' : ''}`}
+aria-current={isActive ? 'page' : undefined}
+>
+<span className="ds-sidenav__icon">{item.icon}</span>
+<span className="ds-sidenav__label">{item.label}</span>
+</Link>
+</li>
+);
+})}
+</ul>
+</div>
+))}
+</nav>
+</aside>
+);
 }

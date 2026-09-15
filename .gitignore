@@ -32,13 +32,6 @@ yarn-error.log*
 .pnpm-debug.log*
 *.log
 
-# Python artifacts
-__pycache__/
-*.py[cod]
-
-# Build output
-backend/dist/
-
 # env files (can opt-in for committing if needed)
 .env*
 
@@ -48,19 +41,3 @@ backend/dist/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Generated ML artifacts (regenerate with ml_pipeline scripts)
-ml_pipeline/data/
-ml_pipeline/models/
-ml_pipeline/plots/
-ml_pipeline/results/
-
-# Generated reports and documentation exports
-/design.md
-frontend/lighthouse-report.json
-frontend/step_*.png
-frontend/public/docs/*.pdf
-frontend/public/docs/images/
-frontend/*.png
-test-results/
-frontend/screenshots/

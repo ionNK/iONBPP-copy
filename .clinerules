@@ -3,3 +3,20 @@
 - Run cd as its own command before other commands.
 - NEVER run git commit or git push. Report completed work; the human commits.
 - NEVER modify files via shell commands (python -c, sed, awk, echo redirects). Always use the file editing tools (replace_in_file / write_to_file).
+
+## Design System (mandatory)
+- Canonical system: docs/unity-design-system.md. Application rules:
+ docs/prototype-style-guide.md. Read both before any UI work.
+- Import the T object from frontend/src/theme/tokens.ts; never hardcode hex/rgba
+ values inline. If a needed value is missing, STOP and ask — check the
+ canonical doc for the right primitive first and propose the mapping.
+- Reuse primitives from frontend/src/components/ui/; never re-declare in page
+ files. New primitives: propose first, then add to frontend/src/components/ui/
+ AND document in docs/prototype-style-guide.md in the same change.
+- Follow the page skeleton and interaction rules in the style guide.
+- Type sizes only from the Unity scale (20/15/14/12) — no 13px.
+- Spacing only from the Unity spacer scale.
+- This prototype is a light-surface adaptation — do not convert to dark
+ surfaces, and do not use the old Ionix palette (#17212f, #F2D641).
+- Icons from lucide-react only. No pushes.
+
