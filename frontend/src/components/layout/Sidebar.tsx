@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Route,
   Search,
+  Settings,
   ShieldCheck,
   Trophy,
   Upload,
@@ -65,6 +66,12 @@ items: [
 { label: 'Segments', href: '/admin/crm/segments', icon: <ChartPie size={16} />, comingSoon: true },
       { label: 'VIP', href: '/admin/crm/vip', icon: <Crown size={16} />, comingSoon: true },
       { label: 'Safer Gambling', href: '/admin/crm/safer-gambling', icon: <ShieldCheck size={16} />, comingSoon: true },
+],
+},
+{
+label: 'Administration',
+items: [
+{ label: 'Settings', href: '/admin/settings', icon: <Settings size={16} /> },
 ],
 },
 ];
