@@ -5,6 +5,9 @@ export const ALERT_RATIO = 0.9;
 
 export type DashboardPeriod = '7d' | '30d' | 'month';
 
+/** Donut breakdown dimensions. `provider` is derived from type — see PROVIDER_BY_TYPE. */
+export type SpendDimension = 'type' | 'provider' | 'market';
+
 export interface DashboardPoint {
  day: string;
  spend: number;
@@ -13,13 +16,71 @@ export interface DashboardPoint {
  alerts: number;
 }
 
-export interface TypeSpend {
- type: string;
+/** One donut slice / legend row — `name` is the category value in the selected dimension. */
+export interface CategorySpend {
+ name: string;
  amount: number;
+}
+
+/** Global dashboard filter — every surface narrows to promos whose dimension value matches. */
+export interface DashboardFilter {
+ dimension: SpendDimension;
+ value: string;
 }
 
 const PERIOD_DAYS: Record<DashboardPeriod, number> = { '7d': 7, '30d': 30, month: 30 };
 const DAYS_REPORTED = 15;
+
+/**
+ * Fixed "today" for schedule maths — the same 15 September the period series
+ * reports through (DAYS_REPORTED). The year is pinned so results never drift.
+ */
+const REPORT_YEAR = 2026;
+const REPORT_MONTH = 8; /* September, zero-indexed */
+const REPORT_TODAY = Date.UTC(REPORT_YEAR, REPORT_MONTH, DAYS_REPORTED);
+const DAY_MS = 24 * 60 * 60 * 1000;
+const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+/**
+ * Provider is NOT a field on Promo — it is DERIVED from the promotion type.
+ * Aviator/crash → Spribe; sportsbook → Sportsbook; casino → Provider TBC;
+ * wallet-level offers → Platform. Unknown types fall back to Provider TBC.
+ */
+const PROVIDER_FALLBACK = 'Provider TBC';
+const PROVIDER_BY_TYPE: Record<string, string> = {
+ /* Aviator / crash */
+ 'Freebet — Welcome': 'Spribe',
+ 'Welcome Offer': 'Spribe',
+ Leaderboard: 'Spribe',
+ Missions: 'Spribe',
+ /* Sportsbook */
+ 'Cashback — Multibet': 'Sportsbook',
+ 'Cashback — Bet Insurance': 'Sportsbook',
+ Cashback: 'Sportsbook',
+ 'Odds Boost': 'Sportsbook',
+ 'Freebet — Rain': 'Sportsbook',
+ 'Freebet — Event': 'Sportsbook',
+ 'Freebet Award': 'Sportsbook',
+ /* Casino */
+ 'Free Spins': PROVIDER_FALLBACK,
+ Jackpot: PROVIDER_FALLBACK,
+ /* Wallet-level — not tied to a game provider */
+ 'Deposit Match': 'Platform',
+ Referral: 'Platform',
+ 'Referral Reward': 'Platform',
+};
+
+export const providerOf = (promo: Promo): string => PROVIDER_BY_TYPE[promo.type] ?? PROVIDER_FALLBACK;
+
+/** Category accessor shared by the donut, the global filter and the palette order. */
+export function dimensionValue(promo: Promo, dimension: SpendDimension): string {
+ if (dimension === 'provider') return providerOf(promo);
+ return dimension === 'market' ? promo.market : promo.type;
+}
+
+export function applyFilter(promos: Promo[], filter: DashboardFilter | null): Promo[] {
+ return filter ? promos.filter((promo) => dimensionValue(promo, filter.dimension) === filter.value) : promos;
+}
 
 const sum = (promos: Promo[], key: 'spend' | 'budget') =>
  promos.reduce((total, promo) => total + (promo[key] ?? 0), 0);
@@ -51,14 +112,49 @@ export function deriveDashboardSeries(promos: Promo[], period: DashboardPeriod):
  });
 }
 
-export function deriveTypeSpend(promos: Promo[]): TypeSpend[] {
+/** Spend grouped by the selected dimension, largest first. */
+export function spendByDimension(promos: Promo[], dimension: SpendDimension): CategorySpend[] {
  return Array.from(
- promos.reduce((byType, promo) => {
- const amount = promo.spend ?? 0;
- byType.set(promo.type, (byType.get(promo.type) ?? 0) + amount);
- return byType;
+ promos.reduce((byName, promo) => {
+ const name = dimensionValue(promo, dimension);
+ byName.set(name, (byName.get(name) ?? 0) + (promo.spend ?? 0));
+ return byName;
  }, new Map<string, number>()),
- ).map(([type, amount]) => ({ type, amount })).sort((a, b) => b.amount - a.amount);
+ ).map(([name, amount]) => ({ name, amount })).sort((a, b) => b.amount - a.amount);
+}
+
+/* Schedule strings: "DD Mon – DD Mon", "DD Mon – ongoing", "YYYY-MM-DD – …" or "Draft". */
+function parseScheduleDate(token: string): number | null {
+ const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(token);
+ if (iso) return Date.UTC(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+ const dayMonth = /^(\d{1,2})\s+([A-Za-z]{3})/.exec(token);
+ if (!dayMonth) return null;
+ const month = MONTHS.indexOf(dayMonth[2].toLowerCase());
+ return month < 0 ? null : Date.UTC(REPORT_YEAR, month, Number(dayMonth[1]));
+}
+
+function scheduleBounds(schedule: string): { start: number | null; end: number | null } {
+ const [startToken = '', endToken = ''] = schedule.split(/\s[–-]\s/);
+ return { start: parseScheduleDate(startToken.trim()), end: parseScheduleDate(endToken.trim()) };
+}
+
+/* Inclusive window: today ≤ date ≤ today + days. */
+const withinNextDays = (date: number | null, days: number) =>
+ date !== null && date >= REPORT_TODAY && date <= REPORT_TODAY + days * DAY_MS;
+
+/** Active promotions whose end date falls within the next `days` — ongoing has no end and is excluded. */
+export function endingWithin(promos: Promo[], days = 7): Promo[] {
+ return promos.filter((promo) => promo.status === 'active' && withinNextDays(scheduleBounds(promo.schedule).end, days));
+}
+
+/** Scheduled promotions whose start date falls within the next `days`. */
+export function startingWithin(promos: Promo[], days = 7): Promo[] {
+ return promos.filter((promo) => promo.status === 'scheduled' && withinNextDays(scheduleBounds(promo.schedule).start, days));
+}
+
+/** Active promotions at or above the alert threshold (BR-6). */
+export function activeBudgetAlerts(promos: Promo[]): Promo[] {
+ return promos.filter((promo) => promo.status === 'active' && promo.budget != null && promo.spend != null && promo.spend / promo.budget >= ALERT_RATIO);
 }
 
 export function periodLabel(period: DashboardPeriod): string {

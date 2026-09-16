@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CircleAlert, CircleCheck, Clock3, Info, TriangleAlert, Zap } from 'lucide-react';
+import { AlertTriangle, CalendarClock, CalendarPlus, ChevronRight, CircleAlert, CircleCheck, ClipboardCheck, Clock3, Info, TriangleAlert, Zap } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import T, { dashboardPalette } from '@/theme/tokens';
-import { Badge, GhostButton, StatChip, ZambiaFlag } from '@/components/ui';
+import { Badge, GhostButton, ZambiaFlag } from '@/components/ui';
 import { PROMO_SEED, loadPromotions } from '@/lib/promotions';
 import type { Promo, PromoStatus } from '@/lib/promotions';
-import { ALERT_RATIO, deriveDashboardSeries, deriveTypeSpend, periodLabel } from '@/lib/dashboard';
+import { ALERT_RATIO, activeBudgetAlerts, applyFilter, deriveDashboardSeries, dimensionValue, endingWithin, periodLabel, spendByDimension, startingWithin } from '@/lib/dashboard';
+import type { DashboardFilter, SpendDimension } from '@/lib/dashboard';
 /* Shared page-skeleton structural classes (top bar, container, chips) */
 import '../promotions/promotions.css';
 import './dashboard.css';
@@ -35,8 +36,21 @@ const fmtAxisK = (n: number) => (n >= 1000 ? `K ${Math.round(n / 1000)}k` : `K $
 const fmtPct = (n: number) => `${Math.round(n)}%`;
 const fmtCount = (n: number) => `${Math.round(n)}`;
 
-/* Stable type-to-palette mapping — palette entries are Unity-backed tokens. */
-const typeColour = (type: string, order: string[]) => dashboardPalette[Math.max(0, order.indexOf(type)) % dashboardPalette.length];
+/* Donut breakdown dimensions — the segmented control in the "Spend by …" card. */
+const DIMENSIONS: { value: SpendDimension; label: string }[] = [
+  { value: 'type', label: 'Type' },
+  { value: 'provider', label: 'Provider' },
+  { value: 'market', label: 'Market' },
+];
+
+/* Stable category-to-palette mapping — palette entries are Unity-backed tokens. */
+const categoryColour = (name: string, order: string[]) => dashboardPalette[Math.max(0, order.indexOf(name)) % dashboardPalette.length];
+
+/* Token hex → translucent tint. Only ever fed T.* values, so no colour literals live in this file. */
+const tint = (hex: string, alpha: number) => {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
+};
 
 /* Activity feed (derived from the promotions list). */
 type ActivityKind = 'alert' | 'scheduled' | 'expired' | 'activation';
@@ -127,11 +141,47 @@ function LegendItem({ label, color, dashed }: { label: string; color: string; da
 }
 
 /* Filtered-empty notice — offWhite panel + Info icon + Footnote text. */
-function FilteredEmpty({ type }: { type: string }) {
+function FilteredEmpty({ value }: { value: string }) {
   return (
     <div className="dash-notice" style={{ background: T.offWhite, border: `1px solid ${T.border}`, borderRadius: T.radiusSm, color: T.textSecondary }}>
       <Info size={16} aria-hidden="true" />
-      <span>No {type} promotions in this period.</span>
+      <span>No {value} promotions in this period.</span>
+    </div>
+  );
+}
+
+/* "Needs attention" card — whole card is a link; 0 counts are de-emphasised, not hidden. */
+interface AttentionCardProps {
+  label: string;
+  count: number;
+  icon: typeof Info;
+  accent: string;
+  onOpen: () => void;
+}
+function AttentionCard({ label, count, icon: Icon, accent, onOpen }: AttentionCardProps) {
+  const empty = count === 0;
+  return (
+    <div
+      className="dash-attention__card dash-card--interactive dash-card--clickable"
+      role="link"
+      tabIndex={0}
+      aria-label={`${label}: ${count}`}
+      onClick={onOpen}
+      onKeyDown={(e) => { if (e.key === 'Enter') onOpen(); }}
+      style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusMd, ['--dash-shadow' as string]: T.shadowRaise }}
+    >
+      <span
+        className="dash-attention__icon"
+        style={{ background: empty ? T.offWhite : tint(accent, 0.1), color: empty ? T.textSecondary : accent, borderRadius: T.radiusPill }}
+        aria-hidden="true"
+      >
+        <Icon size={16} />
+      </span>
+      <div className="dash-attention__copy">
+        <div className="dash-attention__label" style={{ color: T.textSecondary }}>{label}</div>
+        <div className="dash-attention__count" style={{ color: empty ? T.textSecondary : T.textPrimary }}>{count}</div>
+      </div>
+      <ChevronRight size={16} className="dash-attention__chevron" style={{ color: T.textSecondary }} aria-hidden="true" />
     </div>
   );
 }
@@ -192,8 +242,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const [promos, setPromos] = useState<Promo[]>(PROMO_SEED);
   const [period, setPeriod] = useState<Period>('30d');
-  const [hoverType, setHoverType] = useState<string | null>(null);
-  const [filterType, setFilterType] = useState<string | null>(null);
+  const [dimension, setDimension] = useState<SpendDimension>('type');
+  const [hoverName, setHoverName] = useState<string | null>(null);
+  const [filter, setFilter] = useState<DashboardFilter | null>(null);
   const [reduced, setReduced] = useState(false);
 
   /* Hydrate from the shared mock store so counts match the promotions list. */
@@ -203,18 +254,29 @@ export default function DashboardPage() {
     setReduced(prefersReducedMotion());
   }, []);
 
-  /* Type order (spend desc, unfiltered) → stable palette assignment. */
-  const typeOrder = useMemo(() => deriveTypeSpend(promos).map((t) => t.type), [promos]);
-  const colourOf = (type: string) => typeColour(type, typeOrder);
+  /* Category order within the selected dimension (spend desc, unfiltered) → stable palette assignment. */
+  const categoryOrder = useMemo(() => spendByDimension(promos, dimension).map((c) => c.name), [promos, dimension]);
+  const colourOf = (name: string) => categoryColour(name, categoryOrder);
 
   /* Everything below derives from the filtered list. */
-  const filtered = useMemo(() => (filterType ? promos.filter((p) => p.type === filterType) : promos), [promos, filterType]);
+  const filtered = useMemo(() => applyFilter(promos, filter), [promos, filter]);
 
   const counts = useMemo(() => {
     const c: Record<PromoStatus, number> = { active: 0, scheduled: 0, expired: 0, draft: 0, pending: 0 };
     filtered.forEach((p) => c[p.status]++);
     return c;
   }, [filtered]);
+
+  /* "Needs attention" counts — schedule maths pinned to the report date in lib/dashboard. */
+  const needs = useMemo(
+    () => ({
+      pending: counts.pending,
+      alerts: activeBudgetAlerts(filtered).length,
+      ending: endingWithin(filtered).length,
+      starting: startingWithin(filtered).length,
+    }),
+    [filtered, counts.pending],
+  );
 
   const series = useMemo(() => deriveDashboardSeries(filtered, period), [filtered, period]);
   const totalBudget = useMemo(() => filtered.reduce((s, p) => s + (p.budget ?? 0), 0), [filtered]);
@@ -229,10 +291,10 @@ export default function DashboardPage() {
   );
   const pace = totalBudget / 2; /* linear month pace at day 15 of 30 */
 
-  /* Donut + legend (respects filter — a filtered donut shows the single type). */
-  const typeSpend = useMemo(() => deriveTypeSpend(filtered), [filtered]);
-  const typeTotal = typeSpend.reduce((s, t) => s + t.amount, 0);
-  const hovered = hoverType ? typeSpend.find((t) => t.type === hoverType) : null;
+  /* Donut + legend (respects filter — a filtered donut shows the single category). */
+  const breakdown = useMemo(() => spendByDimension(filtered, dimension), [filtered, dimension]);
+  const breakdownTotal = breakdown.reduce((s, c) => s + c.amount, 0);
+  const hovered = hoverName ? breakdown.find((c) => c.name === hoverName) : null;
 
   /* Bars: top 6 promos by spend. */
   const bars = useMemo(
@@ -241,8 +303,8 @@ export default function DashboardPage() {
         .filter((p) => p.budget != null && p.spend != null && p.spend > 0)
         .sort((a, b) => b.spend! - a.spend!)
         .slice(0, 6)
-        .map((p) => ({ id: p.id, name: p.name, type: p.type, budget: p.budget!, spend: p.spend!, ratio: p.spend! / p.budget! })),
-    [filtered],
+        .map((p) => ({ id: p.id, name: p.name, category: dimensionValue(p, dimension), budget: p.budget!, spend: p.spend!, ratio: p.spend! / p.budget! })),
+    [filtered, dimension],
   );
 
   /* Promotions at or above the alert threshold, worst first. */
@@ -263,9 +325,19 @@ export default function DashboardPage() {
   };
 
   const goToList = () => router.push('/admin/promotions');
-  const toggleFilter = (type: string) => setFilterType((cur) => (cur === type ? null : type));
-  const dim = (type: string) => (hoverType && hoverType !== type ? 0.4 : 1);
-  const chartKey = `${period}-${filterType ?? 'all'}`;
+  const goToApprovals = () => router.push('/admin/promotions/approvals');
+  /* Clicking a segment/legend row filters the dashboard by that category; clicking again clears. */
+  const toggleFilter = (value: string) => setFilter((cur) => (cur && cur.dimension === dimension && cur.value === value ? null : { dimension, value }));
+  /* Switching dimension while a filter is active clears the filter. */
+  const switchDimension = (next: SpendDimension) => {
+    if (next === dimension) return;
+    setDimension(next);
+    setHoverName(null);
+    setFilter(null);
+  };
+  const isFiltered = (value: string) => filter?.dimension === dimension && filter.value === value;
+  const dim = (name: string) => (hoverName && hoverName !== name ? 0.4 : 1);
+  const chartKey = `${period}-${dimension}-${filter?.value ?? 'all'}`;
   const aheadOfPace = totalSpend > pace;
 
   return (
@@ -276,9 +348,9 @@ export default function DashboardPage() {
           <div className="promo-title-row">
             <h1 className="promo-title" style={{ color: T.textPrimary }}>Dashboard</h1>
             <ZambiaFlag />
-            {filterType && (
-              <button type="button" className="dash-filter-badge" onClick={() => setFilterType(null)} aria-label={`Clear filter ${filterType}`}>
-                <Badge color={T.navy}>Filtered: {filterType} ×</Badge>
+            {filter && (
+              <button type="button" className="dash-filter-badge" onClick={() => setFilter(null)} aria-label={`Clear filter ${filter.value}`}>
+                <Badge color={T.navy}>Filtered: {filter.value} · {periodLabel(period)} ×</Badge>
               </button>
             )}
           </div>
@@ -308,14 +380,13 @@ export default function DashboardPage() {
       </div>
 
       <div className="promo-container">
-        {/* Status overview — each chip links through to the promotions list. */}
-        <div className="promo-chips">
-          <StatChip label="Active" value={counts.active} active={false} onClick={goToList} />
-          <StatChip label="Scheduled" value={counts.scheduled} active={false} onClick={goToList} />
-          <StatChip label="Pending approval" value={counts.pending} active={false} onClick={goToList} />
-          <StatChip label="Draft" value={counts.draft} active={false} onClick={goToList} />
-          <StatChip label="Total promotions" value={filtered.length} active={false} onClick={goToList} />
-        </div>
+        {/* Needs attention — four action cards; each links through to the relevant list. */}
+        <nav className="dash-attention" aria-label="Needs attention">
+          <AttentionCard label="Pending approvals" count={needs.pending} icon={ClipboardCheck} accent={T.blue} onOpen={goToApprovals} />
+          <AttentionCard label="Budget alerts" count={needs.alerts} icon={AlertTriangle} accent={T.destructiveActive} onOpen={goToList} />
+          <AttentionCard label="Ending in 7 days" count={needs.ending} icon={CalendarClock} accent={T.darkGrey} onOpen={goToList} />
+          <AttentionCard label="Starting in 7 days" count={needs.starting} icon={CalendarPlus} accent={T.progressActive} onOpen={goToList} />
+        </nav>
 
         {/* KPI cards — count-up values, delta pills, 36px sparklines. */}
         <div className="dash-kpis">
@@ -419,22 +490,42 @@ export default function DashboardPage() {
           <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
             <div className="dash-card__header">
               <div>
-                <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Spend by type</h2>
+                <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Spend by {dimension}</h2>
                 <p className="dash-card__caption" style={{ color: T.textSecondary }}>Click a segment to filter the dashboard</p>
+              </div>
+              {/* Dimension toggle — same segmented control as the period switch. */}
+              <div className="dash-segmented" role="group" aria-label="Spend breakdown" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusPill }}>
+                {DIMENSIONS.map((opt) => {
+                  const active = opt.value === dimension;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className="dash-segmented__button"
+                      aria-pressed={active}
+                      onClick={() => switchDimension(opt.value)}
+                      style={{ background: active ? T.navy : 'transparent', color: active ? T.white : T.textSecondary, borderRadius: T.radiusPill }}
+                      onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = T.offWhite; }}
+                      onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {typeSpend.length === 0 && filterType ? (
-              <FilteredEmpty type={filterType} />
+            {breakdown.length === 0 && filter ? (
+              <FilteredEmpty value={filter.value} />
             ) : (
               <>
                 <div className="dash-donut">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart key={chartKey}>
                       <Pie
-                        data={typeSpend}
+                        data={breakdown}
                         dataKey="amount"
-                        nameKey="type"
+                        nameKey="name"
                         cx="50%"
                         cy="50%"
                         innerRadius={68}
@@ -445,43 +536,43 @@ export default function DashboardPage() {
                         cursor="pointer"
                         isAnimationActive={!reduced}
                         animationDuration={600}
-                        onMouseEnter={(_, index: number) => setHoverType(typeSpend[index]?.type ?? null)}
-                        onMouseLeave={() => setHoverType(null)}
-                        onClick={(_, index: number) => { const t = typeSpend[index]; if (t) toggleFilter(t.type); }}
+                        onMouseEnter={(_, index: number) => setHoverName(breakdown[index]?.name ?? null)}
+                        onMouseLeave={() => setHoverName(null)}
+                        onClick={(_, index: number) => { const c = breakdown[index]; if (c) toggleFilter(c.name); }}
                       >
-                        {typeSpend.map((t) => (
-                          <Cell key={t.type} fill={colourOf(t.type)} fillOpacity={dim(t.type)} />
+                        {breakdown.map((c) => (
+                          <Cell key={c.name} fill={colourOf(c.name)} fillOpacity={dim(c.name)} />
                         ))}
                       </Pie>
                     </PieChart>
                   </ResponsiveContainer>
                   {/* Centre label — plain HTML over the chart (not a Recharts label). */}
                   <div className="dash-donut__centre">
-                    <span className="dash-donut__label" style={{ color: T.textSecondary }}>{hovered ? hovered.type : 'Total'}</span>
-                    <span className="dash-donut__amount" style={{ color: T.textPrimary }}>{fmtK(hovered ? hovered.amount : typeTotal)}</span>
+                    <span className="dash-donut__label" style={{ color: T.textSecondary }}>{hovered ? hovered.name : 'Total'}</span>
+                    <span className="dash-donut__amount" style={{ color: T.textPrimary }}>{fmtK(hovered ? hovered.amount : breakdownTotal)}</span>
                     {hovered && (
-                      <span className="dash-donut__sub" style={{ color: T.textSecondary }}>{fmtPct(typeTotal > 0 ? (hovered.amount / typeTotal) * 100 : 0)} of spend</span>
+                      <span className="dash-donut__sub" style={{ color: T.textSecondary }}>{fmtPct(breakdownTotal > 0 ? (hovered.amount / breakdownTotal) * 100 : 0)} of spend</span>
                     )}
                   </div>
                 </div>
 
                 {/* Legend rows — clickable filters, mirror hover dimming. */}
                 <div className="dash-type-legend">
-                  {typeSpend.map((t) => (
+                  {breakdown.map((c) => (
                     <button
-                      key={t.type}
+                      key={c.name}
                       type="button"
                       className="dash-type-legend__row"
-                      aria-pressed={filterType === t.type}
-                      onClick={() => toggleFilter(t.type)}
-                      onMouseEnter={() => setHoverType(t.type)}
-                      onMouseLeave={() => setHoverType(null)}
-                      style={{ opacity: dim(t.type), color: T.textPrimary, fontWeight: filterType === t.type ? 600 : 400 }}
+                      aria-pressed={isFiltered(c.name)}
+                      onClick={() => toggleFilter(c.name)}
+                      onMouseEnter={() => setHoverName(c.name)}
+                      onMouseLeave={() => setHoverName(null)}
+                      style={{ opacity: dim(c.name), color: T.textPrimary, fontWeight: isFiltered(c.name) ? 600 : 400 }}
                     >
-                      <span className="dash-type-legend__dot" style={{ background: colourOf(t.type), borderRadius: T.radiusPill }} aria-hidden="true" />
-                      <span className="dash-type-legend__type">{t.type}</span>
-                      <span>{fmtK(t.amount)}</span>
-                      <span style={{ color: T.textSecondary }}>{fmtPct(typeTotal > 0 ? (t.amount / typeTotal) * 100 : 0)}</span>
+                      <span className="dash-type-legend__dot" style={{ background: colourOf(c.name), borderRadius: T.radiusPill }} aria-hidden="true" />
+                      <span className="dash-type-legend__type">{c.name}</span>
+                      <span>{fmtK(c.amount)}</span>
+                      <span style={{ color: T.textSecondary }}>{fmtPct(breakdownTotal > 0 ? (c.amount / breakdownTotal) * 100 : 0)}</span>
                     </button>
                   ))}
                 </div>
@@ -504,7 +595,7 @@ export default function DashboardPage() {
           </div>
 
           {bars.length === 0 ? (
-            filterType ? <FilteredEmpty type={filterType} /> : <p className="dash-empty" style={{ color: T.textSecondary }}>No promotions have recorded spend.</p>
+            filter ? <FilteredEmpty value={filter.value} /> : <p className="dash-empty" style={{ color: T.textSecondary }}>No promotions have recorded spend.</p>
           ) : (
             <div className="dash-chart dash-chart--bar">
               <ResponsiveContainer width="100%" height="100%">
@@ -520,16 +611,16 @@ export default function DashboardPage() {
                     radius={[0, 4, 4, 0]}
                     cursor="pointer"
                     onClick={goToList}
-                    onMouseEnter={(_, index: number) => setHoverType(bars[index]?.type ?? null)}
-                    onMouseLeave={() => setHoverType(null)}
+                    onMouseEnter={(_, index: number) => setHoverName(bars[index]?.category ?? null)}
+                    onMouseLeave={() => setHoverName(null)}
                     isAnimationActive={!reduced}
                     animationDuration={600}
                   >
                     {bars.map((b) => (
                       <Cell
                         key={b.id}
-                        fill={colourOf(b.type)}
-                        fillOpacity={dim(b.type)}
+                        fill={colourOf(b.category)}
+                        fillOpacity={dim(b.category)}
                         stroke={b.ratio >= ALERT_RATIO ? T.destructiveActive : undefined}
                         strokeWidth={b.ratio >= ALERT_RATIO ? 2 : 0}
                       />
@@ -554,7 +645,7 @@ export default function DashboardPage() {
           </div>
 
           {attention.length === 0 ? (
-            filterType ? <FilteredEmpty type={filterType} /> : <p className="dash-empty" style={{ color: T.textSecondary }}>No promotions are near their budget.</p>
+            filter ? <FilteredEmpty value={filter.value} /> : <p className="dash-empty" style={{ color: T.textSecondary }}>No promotions are near their budget.</p>
           ) : (
             <ul className="dash-attention__list">
               {attention.map((p, i) => {
@@ -600,7 +691,7 @@ export default function DashboardPage() {
           </div>
 
           {activity.length === 0 ? (
-            filterType ? <FilteredEmpty type={filterType} /> : <p className="dash-empty" style={{ color: T.textSecondary }}>No recent activity.</p>
+            filter ? <FilteredEmpty value={filter.value} /> : <p className="dash-empty" style={{ color: T.textSecondary }}>No recent activity.</p>
           ) : (
             <ul className="dash-activity__list">
               {activity.map((item, i) => {

@@ -21,14 +21,69 @@
   gap: 12px;
 }
 
+/* "Needs attention" strip — 2 × 2 until the 1024 breakpoint, then 4 × 1fr. */
+.dash-attention {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 @media (min-width: 1024px) {
   .dash-grid {
     grid-template-columns: 3fr 2fr;
   }
 
-  .dash-kpis {
+  .dash-kpis,
+  .dash-attention {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+}
+
+/* Attention card — whole card is a link (role="link"); raise on hover via
+ * .dash-card--interactive / --dash-shadow like the KPI cards. */
+.dash-attention__card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px 16px;
+}
+
+.dash-attention__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+}
+
+.dash-attention__copy {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Caption Bold — 12px/600 uppercase label (same treatment as sidebar group
+ * labels) above a 20px/600 count. */
+.dash-attention__label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-attention__count {
+  margin-top: 2px;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.dash-attention__chevron {
+  flex: none;
 }
 
 .dash-card {
