@@ -14,15 +14,110 @@
   gap: 20px;
 }
 
+/* KPI row — 2-up until the 1024 breakpoint, then 4-up. */
+.dash-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 @media (min-width: 1024px) {
   .dash-grid {
     grid-template-columns: 3fr 2fr;
+  }
+
+  .dash-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
 .dash-card {
   min-width: 0;
   padding: 20px 24px;
+}
+
+/* Hover raise — shadow colour comes from T.shadowRaise via --dash-shadow. */
+.dash-card--interactive {
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+
+.dash-card--interactive:hover {
+  box-shadow: var(--dash-shadow);
+  transform: translateY(-1px);
+}
+
+.dash-card--clickable {
+  cursor: pointer;
+}
+
+/* Header controls (period control + filter badge). */
+.dash-topbar__controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dash-filter-badge {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dash-segmented {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.dash-segmented__button {
+  border: 0;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+/* KPI cards. */
+.dash-kpi {
+  padding: 16px;
+}
+
+.dash-kpi__label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Unity type scale: 20px metric value. */
+.dash-kpi__value {
+  margin-top: 8px;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.dash-kpi__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.dash-delta {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dash-spark {
+  height: 36px;
+  margin-top: 12px;
 }
 
 .dash-card__header {
@@ -46,29 +141,14 @@
   line-height: 1.5;
 }
 
-.dash-card__stat {
-  flex: none;
-  text-align: right;
-}
-
-.dash-card__stat-value {
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.dash-card__stat-caption {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 2px;
-  font-size: 12px;
-}
-
 /* Fixed-height host for ResponsiveContainer. */
 .dash-chart {
   width: 100%;
   height: 280px;
+}
+
+.dash-chart--bar {
+  height: 252px;
 }
 
 /* Hand-rolled chart legend — swatch is a 16px line (solid or dashed). */
@@ -76,8 +156,80 @@
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  margin-top: 12px;
   font-size: 12px;
+}
+
+/* Donut host + absolutely positioned HTML centre label. */
+.dash-donut {
+  position: relative;
+  height: 232px;
+}
+
+.dash-donut__centre {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+}
+
+.dash-donut__label,
+.dash-donut__sub {
+  font-size: 12px;
+}
+
+.dash-donut__amount {
+  margin: 2px 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+/* Legend rows under the donut — also act as filters. */
+.dash-type-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.dash-type-legend__row {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+
+.dash-type-legend__dot {
+  width: 8px;
+  height: 8px;
+}
+
+.dash-type-legend__type {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Filtered-empty notice — offWhite panel + Info icon + Footnote text. */
+.dash-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .dash-legend__item {
@@ -163,4 +315,58 @@
 .dash-empty {
   margin: 0;
   font-size: 14px;
+}
+
+/* Recent activity list. */
+.dash-activity__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dash-activity__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin: 0 -12px;
+  transition: background-color 150ms ease;
+}
+
+.dash-activity__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+
+.dash-activity__copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-activity__title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.dash-activity__time {
+  flex: none;
+  font-size: 12px;
+}
+
+/* Reduced motion — no raise transform/transition on cards. */
+@media (prefers-reduced-motion: reduce) {
+  .dash-card--interactive,
+  .dash-segmented__button,
+  .dash-type-legend__row,
+  .dash-activity__row {
+    transition: none;
+  }
+
+  .dash-card--interactive:hover {
+    transform: none;
+  }
 }

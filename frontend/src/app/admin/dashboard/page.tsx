@@ -2,23 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { TriangleAlert } from 'lucide-react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Line,
-  LineChart,
-  ReferenceLine,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import T from '@/theme/tokens';
+import { CircleAlert, CircleCheck, Clock3, Info, TriangleAlert, Zap } from 'lucide-react';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import T, { dashboardPalette } from '@/theme/tokens';
 import { Badge, GhostButton, StatChip, ZambiaFlag } from '@/components/ui';
 import { PROMO_SEED, loadPromotions } from '@/lib/promotions';
 import type { Promo, PromoStatus } from '@/lib/promotions';
+import { ALERT_RATIO, deriveDashboardSeries, deriveTypeSpend, periodLabel } from '@/lib/dashboard';
 /* Shared page-skeleton structural classes (top bar, container, chips) */
 import '../promotions/promotions.css';
 import './dashboard.css';
@@ -32,49 +22,71 @@ const STATUS: Record<PromoStatus, { label: string; color: string; ghost?: boolea
   pending: { label: 'Pending approval', color: T.navy, ghost: true },
 };
 
-/* Budget alert threshold — BR-6: alert at >=90%, never block. */
-const ALERT_RATIO = 0.9;
+type Period = '7d' | '30d' | 'month';
+const PERIODS: { value: Period; label: string }[] = [
+  { value: '7d', label: '7d' },
+  { value: '30d', label: '30d' },
+  { value: 'month', label: 'This month' },
+];
 
-const fmtK = (n: number) => `K ${n.toLocaleString()}`;
+const fmtK = (n: number) => `K ${Math.round(n).toLocaleString()}`;
 /* Axis tick format — compact thousands ("K 120k"). */
-const fmtAxisK = (n: number) => (n >= 1000 ? `K ${Math.round(n / 1000)}k` : `K ${n}`);
+const fmtAxisK = (n: number) => (n >= 1000 ? `K ${Math.round(n / 1000)}k` : `K ${Math.round(n)}`);
+const fmtPct = (n: number) => `${Math.round(n)}%`;
+const fmtCount = (n: number) => `${Math.round(n)}`;
 
-/* ---------------------------------------------------------------------------
- * Mock series — September 2026 month-to-date. Static prototype data; the
- * spend series is cumulative so it reads against the linear budget pace.
- * ------------------------------------------------------------------------- */
-const DAYS_IN_MONTH = 30;
+/* Stable type-to-palette mapping — palette entries are Unity-backed tokens. */
+const typeColour = (type: string, order: string[]) => dashboardPalette[Math.max(0, order.indexOf(type)) % dashboardPalette.length];
 
-/* Daily promo spend (ZMW) across all active promotions, 1–15 Sep. */
-const DAILY_SPEND = [8200, 7600, 9100, 12400, 14800, 15200, 9800, 8900, 9400, 10200, 11800, 16400, 17100, 10600, 9900];
+/* Activity feed (derived from the promotions list). */
+type ActivityKind = 'alert' | 'scheduled' | 'expired' | 'activation';
+interface ActivityItem { id: string; kind: ActivityKind; title: string; detail: string; minutesAgo: number }
+const ACTIVITY_COLOUR: Record<ActivityKind, string> = {
+  alert: T.destructiveActive,
+  scheduled: T.blue,
+  expired: T.darkGrey,
+  activation: T.progressActive,
+};
+const ACTIVITY_ICON: Record<ActivityKind, typeof Info> = { alert: CircleAlert, scheduled: Clock3, expired: CircleCheck, activation: Zap };
 
-const MONTHLY_BUDGET = 330000;
-
-interface SpendPoint {
-  day: string;
-  spend: number;
-  pace: number;
+function deriveActivity(promos: Promo[]): ActivityItem[] {
+  const items: ActivityItem[] = [];
+  promos.forEach((p, i) => {
+    const seed = (i + 1) * 37;
+    const ratio = p.budget && p.spend ? p.spend / p.budget : 0;
+    if (p.status === 'active' && ratio >= ALERT_RATIO) {
+      items.push({ id: `${p.id}-alert`, kind: 'alert', title: `${p.name} reached ${Math.round(ratio * 100)}% of budget`, detail: `${p.id} · ${p.type}`, minutesAgo: 20 + (seed % 90) });
+    }
+    if (p.status === 'active') items.push({ id: `${p.id}-live`, kind: 'activation', title: `${p.name} went live`, detail: `${p.id} · ${p.type}`, minutesAgo: 180 + (seed % 600) });
+    if (p.status === 'scheduled') items.push({ id: `${p.id}-sched`, kind: 'scheduled', title: `${p.name} scheduled`, detail: `${p.id} · ${p.schedule}`, minutesAgo: 60 + (seed % 400) });
+    if (p.status === 'expired') items.push({ id: `${p.id}-exp`, kind: 'expired', title: `${p.name} expired`, detail: `${p.id} · ${p.schedule}`, minutesAgo: 1440 + (seed % 2000) });
+  });
+  return items.sort((a, b) => a.minutesAgo - b.minutesAgo).slice(0, 6);
 }
 
-const SPEND_SERIES: SpendPoint[] = DAILY_SPEND.reduce<SpendPoint[]>((acc, daily, i) => {
-  const prev = acc.length ? acc[acc.length - 1].spend : 0;
-  acc.push({
-    day: `${i + 1} Sep`,
-    spend: prev + daily,
-    pace: Math.round((MONTHLY_BUDGET / DAYS_IN_MONTH) * (i + 1)),
-  });
-  return acc;
-}, []);
+const relativeTime = (m: number) => (m < 60 ? `${m}m ago` : m < 1440 ? `${Math.round(m / 60)}h ago` : `${Math.round(m / 1440)}d ago`);
 
-const MTD_SPEND = SPEND_SERIES[SPEND_SERIES.length - 1].spend;
-const MTD_PACE = SPEND_SERIES[SPEND_SERIES.length - 1].pace;
+/* Reduced motion — read once per render on the client; SSR defaults to false. */
+const prefersReducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* Awards credited per day, 1–15 Sep (count). */
-const AWARDS_SERIES = [
-  1240, 1180, 1320, 1710, 1990, 2050, 1410, 1290, 1330, 1460, 1620, 2210, 2340, 1520, 1440,
-].map((awards, i) => ({ day: `${i + 1} Sep`, awards }));
-
-const TOTAL_AWARDS = AWARDS_SERIES.reduce((s, p) => s + p.awards, 0);
+/* Count-up hook — 300ms rAF tween from 0 to `target`; re-runs when target
+ * changes. Under reduced motion the target is returned directly (no tween). */
+function useCountUp(target: number, reduced: boolean): number {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (reduced) return;
+    let frame = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / 300);
+      setValue(target * (1 - (1 - t) * (1 - t)));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [target, reduced]);
+  return reduced ? target : value;
+}
 
 /* ---------------------------------------------------------------------------
  * Custom tooltip. Recharts' TooltipProps generics fight the payload shape
@@ -114,46 +126,184 @@ function LegendItem({ label, color, dashed }: { label: string; color: string; da
   );
 }
 
+/* Filtered-empty notice — offWhite panel + Info icon + Footnote text. */
+function FilteredEmpty({ type }: { type: string }) {
+  return (
+    <div className="dash-notice" style={{ background: T.offWhite, border: `1px solid ${T.border}`, borderRadius: T.radiusSm, color: T.textSecondary }}>
+      <Info size={16} aria-hidden="true" />
+      <span>No {type} promotions in this period.</span>
+    </div>
+  );
+}
+
+/* Delta pill — ▲/▼ with good/bad tint. `invert` flips the semantics (alerts up = bad). */
+function DeltaPill({ pct, invert }: { pct: number; invert?: boolean }) {
+  const up = pct >= 0;
+  const good = invert ? !up : up;
+  return (
+    <span className="dash-delta" style={{ color: good ? T.success : T.destructive, background: good ? T.successBg : T.selectionBg, borderRadius: T.radiusPill }}>
+      {up ? '▲' : '▼'} {Math.abs(pct)}%
+    </span>
+  );
+}
+
+/* KPI card — count-up value, delta pill, 36px sparkline. */
+interface KpiCardProps {
+  label: string;
+  value: number;
+  format: (n: number) => string;
+  deltaPct: number;
+  invertDelta?: boolean;
+  accent: string;
+  series: { day: string; v: number }[];
+  chartKey: string;
+  reduced: boolean;
+  onClick?: () => void;
+}
+function KpiCard({ label, value, format, deltaPct, invertDelta, accent, series, chartKey, reduced, onClick }: KpiCardProps) {
+  const shown = useCountUp(value, reduced);
+  return (
+    <section
+      className={`dash-card dash-kpi dash-card--interactive${onClick ? ' dash-card--clickable' : ''}`}
+      style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm, ['--dash-shadow' as string]: T.shadowRaise }}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
+    >
+      <div className="dash-kpi__label" style={{ color: T.textSecondary }}>{label}</div>
+      <div className="dash-kpi__value" style={{ color: T.textPrimary }}>{format(shown)}</div>
+      <div className="dash-kpi__meta" style={{ color: T.textSecondary }}>
+        <DeltaPill pct={deltaPct} invert={invertDelta} />
+        <span>vs previous window</span>
+      </div>
+      <div className="dash-spark">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart key={chartKey} data={series} margin={{ top: 2, right: 2, bottom: 2, left: 2 }}>
+            <Line type="monotone" dataKey="v" stroke={accent} strokeWidth={2} dot={false} isAnimationActive={!reduced} animationDuration={600} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </section>
+  );
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [promos, setPromos] = useState<Promo[]>(PROMO_SEED);
+  const [period, setPeriod] = useState<Period>('30d');
+  const [hoverType, setHoverType] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<string | null>(null);
+  const [reduced, setReduced] = useState(false);
 
   /* Hydrate from the shared mock store so counts match the promotions list. */
   useEffect(() => {
-    /* eslint-disable-next-line react-hooks/set-state-in-effect -- mount-only hydration from localStorage */
+    /* eslint-disable-next-line react-hooks/set-state-in-effect -- mount-only hydration from localStorage + media query */
     setPromos(loadPromotions());
+    setReduced(prefersReducedMotion());
   }, []);
+
+  /* Type order (spend desc, unfiltered) → stable palette assignment. */
+  const typeOrder = useMemo(() => deriveTypeSpend(promos).map((t) => t.type), [promos]);
+  const colourOf = (type: string) => typeColour(type, typeOrder);
+
+  /* Everything below derives from the filtered list. */
+  const filtered = useMemo(() => (filterType ? promos.filter((p) => p.type === filterType) : promos), [promos, filterType]);
 
   const counts = useMemo(() => {
     const c: Record<PromoStatus, number> = { active: 0, scheduled: 0, expired: 0, draft: 0, pending: 0 };
-    promos.forEach((p) => c[p.status]++);
+    filtered.forEach((p) => c[p.status]++);
     return c;
-  }, [promos]);
+  }, [filtered]);
+
+  const series = useMemo(() => deriveDashboardSeries(filtered, period), [filtered, period]);
+  const totalBudget = useMemo(() => filtered.reduce((s, p) => s + (p.budget ?? 0), 0), [filtered]);
+  const totalSpend = useMemo(() => filtered.reduce((s, p) => s + (p.spend ?? 0), 0), [filtered]);
+  const utilisation = totalBudget > 0 ? (totalSpend / totalBudget) * 100 : 0;
+  const last = series[series.length - 1];
+
+  /* Hero: cumulative spend; daily deltas feed the spend sparkline. */
+  const hero = useMemo(
+    () => series.map((pt, i) => ({ day: pt.day, spend: pt.spend, daily: i === 0 ? pt.spend : pt.spend - series[i - 1].spend })),
+    [series],
+  );
+  const pace = totalBudget / 2; /* linear month pace at day 15 of 30 */
+
+  /* Donut + legend (respects filter — a filtered donut shows the single type). */
+  const typeSpend = useMemo(() => deriveTypeSpend(filtered), [filtered]);
+  const typeTotal = typeSpend.reduce((s, t) => s + t.amount, 0);
+  const hovered = hoverType ? typeSpend.find((t) => t.type === hoverType) : null;
+
+  /* Bars: top 6 promos by spend. */
+  const bars = useMemo(
+    () =>
+      filtered
+        .filter((p) => p.budget != null && p.spend != null && p.spend > 0)
+        .sort((a, b) => b.spend! - a.spend!)
+        .slice(0, 6)
+        .map((p) => ({ id: p.id, name: p.name, type: p.type, budget: p.budget!, spend: p.spend!, ratio: p.spend! / p.budget! })),
+    [filtered],
+  );
 
   /* Promotions at or above the alert threshold, worst first. */
   const attention = useMemo(
-    () =>
-      promos
-        .filter((p) => p.budget != null && p.spend != null && p.spend / p.budget >= ALERT_RATIO)
-        .sort((a, b) => (b.spend! / b.budget!) - (a.spend! / a.budget!)),
-    [promos],
+    () => filtered.filter((p) => p.budget != null && p.spend != null && p.spend / p.budget >= ALERT_RATIO).sort((a, b) => b.spend! / b.budget! - a.spend! / a.budget!),
+    [filtered],
   );
 
-  const goToList = () => router.push('/admin/promotions');
+  const activity = useMemo(() => deriveActivity(filtered), [filtered]);
 
-  const aheadOfPace = MTD_SPEND > MTD_PACE;
-  const paceDelta = Math.abs(MTD_SPEND - MTD_PACE);
+  /* KPI deltas — second half of the window vs first half. */
+  const halfDelta = (key: 'spend' | 'active' | 'alerts') => {
+    if (series.length < 2) return 0;
+    const half = Math.floor(series.length / 2);
+    const recent = series.slice(-half).reduce((s, p) => s + p[key], 0);
+    const prior = series.slice(0, series.length - half).reduce((s, p) => s + p[key], 0);
+    return prior === 0 ? (recent === 0 ? 0 : 100) : Math.round(((recent - prior) / prior) * 100);
+  };
+
+  const goToList = () => router.push('/admin/promotions');
+  const toggleFilter = (type: string) => setFilterType((cur) => (cur === type ? null : type));
+  const dim = (type: string) => (hoverType && hoverType !== type ? 0.4 : 1);
+  const chartKey = `${period}-${filterType ?? 'all'}`;
+  const aheadOfPace = totalSpend > pace;
 
   return (
     <div className="promo-page" style={{ background: T.offWhite }}>
-      {/* Top bar — Internal Tool Shell: title + market flag + subtitle */}
+      {/* Top bar — Internal Tool Shell: title + market flag + subtitle; period control right. */}
       <div className="promo-topbar" style={{ background: T.white, borderBottom: `1px solid ${T.border}` }}>
         <div>
           <div className="promo-title-row">
             <h1 className="promo-title" style={{ color: T.textPrimary }}>Dashboard</h1>
             <ZambiaFlag />
+            {filterType && (
+              <button type="button" className="dash-filter-badge" onClick={() => setFilterType(null)} aria-label={`Clear filter ${filterType}`}>
+                <Badge color={T.navy}>Filtered: {filterType} ×</Badge>
+              </button>
+            )}
           </div>
-          <p className="promo-subtitle" style={{ color: T.textSecondary }}>ionix Boost · September month-to-date</p>
+          <p className="promo-subtitle" style={{ color: T.textSecondary }}>ionix Boost · {periodLabel(period)}</p>
+        </div>
+        <div className="dash-topbar__controls">
+          <div className="dash-segmented" role="group" aria-label="Period" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusPill }}>
+            {PERIODS.map((opt) => {
+              const active = opt.value === period;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className="dash-segmented__button"
+                  aria-pressed={active}
+                  onClick={() => setPeriod(opt.value)}
+                  style={{ background: active ? T.navy : 'transparent', color: active ? T.white : T.textSecondary, borderRadius: T.radiusPill }}
+                  onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = T.offWhite; }}
+                  onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -164,25 +314,70 @@ export default function DashboardPage() {
           <StatChip label="Scheduled" value={counts.scheduled} active={false} onClick={goToList} />
           <StatChip label="Pending approval" value={counts.pending} active={false} onClick={goToList} />
           <StatChip label="Draft" value={counts.draft} active={false} onClick={goToList} />
-          <StatChip label="Total promotions" value={promos.length} active={false} onClick={goToList} />
+          <StatChip label="Total promotions" value={filtered.length} active={false} onClick={goToList} />
+        </div>
+
+        {/* KPI cards — count-up values, delta pills, 36px sparklines. */}
+        <div className="dash-kpis">
+          <KpiCard
+            label="Total spend"
+            value={totalSpend}
+            format={fmtK}
+            deltaPct={halfDelta('spend')}
+            accent={T.yellow}
+            series={hero.map((p) => ({ day: p.day, v: p.daily }))}
+            chartKey={chartKey}
+            reduced={reduced}
+          />
+          <KpiCard
+            label="Budget utilisation"
+            value={utilisation}
+            format={fmtPct}
+            deltaPct={series.length > 1 ? Math.round(last.utilisation - series[0].utilisation) : 0}
+            accent={T.navy}
+            series={series.map((p) => ({ day: p.day, v: p.utilisation }))}
+            chartKey={chartKey}
+            reduced={reduced}
+          />
+          <KpiCard
+            label="Active promotions"
+            value={counts.active}
+            format={fmtCount}
+            deltaPct={halfDelta('active')}
+            accent={T.progressActive}
+            series={series.map((p) => ({ day: p.day, v: p.active }))}
+            chartKey={chartKey}
+            reduced={reduced}
+          />
+          <KpiCard
+            label="Budget alerts"
+            value={attention.length}
+            format={fmtCount}
+            deltaPct={halfDelta('alerts')}
+            invertDelta
+            accent={T.destructiveActive}
+            series={series.map((p) => ({ day: p.day, v: p.alerts }))}
+            chartKey={chartKey}
+            reduced={reduced}
+            onClick={goToList}
+          />
         </div>
 
         <div className="dash-grid">
-          {/* Spend vs budget pace — cumulative line + dashed pace line */}
+          {/* Hero — Spend over time (cumulative area) vs linear budget pace. */}
           <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
             <div className="dash-card__header">
               <div>
-                <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Promo spend vs budget pace</h2>
-                <p className="dash-card__caption" style={{ color: T.textSecondary }}>
-                  Cumulative spend across active promotions · budget {fmtK(MONTHLY_BUDGET)}
+                <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Spend over time</h2>
+                <p className="dash-card__caption" style={{ color: aheadOfPace ? T.destructive : T.textSecondary }}>
+                  {aheadOfPace && <TriangleAlert size={12} aria-hidden="true" style={{ verticalAlign: 'middle' }} />}
+                  {' '}Cumulative spend · budget {fmtK(totalBudget)} · {aheadOfPace ? 'ahead of' : 'under'} pace
                 </p>
               </div>
-              <div className="dash-card__stat">
-                <div className="dash-card__stat-value" style={{ color: T.textPrimary }}>{fmtK(MTD_SPEND)}</div>
-                <div className="dash-card__stat-caption" style={{ color: aheadOfPace ? T.destructive : T.success }}>
-                  {aheadOfPace && <TriangleAlert size={12} aria-hidden="true" />}
-                  {fmtK(paceDelta)} {aheadOfPace ? 'ahead of' : 'under'} pace
-                </div>
+              {/* Card-owned HTML legend (top-right, 12px) — carries the "Budget pace" name. */}
+              <div className="dash-legend">
+                <LegendItem label="Spend" color={T.yellow} />
+                <LegendItem label="Budget pace" color={T.destructiveActive} dashed />
               </div>
             </div>
 
@@ -190,78 +385,161 @@ export default function DashboardPage() {
  so it needs room past the plot edge or the SVG boundary clips it. */}
             <div className="dash-chart">
               <ResponsiveContainer width="100%" height="100%">
-                 <LineChart data={SPEND_SERIES} margin={{ top: 8, right: 24, bottom: 0, left: 0 }}>
-                  <CartesianGrid stroke={T.border} vertical={false} />
-                  <XAxis dataKey="day" tick={TICK} tickLine={false} axisLine={{ stroke: T.border }} interval={1} />
+                 <AreaChart key={chartKey} data={hero} margin={{ top: 8, right: 24, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="dash-spend-fill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={T.yellowSoft} />
+                      <stop offset="100%" stopColor={T.yellowSoft} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke={T.chartTrack} vertical={false} />
+                  <XAxis dataKey="day" tick={TICK} tickLine={false} axisLine={false} interval={period === '7d' ? 0 : 1} />
                   <YAxis tick={TICK} tickLine={false} axisLine={false} tickFormatter={fmtAxisK} width={64} />
                   <Tooltip cursor={{ stroke: T.ghostBorder }} content={<ChartTooltip formatter={fmtK} />} />
-                  {/* Month budget ceiling — dashed, no label (legend carries the name). */}
-                  <ReferenceLine y={MONTHLY_BUDGET} stroke={T.ghostBorder} strokeDasharray="4 4" />
-                  <Line
-                    type="monotone"
-                    dataKey="pace"
-                    name="Budget pace"
-                    stroke={T.textSecondary}
-                    strokeWidth={1.5}
-                    strokeDasharray="4 4"
-                    dot={false}
-                    activeDot={false}
-                    isAnimationActive={false}
-                  />
-                  <Line
+                  {/* Budget pace — dashed, no label (legend above carries the name). */}
+                  <ReferenceLine y={pace} stroke={T.destructiveActive} strokeDasharray="4 4" />
+                  <Area
                     type="monotone"
                     dataKey="spend"
                     name="Spend"
-                    stroke={T.navy}
-                    strokeWidth={2}
-                    dot={false}
-                    activeDot={{ r: 4, fill: T.navy, stroke: T.white, strokeWidth: 2 }}
-                    isAnimationActive={false}
+                    stroke={T.yellow}
+                    strokeWidth={2.5}
+                    fill="url(#dash-spend-fill)"
+                    activeDot={{ r: 6, fill: T.yellow, stroke: T.white, strokeWidth: 2 }}
+                    isAnimationActive={!reduced}
+                    animationDuration={600}
                   />
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="dash-legend">
-              <LegendItem label="Spend" color={T.navy} />
-              <LegendItem label="Budget pace" color={T.textSecondary} dashed />
-              <LegendItem label="Month budget" color={T.ghostBorder} dashed />
-            </div>
           </section>
 
           {/* Awards credited per day — bar chart */}
           <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
             <div className="dash-card__header">
               <div>
-                <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Awards credited</h2>
-                <p className="dash-card__caption" style={{ color: T.textSecondary }}>Per day · all promotions</p>
-              </div>
-              <div className="dash-card__stat">
-                <div className="dash-card__stat-value" style={{ color: T.textPrimary }}>{TOTAL_AWARDS.toLocaleString()}</div>
-                <div className="dash-card__stat-caption" style={{ color: T.textSecondary }}>month to date</div>
+                <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Spend by type</h2>
+                <p className="dash-card__caption" style={{ color: T.textSecondary }}>Click a segment to filter the dashboard</p>
               </div>
             </div>
 
-            <div className="dash-chart">
+            {typeSpend.length === 0 && filterType ? (
+              <FilteredEmpty type={filterType} />
+            ) : (
+              <>
+                <div className="dash-donut">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart key={chartKey}>
+                      <Pie
+                        data={typeSpend}
+                        dataKey="amount"
+                        nameKey="type"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={68}
+                        outerRadius={96}
+                        paddingAngle={2}
+                        stroke={T.white}
+                        strokeWidth={2}
+                        cursor="pointer"
+                        isAnimationActive={!reduced}
+                        animationDuration={600}
+                        onMouseEnter={(_, index: number) => setHoverType(typeSpend[index]?.type ?? null)}
+                        onMouseLeave={() => setHoverType(null)}
+                        onClick={(_, index: number) => { const t = typeSpend[index]; if (t) toggleFilter(t.type); }}
+                      >
+                        {typeSpend.map((t) => (
+                          <Cell key={t.type} fill={colourOf(t.type)} fillOpacity={dim(t.type)} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                  {/* Centre label — plain HTML over the chart (not a Recharts label). */}
+                  <div className="dash-donut__centre">
+                    <span className="dash-donut__label" style={{ color: T.textSecondary }}>{hovered ? hovered.type : 'Total'}</span>
+                    <span className="dash-donut__amount" style={{ color: T.textPrimary }}>{fmtK(hovered ? hovered.amount : typeTotal)}</span>
+                    {hovered && (
+                      <span className="dash-donut__sub" style={{ color: T.textSecondary }}>{fmtPct(typeTotal > 0 ? (hovered.amount / typeTotal) * 100 : 0)} of spend</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Legend rows — clickable filters, mirror hover dimming. */}
+                <div className="dash-type-legend">
+                  {typeSpend.map((t) => (
+                    <button
+                      key={t.type}
+                      type="button"
+                      className="dash-type-legend__row"
+                      aria-pressed={filterType === t.type}
+                      onClick={() => toggleFilter(t.type)}
+                      onMouseEnter={() => setHoverType(t.type)}
+                      onMouseLeave={() => setHoverType(null)}
+                      style={{ opacity: dim(t.type), color: T.textPrimary, fontWeight: filterType === t.type ? 600 : 400 }}
+                    >
+                      <span className="dash-type-legend__dot" style={{ background: colourOf(t.type), borderRadius: T.radiusPill }} aria-hidden="true" />
+                      <span className="dash-type-legend__type">{t.type}</span>
+                      <span>{fmtK(t.amount)}</span>
+                      <span style={{ color: T.textSecondary }}>{fmtPct(typeTotal > 0 ? (t.amount / typeTotal) * 100 : 0)}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </section>
+        </div>
+
+        {/* Budget vs spend by promotion — horizontal bars, top 6 by spend. */}
+        <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
+          <div className="dash-card__header">
+            <div>
+              <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Budget vs spend by promotion</h2>
+              <p className="dash-card__caption" style={{ color: T.textSecondary }}>Top 6 by spend · red outline = at or above 90% of budget · click a bar to open the list</p>
+            </div>
+            <div className="dash-legend">
+              <LegendItem label="Budget" color={T.ghostBorder} />
+              <LegendItem label="Spend" color={T.navy} />
+            </div>
+          </div>
+
+          {bars.length === 0 ? (
+            filterType ? <FilteredEmpty type={filterType} /> : <p className="dash-empty" style={{ color: T.textSecondary }}>No promotions have recorded spend.</p>
+          ) : (
+            <div className="dash-chart dash-chart--bar">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={AWARDS_SERIES} margin={{ top: 8, right: 8, bottom: 0, left: 0 }} barCategoryGap="30%">
-                  <CartesianGrid stroke={T.border} vertical={false} />
-                  <XAxis dataKey="day" tick={TICK} tickLine={false} axisLine={{ stroke: T.border }} interval={2} />
-                  <YAxis tick={TICK} tickLine={false} axisLine={false} width={48} />
-                  <Tooltip
-                    cursor={{ fill: T.selectionBg }}
-                    content={<ChartTooltip formatter={(n: number) => n.toLocaleString()} />}
-                  />
-                  <Bar dataKey="awards" name="Awards" fill={T.navy} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                <BarChart key={chartKey} data={bars} layout="vertical" margin={{ top: 4, right: 24, bottom: 0, left: 8 }} barCategoryGap="28%" barGap={2}>
+                  <CartesianGrid stroke={T.chartTrack} horizontal={false} />
+                  <XAxis type="number" tick={TICK} tickLine={false} axisLine={false} tickFormatter={fmtAxisK} />
+                  <YAxis type="category" dataKey="name" tick={TICK} tickLine={false} axisLine={false} width={180} />
+                  <Tooltip cursor={{ fill: T.selectionBg }} content={<ChartTooltip formatter={fmtK} />} />
+                  <Bar dataKey="budget" name="Budget" fill={T.chartTrack} radius={[0, 4, 4, 0]} cursor="pointer" onClick={goToList} isAnimationActive={!reduced} animationDuration={600} />
+                  <Bar
+                    dataKey="spend"
+                    name="Spend"
+                    radius={[0, 4, 4, 0]}
+                    cursor="pointer"
+                    onClick={goToList}
+                    onMouseEnter={(_, index: number) => setHoverType(bars[index]?.type ?? null)}
+                    onMouseLeave={() => setHoverType(null)}
+                    isAnimationActive={!reduced}
+                    animationDuration={600}
+                  >
+                    {bars.map((b) => (
+                      <Cell
+                        key={b.id}
+                        fill={colourOf(b.type)}
+                        fillOpacity={dim(b.type)}
+                        stroke={b.ratio >= ALERT_RATIO ? T.destructiveActive : undefined}
+                        strokeWidth={b.ratio >= ALERT_RATIO ? 2 : 0}
+                      />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
-
-            <div className="dash-legend">
-              <LegendItem label="Awards" color={T.navy} />
-            </div>
-          </section>
-        </div>
+          )}
+        </section>
 
         {/* Budget attention — promotions at/over the 90% alert threshold. */}
         <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
@@ -276,7 +554,7 @@ export default function DashboardPage() {
           </div>
 
           {attention.length === 0 ? (
-            <p className="dash-empty" style={{ color: T.textSecondary }}>No promotions are near their budget.</p>
+            filterType ? <FilteredEmpty type={filterType} /> : <p className="dash-empty" style={{ color: T.textSecondary }}>No promotions are near their budget.</p>
           ) : (
             <ul className="dash-attention__list">
               {attention.map((p, i) => {
@@ -304,6 +582,46 @@ export default function DashboardPage() {
                     <div className="promo-budget__track" style={{ background: T.border, borderRadius: T.radiusPill }}>
                       <div className="promo-budget__fill" style={{ width: `${pct}%`, background: T.destructive, borderRadius: T.radiusPill }} />
                     </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        {/* Recent activity — alerts, activations, scheduled and expired promotions. */}
+        <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
+          <div className="dash-card__header">
+            <div>
+              <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Recent activity</h2>
+              <p className="dash-card__caption" style={{ color: T.textSecondary }}>Latest budget alerts, activations and schedule changes</p>
+            </div>
+            <GhostButton small onClick={goToList}>View all promotions</GhostButton>
+          </div>
+
+          {activity.length === 0 ? (
+            filterType ? <FilteredEmpty type={filterType} /> : <p className="dash-empty" style={{ color: T.textSecondary }}>No recent activity.</p>
+          ) : (
+            <ul className="dash-activity__list">
+              {activity.map((item, i) => {
+                const Icon = ACTIVITY_ICON[item.kind];
+                const colour = ACTIVITY_COLOUR[item.kind];
+                return (
+                  <li
+                    key={item.id}
+                    className="dash-activity__row"
+                    style={{ borderTop: i === 0 ? 'none' : `1px solid ${T.border}`, borderRadius: T.radiusSm }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = T.offWhite)}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <span className="dash-activity__icon" style={{ background: T.selectionBg, color: colour, borderRadius: T.radiusPill }} aria-hidden="true">
+                      <Icon size={16} />
+                    </span>
+                    <div className="dash-activity__copy">
+                      <div className="dash-activity__title" style={{ color: T.textPrimary }}>{item.title}</div>
+                      <div className="dash-attention__id" style={{ color: T.textSecondary }}>{item.detail}</div>
+                    </div>
+                    <span className="dash-activity__time" style={{ color: T.textSecondary }}>{relativeTime(item.minutesAgo)}</span>
                   </li>
                 );
               })}

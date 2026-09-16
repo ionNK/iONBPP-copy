@@ -54,7 +54,14 @@ successBg: 'rgba(0,118,0,0.08)',
  selectionBg: 'rgba(0,21,40,0.03)',
  /** Hover raise shadow for selectable cards. */
  shadowRaise: '0 8px 20px rgba(0,21,40,0.08)',
+ /** Dashboard budget-bar track — Unity black-based opacity ramp at 6%. */
+ chartTrack: 'rgba(0,21,40,0.06)',
+ /** Dashboard area fill — Yellow/betika-100 at 18% opacity. */
+ yellowSoft: 'rgba(255,222,36,0.18)',
 } as const;
+
+/** Dashboard categorical chart order: existing Unity-backed semantic tokens. */
+export const dashboardPalette = [T.yellow, T.navy, T.progressActive, T.blue, T.destructiveActive, T.darkGrey] as const;
 
 export type DesignTokens = typeof T;
 
