@@ -8,6 +8,7 @@ import {
   ChartPie,
   ClipboardCheck,
   Crown,
+  FlaskConical,
   Gift,
   LayoutDashboard,
   MessageSquare,
@@ -25,7 +26,7 @@ label: string;
 href?: string;
 icon: ReactNode;
 comingSoon?: boolean;
-/** Onboarding anchor — rendered as data-tour for CoachMarks. */
+/** Onboarding anchor, rendered as data-tour for CoachMarks. */
 tour?: string;
 };
 
@@ -36,7 +37,7 @@ items: NavItem[];
 
 /**
  * Internal Tool Shell nav (docs/prototype-style-guide.md): flat items under
- * UPPERCASE 12px/600 textSecondary group labels — no expandable modules, no
+ * UPPERCASE 12px/600 textSecondary group labels: no expandable modules, no
  * chevrons, no accent indicator bars, no brand block, no user identity block
  * (identity lives in the global top bar).
  */
@@ -71,13 +72,14 @@ items: [
 {
 label: 'Administration',
 items: [
+{ label: 'Simulator', href: '/admin/simulator', icon: <FlaskConical size={16} /> },
 { label: 'Settings', href: '/admin/settings', icon: <Settings size={16} /> },
 ],
 },
 ];
 
 /**
- * Admin side navigation — light-surface Internal Tool Shell. Ghost search
+ * Admin side navigation: light-surface Internal Tool Shell. Ghost search
  * field at the top filters the flat nav groups. All styling lives in the
  * .ds-sidenav section of app/design-system.css.
  */
@@ -111,7 +113,7 @@ aria-label="Search navigation"
 {group.items.map((item) => {
 const isActive = item.href !== undefined && pathname === item.href;
 
-/* Unreleased items link to a teaser route; reduced emphasis + "Soon" pill kept as-is. */
+/* Unreleased items link to a teaser route; reduced emphasis + "TBC" pill kept as-is. */
 if (item.comingSoon) {
 return (
 <li key={item.label}>
@@ -123,7 +125,7 @@ data-tour={item.tour}
 >
 <span className="ds-sidenav__icon">{item.icon}</span>
 <span className="ds-sidenav__label">{item.label}</span>
-<span className="ds-sidenav__pill">Soon</span>
+<span className="ds-sidenav__pill">TBC</span>
 </Link>
 </li>
 );
