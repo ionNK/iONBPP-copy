@@ -14,6 +14,7 @@ import { loadPromotions } from '@/lib/promotions';
 import { GLOSSARY, MANUAL_SECTIONS, TUTORIAL_VIDEOS, loadTutorialProgress, markTutorialProgress } from '@/data/manual';
 import type { ManualBlock, TutorialProgress, TutorialVideo } from '@/data/manual';
 import VideoModal from '@/components/settings/VideoModal';
+import { requestOnboardingShow, saveOnboardingState } from '../FirstRunTour';
 import { USER_ROLES, USER_SEED } from '@/data/users';
 import type { AdminUser, UserRole, UserStatus } from '@/data/users';
 /* Version is read from the workspace manifest at build time (frontend/package.json). */
@@ -64,9 +65,6 @@ function pickOption<Opt extends string>(options: readonly Opt[], value: string, 
 }
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, Number.isFinite(n) ? n : min));
-
-/* Same key FirstRunTour reads on mount (frontend/src/app/admin/FirstRunTour.tsx, not exported there). */
-const ONBOARDING_KEY = 'onboarding.v1.completed';
 
 /* BR-6 alert threshold bounds. */
 const ALERT_MIN = 50;
@@ -428,11 +426,10 @@ function SettingsContent() {
       body: 'You will be taken to All Promotions and the five-step tour will start again.',
       confirmLabel: 'Replay tour',
       onConfirm: () => {
-        try {
-          window.localStorage.removeItem(ONBOARDING_KEY);
-        } catch {
-          /* Prototype mock: storage failures are non-fatal. */
-        }
+        /* Reset the record and raise the session flag; FirstRunTour consumes
+         * it on the landing route and opens the tour immediately (count 1 of 3). */
+        saveOnboardingState({ shownCount: 0, dismissedForever: false });
+        requestOnboardingShow();
         setConfirm(null);
         window.location.assign('/admin/promotions');
       },

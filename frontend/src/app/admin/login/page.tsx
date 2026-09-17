@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTheme } from '@/context/ThemeContext';
+import { requestOnboardingShow } from '../FirstRunTour';
 
 const googleIcon = '/assets/login/google.svg';
 
@@ -33,6 +34,10 @@ export default function LoginPage() {
     // localStorage (betika-theme), and the <html> data attributes stay in sync
     // across client-side navigation.
     setTheme('dark');
+
+    // Successful login: FirstRunTour consumes this session flag once on the
+    // landing route (shows the tour for the first three logins only).
+    requestOnboardingShow();
 
     window.setTimeout(() => router.push('/admin/promotions'), 800);
   };

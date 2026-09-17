@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import T from '@/theme/tokens';
 import { GhostButton } from './GhostButton';
@@ -14,11 +15,23 @@ export interface CoachMarkStep {
   body: string;
 }
 
+export interface CoachMarkFooterContext {
+  index: number;
+  total: number;
+  isLast: boolean;
+}
+
 export interface CoachMarksProps {
   steps: CoachMarkStep[];
   open: boolean;
   /** Fired on Done, Skip tour, Escape and scrim click. */
   onComplete: () => void;
+  /**
+   * Optional slot rendered below the body and above the Skip / Next / Done
+   * actions (e.g. "Shown n of 3", a final-step "Don't show again" control).
+   * Nothing is rendered when absent.
+   */
+  footer?: (ctx: CoachMarkFooterContext) => ReactNode;
 }
 
 type Rect = { top: number; left: number; width: number; height: number };
@@ -78,7 +91,7 @@ function place(anchor: Rect, cardHeight: number) {
  * portal on document.body so it sits above the TopBar/Sidebar shell.
  * Escape / scrim click = skip; focus moves into the card on every step.
  */
-export function CoachMarks({ steps, open, onComplete }: CoachMarksProps) {
+export function CoachMarks({ steps, open, onComplete, footer }: CoachMarksProps) {
   const [index, setIndex] = useState(0);
   const [anchor, setAnchor] = useState<Rect | null>(null);
   const [cardHeight, setCardHeight] = useState(0);
@@ -185,6 +198,10 @@ export function CoachMarks({ steps, open, onComplete }: CoachMarksProps) {
         <p id={bodyId} className="ui-coach-marks__body" style={{ color: T.textSecondary }}>
           {step.body}
         </p>
+        {footer && (
+          /* Spacer-scale 12 — same rhythm as the card gap. */
+          <div style={{ marginTop: 12 }}>{footer({ index, total, isLast })}</div>
+        )}
         <div className="ui-coach-marks__actions">
           <GhostButton small onClick={onComplete}>Skip tour</GhostButton>
           <div className="ui-coach-marks__nav">

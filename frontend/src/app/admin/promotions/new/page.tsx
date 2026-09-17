@@ -666,10 +666,9 @@ Budgets alert the business when spend reaches the threshold. They never block aw
 <>
 <h2 className="np-card__heading" style={{ color: T.textPrimary }}>Schedule</h2>
 <div className="np-form-grid">
-<Field label="Start" required error={errors.startDate || errors.startTime} hint="Date and time (24h), Africa/Lusaka.">
+<Field label="Start" required error={errors.startDate || errors.startTime} hint="Date and time (24h).">
 <DateTimeField
 showTime
-timezoneLabel="Africa/Lusaka"
 value={parseIsoDateTime(draft.startDate, draft.startTime)}
 invalid={!!(errors.startDate || errors.startTime)}
 ariaLabel="Start date and time"
@@ -695,7 +694,6 @@ On date
  * same way). Applying a date selects "On date"; while Ongoing, show the placeholder. */}
 <DateTimeField
 showTime
-timezoneLabel="Africa/Lusaka"
 block={false}
 value={draft.endMode === 'date' ? parseIsoDateTime(draft.endDate, draft.endTime) : null}
 invalid={!!(errors.endDate || errors.endTime)}
@@ -721,16 +719,6 @@ Ongoing
 {(errors.endDate || errors.endTime) && (
 <p className="np-error" role="alert" style={{ color: T.destructive }}>{errors.endDate || errors.endTime}</p>
 )}
-</Field>
-<Field label="Timezone" full>
-<input
-className="np-input"
-style={{ ...inputStyle(), background: T.offWhite }}
-value="Africa/Lusaka (CAT)"
-readOnly
-disabled
-aria-label="Timezone"
-/>
 </Field>
 </div>
 </>
@@ -1013,7 +1001,6 @@ onEdit={goToStep}
 rows={[
 ['Start', draft.startDate ? `${draft.startDate} ${draft.startTime || ''}`.trim() : '·'],
 ['End', draft.endMode === 'ongoing' ? 'Ongoing' : `${draft.endDate || '·'} ${draft.endTime || ''}`.trim()],
-['Timezone', 'Africa/Lusaka (CAT)'],
 ]}
 />
 <ReviewSection

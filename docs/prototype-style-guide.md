@@ -66,6 +66,12 @@ EvidenceCard, ComingSoon (teaser card for unreleased "TBC" nav routes:
 white card radiusMd max-w 640, 20px/600 title + ghost navy "Coming soon"
 Badge, 14px textSecondary description, 14px bullets with 16px lucide Check,
 optional "Until then" notice = offWhite panel + Info icon + 12px text).
+CoachMarks (step-by-step onboarding: scrim + spotlight ring + 360px white
+card anchored to `[data-tour]` targets; 12px counter, 15px title, 14px body,
+Skip / Back / Next-Done footer; optional `footer?: (ctx: { index, total,
+isLast }) => ReactNode` slot rendered below the body and above the actions —
+FirstRunTour uses it for the 12px textSecondary "Shown n of 3" line and the
+final-step 14px "Don't show again" native checkbox).
 DateRangePicker / DateTimeField / TimeField (Unity Date Picker; replaces
 every native `type="date|time|datetime-local"` input). Trigger = ghost
 field (ghostBorder, radiusSm, lucide Calendar 16px, 14px text: range
