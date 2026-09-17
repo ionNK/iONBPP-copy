@@ -62,6 +62,9 @@ pressed=yellowActive), SecondaryButton (navyDeep bg + white text),
 GhostButton (ghostBorder), DestructiveGhostButton, FilterSelect,
 Toggle (Unity Switch: navy track when on, ghostBorder track when off;
 `disabled` renders a locked state, e.g. mandatory business rules),
+ChannelChips (read-only 12px channel pills with lucide surface icons; neutral
+`offWhite` fill and `border` outline; use in promotion tables, summaries and
+content previews),
 EvidenceCard, ComingSoon (teaser card for unreleased "TBC" nav routes:
 white card radiusMd max-w 640, 20px/600 title + ghost navy "Coming soon"
 Badge, 14px textSecondary description, 14px bullets with 16px lucide Check,

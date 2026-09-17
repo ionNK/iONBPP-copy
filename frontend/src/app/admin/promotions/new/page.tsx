@@ -9,14 +9,15 @@ Check, ChevronLeft, CircleCheck, FileText, ImagePlus, Info, Plus, Trash2, Triang
 import '../promotions.css';
 import './new.css';
 import T from '@/theme/tokens';
-import { Badge, DateTimeField, GhostButton, PrimaryButton, TimeField, Toggle, parseIsoDateTime, toIsoDate, toIsoTime } from '@/components/ui';
+import { Badge, ChannelChips, DateTimeField, GhostButton, PrimaryButton, TimeField, Toggle, parseIsoDateTime, toIsoDate, toIsoTime } from '@/components/ui';
 import { addPromotion, nextPromoId, setListNotice } from '@/lib/promotions';
 import type { Promo } from '@/lib/promotions';
+import { channelSummary, normalizeChannels } from '@/lib/promotions';
 import { BET_RESTRICTIONS, catalogEventLabel } from '@/data/event-catalog';
 import { isRangeOperator, isZeroArityOperator, QUALIFICATION_OPERATOR_VALUES } from '@/data/operator-catalog';
 import { getPromotionType } from '@/data/promotion-templates';
 import type { TemplateId, TierRow } from '@/data/promotion-templates';
-import { DRAFT_KEY, baseDraft, sanitizeQualification, templateDraft, validateBasics, validateQualification } from './draft';
+import { DRAFT_KEY, baseDraft, sanitizeDraftChannels, sanitizeQualification, templateDraft, validateBasics, validateQualification } from './draft';
 import type { BannerSlot, PromotionDraft, TriggerRule } from './draft';
 import { Field, inputStyle } from './fields';
 import { Step1Basics } from './Step1Basics';
@@ -105,6 +106,7 @@ schedule: scheduleLabel(d),
 budget: d.budget ? Number(d.budget) : null,
 spend: null,
 status,
+channels: normalizeChannels(d.channels),
 };
 }
 
@@ -169,6 +171,7 @@ setDraft({
 template: tpl === 'welcome_offer' || tpl === 'cashback' ? tpl : null,
 /* Pre-rules-model drafts (flat fields / no primary trigger) fall back to an empty qualification. */
 qualification: sanitizeQualification(rest.qualification),
+channels: sanitizeDraftChannels(rest.channels),
 });
 }
 } catch {
@@ -305,6 +308,10 @@ const bannersFilled = draft.bannerSlots.filter((s) => s.fileName).length;
 const contentIncomplete = bannersFilled < draft.bannerSlots.length || !draft.tcsFileName;
 const qualificationRules = draft.qualification.triggers.flatMap((trigger) => trigger.rules);
   const hasChannelRule = qualificationRules.some((rule) => rule.param === 'Channel');
+/* Channel-level eligibility; per-trigger Channel conditions can narrow it further. */
+const selectedChannelSummary = hasChannelRule
+  ? `${channelSummary(draft.channels)} · narrowed further by Channel conditions on the triggers above`
+  : channelSummary(draft.channels);
 
 const showTcsWarning = draft.template === 'cashback' || draft.qualification.triggers.length > 1;
 
@@ -894,6 +901,7 @@ style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.r
 <p className="np-preview-tile__desc" style={{ color: T.textSecondary }}>
 {draft.shortDescription || 'Short description will appear here.'}
 </p>
+<ChannelChips channels={draft.channels} compact />
 <p className="np-preview-tile__more" style={{ color: T.navy }}>Read More</p>
 </div>
 </div>
@@ -938,7 +946,7 @@ draft.qualification.counting.length > 0
 ? draft.qualification.counting.map(qualificationRuleSummary).join(' AND ')
 : 'Each qualifying event (subject to award limits)',
 ],
-['Channels', hasChannelRule ? 'As defined by Channel conditions on the triggers above' : 'All (site-wide)'],
+['Channels', selectedChannelSummary],
 [
 'Eligibility',
 draft.qualification.eligibility.audience === 'all'

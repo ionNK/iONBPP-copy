@@ -1,5 +1,6 @@
 /** Static catalog for the New Promotion wizard. */
 import type { Qualification } from '@/app/admin/promotions/new/draft';
+import type { Channel } from '@/lib/promotions';
 import type { EventId } from '@/data/event-catalog';
 
 export type TemplateId = 'welcome_offer' | 'cashback';
@@ -37,7 +38,7 @@ const BET_SETTLED_EVENT: EventId = 'bet_settled';
 /** Draft fields a template may set, grouped by wizard step. */
 export interface TemplatePrefill {
  /* Basics */ type?: PromotionTypeId; vertical?: ProductVertical;
- /* Qualification */ qualification?: Qualification;
+ /* Qualification */ qualification?: Qualification; channels?: Channel[];
  /* Award */ rewardType?: RewardType; freebetCount?: string; freebetValue?: string; freebetExpiryHours?: string; payoutMode?: PayoutMode; fixedAmount?: string; tiers?: TierRow[]; payoutCap?: string; maxAwardsPerDay?: string; lifetimeCount?: string; lifetimeValue?: string; creditTiming?: CreditTiming; creditTime?: string; restrictedProduct?: string; wholeStakeOnly?: boolean; winningsExcludeStake?: boolean; withholdOtherOffers?: boolean;
  /* Budget */ budget?: string; alertThreshold?: string; alertRecipients?: string;
  /* Schedule */ startDate?: string; startTime?: string; endMode?: EndMode; endDate?: string; endTime?: string;
@@ -50,8 +51,11 @@ export const PROMOTION_TEMPLATES: PromotionTemplate[] = [
  {
  id: 'welcome_offer', name: 'Aviator Welcome Offer',
  caption: 'Freebet reward for new customers with a daily qualifying-bet counter',
+
  prefill: {
  type: 'welcome_offer', vertical: 'Aviator',
+      /* Mirrors seed PR-001: the Aviator welcome offer is an app + mobile web offer. */
+      channels: ['app', 'mobile'],
  qualification: {
  triggers: [
  {

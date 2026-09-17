@@ -41,6 +41,7 @@ const DIMENSIONS: { value: SpendDimension; label: string }[] = [
   { value: 'type', label: 'Type' },
   { value: 'provider', label: 'Provider' },
   { value: 'market', label: 'Market' },
+  { value: 'channel', label: 'Channel' },
 ];
 
 /* Stable category-to-palette mapping: palette entries are Unity-backed tokens. */

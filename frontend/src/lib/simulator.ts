@@ -17,7 +17,8 @@ import type { PromotionTemplate, TemplatePrefill, TierRow } from '@/data/promoti
 import { getCatalogEvent } from '@/data/event-catalog';
 import type { EventId } from '@/data/event-catalog';
 import type { TriggerRule } from '@/app/admin/promotions/new/draft';
-import type { Promo } from '@/lib/promotions';
+import { CHANNEL_LABELS, channelSummary } from '@/lib/promotions';
+import type { Channel, Promo } from '@/lib/promotions';
 import type { Settings } from '@/lib/settings';
 
 /* ------------------------------------------------------------------ */
@@ -68,7 +69,9 @@ export interface Scenario {
   personaId: string;
   /** datetime-local: YYYY-MM-DDTHH:mm (Africa/Lusaka wall-clock). */
   fixedAt: string;
-  events: ScenarioEvent[];
+  /** Player surface being simulated; required for promotion-channel eligibility. */
+channel: Channel;
+events: ScenarioEvent[];
 }
 
 /** Key fields the inline picker exposes per event (from the catalog). */
@@ -195,7 +198,7 @@ const skipped = (label: string, reason = 'Not configured'): RuleCheck => ({ labe
 const check = (label: string, pass: boolean, actual: string, required: string): RuleCheck => ({ label, status: pass ? 'PASS' : 'FAIL', actual, required });
 function stageStatus(checks: RuleCheck[]): CheckStatus { return checks.some((c) => c.status === 'FAIL') ? 'FAIL' : checks.some((c) => c.status === 'PASS') ? 'PASS' : 'SKIPPED'; }
 
-export function simulate(promo: Promo, persona: Persona, events: ScenarioEvent[], fixedAt: string, settings: Settings): SimulationResult {
+export function simulate(promo: Promo, persona: Persona, events: ScenarioEvent[], fixedAt: string, settings: Settings, channel: Channel): SimulationResult {
   const now = parseFixedAt(fixedAt); const year = Number.isFinite(now) ? new Date(now).getUTCFullYear() : 2026;
   const prefill: TemplatePrefill = templateFor(promo)?.prefill ?? {}; const qualification = prefill.qualification;
   const ordered = [...events].sort((a, b) => a.offsetMinutes - b.offsetMinutes); const lastEventAt = ordered.length ? now + ordered[ordered.length - 1].offsetMinutes * 60_000 : now; const stages: StageResult[] = [];
@@ -205,6 +208,14 @@ export function simulate(promo: Promo, persona: Persona, events: ScenarioEvent[]
   scheduleChecks.push(check('Promotion status', promo.status === 'active' || promo.status === 'scheduled', promo.status, 'active or scheduled'));
   stages.push({ id: 'schedule', title: 'Schedule', status: stageStatus(scheduleChecks), checks: scheduleChecks, summary: window.start === null ? 'No schedule on this promotion' : `${promo.schedule} · ${settings.timezone}`, config: [['schedule', promo.schedule], ['timezone', settings.timezone], ['status', promo.status]], inputs: [['fixedAt', fmtDateTime(now)], ['lastEventAt', fmtDateTime(lastEventAt)], ['events', String(ordered.length)]] });
   const elig = qualification?.eligibility; const eligibilityChecks: RuleCheck[] = [];
+const channelEligible = promo.channels.includes(channel);
+eligibilityChecks.push({
+label: 'Channel',
+status: channelEligible ? 'PASS' : 'FAIL',
+actual: CHANNEL_LABELS[channel],
+required: channelSummary(promo.channels),
+...(channelEligible ? {} : { reason: `Promotion is not available on ${CHANNEL_LABELS[channel]}.` }),
+});
   eligibilityChecks.push(check('Market', persona.market === promo.market, persona.market, `= ${promo.market}`)); eligibilityChecks.push({ ...skipped('KYC status'), actual: persona.kycStatus }); eligibilityChecks.push(check('RG exclusion', persona.rgStatus !== 'Self-excluded', persona.rgStatus, 'not Self-excluded (platform rule)'));
   if (elig?.audience === 'new_customers' && elig.windowDays) { const regAt = persona.registrationDate === 'today' ? Date.UTC(year, new Date(now).getUTCMonth(), new Date(now).getUTCDate()) : parseFixedAt(`${persona.registrationDate}T00:00`); const days = Number.isFinite(regAt) ? Math.floor((lastEventAt - regAt) / DAY_MS) : NaN; eligibilityChecks.push(check('Registration window', Number.isFinite(days) && days >= 0 && days <= elig.windowDays, Number.isFinite(days) ? `${days} days since registration` : '·', `≤ ${elig.windowDays} days`)); }
   else if (elig?.audience === 'all') eligibilityChecks.push(check('Audience', true, 'any player', 'all players')); else eligibilityChecks.push(skipped('Registration window'));
@@ -247,7 +258,7 @@ export function simulate(promo: Promo, persona: Persona, events: ScenarioEvent[]
 export interface SimulationRun { id: string; createdAt: number; promoId: string; promoName: string; personaId: string; outcome: 'PASS' | 'FAIL'; failedAt: StageId | null; scenario: Scenario; }
 export const RUNS_KEY = 'simulator.v1.runs'; export const MAX_RUNS = 25;
 export function runId(createdAt: number): string { return `sim_${createdAt.toString(36)}`; }
-export function loadRuns(): SimulationRun[] { if (typeof window === 'undefined') return []; try { const parsed: unknown = JSON.parse(window.localStorage.getItem(RUNS_KEY) ?? '[]'); return Array.isArray(parsed) ? parsed as SimulationRun[] : []; } catch { return []; } }
+export function loadRuns(): SimulationRun[] { if (typeof window === 'undefined') return []; try { const parsed: unknown = JSON.parse(window.localStorage.getItem(RUNS_KEY) ?? '[]'); return Array.isArray(parsed) ? parsed.map((run) => ({ ...run, scenario: { ...run.scenario, channel: run.scenario?.channel ?? 'app' } })) as SimulationRun[] : []; } catch { return []; } }
 export function saveRuns(runs: SimulationRun[]): void { if (typeof window === 'undefined') return; try { window.localStorage.setItem(RUNS_KEY, JSON.stringify(runs.slice(0, MAX_RUNS))); } catch { /* Prototype mock: storage failures are non-fatal. */ } }
 export function addRun(run: SimulationRun): SimulationRun[] { const next = [run, ...loadRuns()].slice(0, MAX_RUNS); saveRuns(next); return next; }
 /** Stamp and persist a run. The wall-clock read lives here (history bookkeeping), never inside simulate(). */

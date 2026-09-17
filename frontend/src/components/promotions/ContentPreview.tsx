@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import T from '@/theme/tokens';
-import { PrimaryButton } from '@/components/ui';
+import { ChannelChips, PrimaryButton } from '@/components/ui';
+import type { Channel } from '@/lib/promotions';
 
 const customerPreview = {
   background: T.navy,
@@ -25,6 +26,7 @@ export interface ContentPreviewProps {
   terms?: string;
   type?: string;
   market?: string;
+channels?: Channel[];
   readOnly?: boolean;
 }
 
@@ -60,6 +62,7 @@ export function ContentPreview({
   terms,
   type,
   market,
+channels,
   readOnly = false,
 }: ContentPreviewProps) {
   const [mode, setMode] = useState<PreviewMode>('mobile');
@@ -108,7 +111,8 @@ export function ContentPreview({
           )}
           <div className="content-preview__body">
             {(type || market) && <span className="content-preview__badge" style={{ border: `1px solid ${customerPreview.border}`, color: customerPreview.text }}>{[type, market].filter(Boolean).join(' · ')}</span>}
-            <h4 className="content-preview__title" style={{ color: customerPreview.text }}>{title?.trim() || 'Promotion title'}</h4>
+            {channels && channels.length > 0 && <ChannelChips channels={channels} compact />}
+<h4 className="content-preview__title" style={{ color: customerPreview.text }}>{title?.trim() || 'Promotion title'}</h4>
             <p className="content-preview__description" style={{ color: customerPreview.secondary }}>{shortDescription || 'Short description will appear here.'}</p>
             <div className="content-preview__cta"><PrimaryButton onClick={() => undefined}>{ctaLabel || 'Opt in'}</PrimaryButton></div>
             <button

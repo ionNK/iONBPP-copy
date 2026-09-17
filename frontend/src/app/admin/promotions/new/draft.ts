@@ -20,6 +20,8 @@ import type {
 import { QUALIFICATION_EVENT_IDS, isNumericType } from '@/data/event-catalog';
 import type { EventId } from '@/data/event-catalog';
 import { isRangeOperator, isZeroArityOperator } from '@/data/operator-catalog';
+import { CHANNELS, allChannels } from '@/lib/promotions';
+import type { Channel } from '@/lib/promotions';
 
 export interface TriggerRule {
  id: string;
@@ -71,6 +73,9 @@ export interface PromotionDraft {
  /* Qualification */
 
  qualification: Qualification;
+  /** Surfaces a player can qualify through; at least one is required. */
+  channels: Channel[];
+
 
  /* Award */
  rewardType: RewardType;
@@ -236,6 +241,17 @@ export function sanitizeQualification(value: unknown): Qualification {
  };
 }
 
+/**
+ * Draft restore: an absent `channels` key (drafts saved before the field
+ * existed) means all four; unknown values are dropped but an explicit empty
+ * selection is preserved so Step 2 validation can surface it.
+ */
+export function sanitizeDraftChannels(value: unknown): Channel[] {
+  if (value === undefined) return allChannels();
+  if (!Array.isArray(value)) return allChannels();
+  return CHANNELS.filter((channel) => value.includes(channel));
+}
+
 export function baseSlots(): BannerSlot[] {
  return [
  { id: 1, kind: 'fixed', label: 'Promotions page · desktop', placement: 'Promotions page', device: 'Desktop', fileName: '', preview: '' },
@@ -250,7 +266,9 @@ export function baseDraft(): PromotionDraft {
  dirty: false,
  name: '',
  type: '',
+
  vertical: '',
+channels: allChannels(),
  qualification: emptyQualification(),
 
  rewardType: 'freebet',
@@ -297,6 +315,7 @@ export function templateDraft(id: TemplateId): PromotionDraft {
  ? cloneQualification(prefill.qualification)
  : emptyQualification(),
  tiers: (prefill.tiers ?? SEED_TIERS).map((t) => ({ ...t })),
+    channels: prefill.channels ? [...prefill.channels] : allChannels(),
  template: id,
  step: 1,
  dirty: false,
@@ -320,6 +339,10 @@ export function validateQualification(d: PromotionDraft): Record<string, string>
 
  if (d.qualification.triggers.length === 0) {
  errors.triggers = 'Add at least one trigger.';
+}
+
+  if (d.channels.length === 0) {
+    errors.channels = 'Select at least one channel.';
  }
 
  for (const trigger of d.qualification.triggers) {

@@ -8,8 +8,8 @@ import { Badge, DateTimeField, DestructiveGhostButton, PrimaryButton, parseIsoDa
 import { EVENT_CATALOG, getCatalogEvent } from '@/data/event-catalog';
 import type { EventId } from '@/data/event-catalog';
 import { markTutorialProgress } from '@/data/manual';
-import { loadPromotions, PROMO_SEED } from '@/lib/promotions';
-import type { Promo } from '@/lib/promotions';
+import { CHANNELS, CHANNEL_LABELS, loadPromotions, PROMO_SEED } from '@/lib/promotions';
+import type { Channel, Promo } from '@/lib/promotions';
 import { loadSettings } from '@/lib/settings';
 import { clearRuns, defaultEvent, fmtK, GAME_CODES, getPersona, loadRuns, newEventId, PERSONAS, PICKER_FIELDS, PRESETS, recordRun, simulate } from '@/lib/simulator';
 import type { CheckStatus, Scenario, ScenarioEvent, SimulationResult, SimulationRun, StageId } from '@/lib/simulator';
@@ -23,7 +23,7 @@ const FIXED_DEFAULT = '2026-09-17T14:00';
 
 function clonePreset(id: string): Scenario {
   const preset = PRESETS.find((item) => item.id === id) ?? PRESETS[0];
-  return { promoId: preset.promoId, personaId: preset.personaId, fixedAt: FIXED_DEFAULT, events: preset.events.map((event) => ({ ...event, id: newEventId(), params: { ...event.params } })) };
+  return { promoId: preset.promoId, personaId: preset.personaId, fixedAt: FIXED_DEFAULT, channel: 'app', events: preset.events.map((event) => ({ ...event, id: newEventId(), params: { ...event.params } })) };
 }
 
 function Status({ value }: { value: CheckStatus }) {
@@ -49,8 +49,9 @@ export default function SimulatorPage() {
   const [runs, setRuns] = useState<SimulationRun[]>(() => loadRuns());
 
   const activePromos = promos.filter((promo) => promo.status !== 'draft');
-  const promo = activePromos.find((item) => item.id === scenario.promoId) ?? activePromos[0] ?? PROMO_SEED[0];
-  const evaluation = result ?? simulate(promo, getPersona(scenario.personaId), scenario.events, scenario.fixedAt, loadSettings());
+  const channelPromos = activePromos.filter((item) => item.channels.includes(scenario.channel));
+const promo = channelPromos.find((item) => item.id === scenario.promoId) ?? channelPromos[0] ?? PROMO_SEED[0];
+  const evaluation = result ?? simulate(promo, getPersona(scenario.personaId), scenario.events, scenario.fixedAt, loadSettings(), scenario.channel);
   const inspector = evaluation.stages.find((stage) => stage.id === selected) ?? evaluation.stages[0];
   const catalog = useMemo(() => EVENT_CATALOG.flatMap((category) => category.events), []);
 
@@ -58,9 +59,17 @@ export default function SimulatorPage() {
   const updateParam = (id: string, name: string, value: string) => setScenario((current) => ({ ...current, events: current.events.map((event) => (event.id === id ? { ...event, params: { ...event.params, [name]: value } } : event)) }));
   const moveEvent = (index: number, delta: number) => setScenario((current) => { const events = [...current.events]; const target = index + delta; if (target < 0 || target >= events.length) return current; [events[index], events[target]] = [events[target], events[index]]; return { ...current, events }; });
   const loadPreset = (id: string) => { setScenario(clonePreset(id)); setResult(null); setSelected('trigger'); };
-  const restore = (item: SimulationRun) => { setScenario({ ...item.scenario, events: item.scenario.events.map((event) => ({ ...event, id: newEventId(), params: { ...event.params } })) }); setResult(null); setTab('new'); };
+const setChannel = (channel: Channel) => {
+const eligible = activePromos.filter((item) => item.channels.includes(channel));
+setScenario((current) => {
+const promoId = eligible.some((item) => item.id === current.promoId) ? current.promoId : eligible[0]?.id ?? current.promoId;
+return { ...current, channel, promoId };
+});
+setResult(null);
+};
+  const restore = (item: SimulationRun) => { setScenario({ ...item.scenario, channel: item.scenario.channel ?? 'app', events: item.scenario.events.map((event) => ({ ...event, id: newEventId(), params: { ...event.params } })) }); setResult(null); setTab('new'); };
   const run = () => {
-    const output = simulate(promo, getPersona(scenario.personaId), scenario.events, scenario.fixedAt, loadSettings());
+    const output = simulate(promo, getPersona(scenario.personaId), scenario.events, scenario.fixedAt, loadSettings(), scenario.channel);
     setResult(output);
     setSelected(output.failedAt ?? 'ledger');
     setRuns(recordRun({ promoId: promo.id, promoName: promo.name, personaId: scenario.personaId, outcome: output.outcome, failedAt: output.failedAt, scenario }));
@@ -100,7 +109,8 @@ export default function SimulatorPage() {
           <section className="sim-card sim-scenario" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusMd }}>
             <div className="sim-section-head"><div><h2>Scenario</h2><p style={{ color: T.textSecondary }}>Choose a preset or edit the event sequence.</p></div></div>
             <label className="sim-field">Preset<select style={inputStyle} value="" onChange={(e) => { if (e.target.value) loadPreset(e.target.value); }}><option value="">Load a preset…</option>{PRESETS.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select></label>
-            <label className="sim-field">Promotion<select style={inputStyle} value={promo.id} onChange={(e) => { setScenario({ ...scenario, promoId: e.target.value }); setResult(null); }}>{activePromos.map((item) => <option value={item.id} key={item.id}>{item.id} · {item.name}</option>)}</select></label>
+            <label className="sim-field">Channel<select style={inputStyle} value={scenario.channel} onChange={(e) => { setChannel(e.target.value as Channel); }}>{CHANNELS.map((channel) => <option value={channel} key={channel}>{CHANNEL_LABELS[channel]}</option>)}</select></label>
+<label className="sim-field">Promotion<select style={inputStyle} value={promo.id} onChange={(e) => { setScenario({ ...scenario, promoId: e.target.value }); setResult(null); }}>{channelPromos.map((item) => <option value={item.id} key={item.id}>{item.id} · {item.name}</option>)}</select></label>
             <label className="sim-field">Persona<select style={inputStyle} value={scenario.personaId} onChange={(e) => { setScenario({ ...scenario, personaId: e.target.value }); setResult(null); }}>{PERSONAS.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select></label>
             <div className="sim-field" role="group" aria-labelledby="sim-fixed-at-label">
 <span id="sim-fixed-at-label">Fixed at</span>

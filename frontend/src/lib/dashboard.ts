@@ -1,4 +1,5 @@
 import type { Promo } from '@/lib/promotions';
+import { CHANNEL_LABELS, channelSummary } from '@/lib/promotions';
 
 /** Budget alert threshold (BR-6): alert at >=90%, never block. */
 export const ALERT_RATIO = 0.9;
@@ -6,7 +7,7 @@ export const ALERT_RATIO = 0.9;
 export type DashboardPeriod = '7d' | '30d' | 'month';
 
 /** Donut breakdown dimensions. `provider` is derived from type, see PROVIDER_BY_TYPE. */
-export type SpendDimension = 'type' | 'provider' | 'market';
+export type SpendDimension = 'type' | 'provider' | 'market' | 'channel';
 
 export interface DashboardPoint {
  day: string;
@@ -75,11 +76,17 @@ export const providerOf = (promo: Promo): string => PROVIDER_BY_TYPE[promo.type]
 /** Category accessor shared by the donut, the global filter and the palette order. */
 export function dimensionValue(promo: Promo, dimension: SpendDimension): string {
  if (dimension === 'provider') return providerOf(promo);
- return dimension === 'market' ? promo.market : promo.type;
+ if (dimension === 'market') return promo.market;
+if (dimension === 'channel') return channelSummary(promo.channels);
+return promo.type;
 }
 
 export function applyFilter(promos: Promo[], filter: DashboardFilter | null): Promo[] {
- return filter ? promos.filter((promo) => dimensionValue(promo, filter.dimension) === filter.value) : promos;
+ if (!filter) return promos;
+if (filter.dimension === 'channel') {
+return promos.filter((promo) => promo.channels.some((channel) => CHANNEL_LABELS[channel] === filter.value));
+}
+return promos.filter((promo) => dimensionValue(promo, filter.dimension) === filter.value);
 }
 
 const sum = (promos: Promo[], key: 'spend' | 'budget') =>
@@ -114,6 +121,22 @@ export function deriveDashboardSeries(promos: Promo[], period: DashboardPeriod):
 
 /** Spend grouped by the selected dimension, largest first. */
 export function spendByDimension(promos: Promo[], dimension: SpendDimension): CategorySpend[] {
+ /* Channel spend has no observed attribution in the prototype model: split a
+ * promotion's spend equally across its enabled channels so the breakdown
+ * totals still sum to overall spend without inventing channel traffic. */
+ if (dimension === 'channel') {
+ return Array.from(
+ promos.reduce((byName, promo) => {
+ if (promo.channels.length === 0) return byName;
+ const share = (promo.spend ?? 0) / promo.channels.length;
+ for (const channel of promo.channels) {
+ const name = CHANNEL_LABELS[channel];
+ byName.set(name, (byName.get(name) ?? 0) + share);
+ }
+ return byName;
+ }, new Map<string, number>()),
+ ).map(([name, amount]) => ({ name, amount: Math.round(amount) })).sort((a, b) => b.amount - a.amount);
+ }
  return Array.from(
  promos.reduce((byName, promo) => {
  const name = dimensionValue(promo, dimension);

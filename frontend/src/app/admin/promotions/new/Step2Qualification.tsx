@@ -30,6 +30,8 @@ import {
 } from '@/data/operator-catalog';
 import type { PromotionDraft, Qualification, Trigger, TriggerRule } from './draft';
 import { inputStyle } from './fields';
+import { CHANNELS, CHANNEL_ICONS, CHANNEL_LABELS } from '@/lib/promotions';
+import type { Channel } from '@/lib/promotions';
 
 interface Step2QualificationProps {
  draft: PromotionDraft;
@@ -129,6 +131,14 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  );
 
  const commit = (next: Qualification) => onEdit('qualification', next);
+
+/* Group 0: Channels. Canonical order is preserved regardless of click order. */
+const toggleChannel = (channel: Channel, checked: boolean) => {
+  onEdit(
+    'channels',
+    CHANNELS.filter((item) => (item === channel ? checked : draft.channels.includes(item))),
+  );
+};
 
  const mapTrigger = (
  triggerId: string,
@@ -552,7 +562,57 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  Qualification
  </h2>
 
- <section aria-labelledby="np-qualifying-title" style={{ marginTop: 20 }}>
+ <section aria-labelledby="np-channels-title" style={{ marginTop: 20 }}>
+<h3
+id="np-channels-title"
+className="np-section__title"
+style={{ color: T.textPrimary }}
+>
+Channels
+</h3>
+<p className="np-hint" style={{ color: T.textSecondary }}>
+Where players can qualify for this promotion. At least one channel is required.
+</p>
+<div
+role="group"
+aria-labelledby="np-channels-title"
+aria-describedby={errors.channels ? 'np-channels-error' : undefined}
+className="np-radio-group"
+style={{ marginTop: 12 }}
+>
+{CHANNELS.map((channel) => {
+const Icon = CHANNEL_ICONS[channel];
+return (
+<label key={channel} className="np-radio-row" style={{ color: T.textPrimary }}>
+<input
+type="checkbox"
+checked={draft.channels.includes(channel)}
+style={{ accentColor: T.navy }}
+onChange={(e) => toggleChannel(channel, e.target.checked)}
+/>
+<Icon size={14} aria-hidden="true" style={{ color: T.textSecondary }} />
+{CHANNEL_LABELS[channel]}
+</label>
+);
+})}
+</div>
+{errors.channels && (
+<p
+id="np-channels-error"
+className="np-error"
+role="alert"
+style={{ color: T.destructive, marginTop: 8 }}
+>
+{errors.channels}
+</p>
+)}
+</section>
+
+<section
+className="np-section"
+aria-labelledby="np-qualifying-title"
+style={{ borderTop: `1px solid ${T.border}` }}
+>
  <h3
  id="np-qualifying-title"
  className="np-section__title"

@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import { CircleCheck, Clock, Pencil, Plus, Search, Trash2, TriangleAlert, X } from 'lucide-react';
 import './promotions.css';
 import T from '@/theme/tokens';
-import { Badge, DestructiveGhostButton, FilterSelect, GhostButton, PrimaryButton, StatChip } from '@/components/ui';
-import { PROMO_SEED, consumeListNotice, loadPromotions, savePromotions } from '@/lib/promotions';
-import type { Promo, PromoStatus } from '@/lib/promotions';
+import { Badge, ChannelChips, DestructiveGhostButton, FilterSelect, GhostButton, PrimaryButton, StatChip } from '@/components/ui';
+import { CHANNELS, CHANNEL_LABELS, PROMO_SEED, channelSummary, consumeListNotice, loadPromotions, savePromotions } from '@/lib/promotions';
+import type { Channel, Promo, PromoStatus } from '@/lib/promotions';
 
 const STATUS: Record<PromoStatus, { label: string; color: string; ghost?: boolean }> = {
 active: { label: 'Active', color: T.success },
@@ -22,6 +22,7 @@ const STATUSES = ['All statuses', 'Active', 'Scheduled', 'Expired', 'Draft', 'Pe
 
 /* Type filter reset option: the type list itself is derived from the data. */
 const ALL_TYPES = 'All types';
+const ALL_CHANNELS = 'All channels';
 
 /* Table pagination, house style: page size 10. */
 const PAGE_SIZE = 10;
@@ -59,6 +60,7 @@ const router = useRouter();
 const [promos, setPromos] = useState<Promo[]>(PROMO_SEED);
 const [statusSel, setStatusSel] = useState('All statuses');
 const [typeFilter, setTypeFilter] = useState<string | null>(null);
+const [channelFilter, setChannelFilter] = useState<Channel | null>(null);
 const [chip, setChip] = useState<PromoStatus | null>(null);
 const [query, setQuery] = useState('');
 const [page, setPage] = useState(1);
@@ -93,16 +95,17 @@ promos.filter((p) => {
 if (chip && p.status !== chip) return false;
 if (statusSel !== 'All statuses' && STATUS[p.status].label !== statusSel) return false;
 if (typeFilter && p.type !== typeFilter) return false;
+if (channelFilter && !p.channels.includes(channelFilter)) return false;
 if (query && !`${p.id} ${p.name} ${p.type}`.toLowerCase().includes(query.toLowerCase())) return false;
 return true;
 }),
-[chip, statusSel, typeFilter, query, promos],
+[channelFilter, chip, statusSel, typeFilter, query, promos],
 );
 
 /* Re-filtering resets to the first page; deletions clamp via currentPage. */
 useEffect(() => {
 setPage(1);
-}, [chip, statusSel, typeFilter, query]);
+}, [channelFilter, chip, statusSel, typeFilter, query]);
 
 const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 const currentPage = Math.min(page, pageCount);
@@ -162,12 +165,12 @@ onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
 
 {/* Stat chips: clicking a chip filters the table by status */}
 <div className="promo-chips">
+<StatChip label="Total promotions" value={promos.length} active={chip === null} onClick={() => setChip(null)} />
 <StatChip label="Active" value={counts.active} active={chip === 'active'} onClick={() => setChip(chip === 'active' ? null : 'active')} />
 <StatChip label="Scheduled" value={counts.scheduled} active={chip === 'scheduled'} onClick={() => setChip(chip === 'scheduled' ? null : 'scheduled')} />
 <StatChip label="Expired" value={counts.expired} active={chip === 'expired'} onClick={() => setChip(chip === 'expired' ? null : 'expired')} />
 <StatChip label="Draft" value={counts.draft} active={chip === 'draft'} onClick={() => setChip(chip === 'draft' ? null : 'draft')} />
 <StatChip label="Pending approval" value={counts.pending} active={chip === 'pending'} onClick={() => setChip(chip === 'pending' ? null : 'pending')} />
-<StatChip label="Total promotions" value={promos.length} active={chip === null} onClick={() => setChip(null)} />
 </div>
 
 {/* Filters: search + status + type selects */}
@@ -187,6 +190,14 @@ label={typeFilter ?? ALL_TYPES}
 options={typeOptions}
 onChange={(value) => setTypeFilter(value === ALL_TYPES ? null : value)}
 />
+<FilterSelect
+label={channelFilter ? CHANNEL_LABELS[channelFilter] : ALL_CHANNELS}
+options={[ALL_CHANNELS, ...CHANNELS.map((channel) => CHANNEL_LABELS[channel])]}
+onChange={(value) => {
+const channel = CHANNELS.find((item) => CHANNEL_LABELS[item] === value);
+setChannelFilter(channel ?? null);
+}}
+/>
 </div>
 
 
@@ -196,7 +207,7 @@ onChange={(value) => setTypeFilter(value === ALL_TYPES ? null : value)}
 <table className="promo-table">
 <thead>
 <tr>
-{['Promotion', 'Type', 'Schedule', 'Budget / Spend', 'Status'].map((h) => (
+{['Promotion', 'Type', 'Channels', 'Schedule', 'Budget / Spend', 'Status'].map((h) => (
 <th key={h} style={{ color: T.textSecondary, borderBottom: `1px solid ${T.border}` }}>
 {h}
 </th>
@@ -221,6 +232,7 @@ onMouseLeave={(e) => (e.currentTarget.style.background = T.white)}
 <div className="promo-id" style={{ color: T.textSecondary }}>{p.id}</div>
 </td>
 <td className="promo-cell" style={{ color: T.textPrimary }}>{p.type}</td>
+<td><ChannelChips channels={p.channels} compact /></td>
 <td className="promo-schedule" style={{ color: T.textSecondary }}>
 <span>
 <Clock size={12} />
@@ -355,6 +367,7 @@ onClick={() => setDrawerTab(tab)}
 ['Type', selected.type],
 ['Schedule', selected.schedule],
 ['Status', STATUS[selected.status].label],
+['Channels', channelSummary(selected.channels)],
 ['Budget', selected.budget != null ? fmtK(selected.budget) : '·'],
 ['Spend', selected.spend != null ? fmtK(selected.spend) : '·'],
 ].map(([label, value]) => (
