@@ -3,7 +3,7 @@
  * conditions). Labels and stored values verbatim from
  * docs/legacy-step2-scope-triggers-spec.md (Step3Triggers) and
  * docs/legacy-eligibility-spec.md §2. Each operator declares its arity so
- * value widgets derive entirely from param type + operator arity — no
+ * value widgets derive entirely from param type + operator arity, with no
  * operator is referenced by literal string in a component.
  */
 import type { ParamType } from './event-catalog';
@@ -14,10 +14,10 @@ const ORDERED_TYPES: ParamType[] = ['integer', 'float', 'string', 'enum'];
 const TEXT_TYPES: ParamType[] = ['string', 'enum'];
 
 /**
- * zero   — takes no value (value/value2 cleared)
- * single — one value input/select
- * list   — one comma-separated value
- * range  — two values: Min stored as value, Max as value2
+ * zero: takes no value (value/value2 cleared)
+ * single: one value input/select
+ * list: one comma-separated value
+ * range: two values, Min stored as value and Max as value2
  */
 export type OperatorArity = 'zero' | 'single' | 'list' | 'range';
 
@@ -53,7 +53,7 @@ export const OPERATORS: RuleOperator[] = [
   { label: 'Is Empty (no value)', value: 'is_empty', arity: 'zero', appliesTo: ALL_TYPES },
 ];
 
-/** Catalog arity for a stored operator value — unknown operators fall back to 'single'. */
+/** Catalog arity for a stored operator value: unknown operators fall back to 'single'. */
 export function operatorsForType(type: ParamType | string): RuleOperator[] {
  return OPERATORS.filter((operator) => operator.appliesTo.includes(type as ParamType));
 }

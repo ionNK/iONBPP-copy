@@ -1,5 +1,5 @@
 /**
- * Proposed consumed-events contract — pending confirmation with platform
+ * Proposed consumed-events contract, pending confirmation with platform
  * engineering (OPPR-14). Extend by adding entries, never UI. Derived params
  * (Remaining Odds) and event-envelope fields (Channel, player context) need
  * engineering confirmation.
@@ -12,7 +12,7 @@ export interface EventParam {
  type: ParamType;
  /** Betting picker groups; shared player context is grouped separately. */
  group?: 'bet' | 'result';
- /** Enum parameters only — rendered as select or checkbox options. */
+ /** Enum parameters only, rendered as select or checkbox options. */
  options?: string[];
 }
 
@@ -38,7 +38,7 @@ export const QUALIFICATION_EVENT_IDS = {
  login: 'login',
 } as const;
 
-/** Union of valid event IDs — type trigger.eventId against this. */
+/** Union of valid event IDs: type trigger.eventId against this. */
 export type EventId =
  (typeof QUALIFICATION_EVENT_IDS)[keyof typeof QUALIFICATION_EVENT_IDS];
 
@@ -67,8 +67,8 @@ export const EVENT_CATALOG: EventCategory[] = [
  {
  id: QUALIFICATION_EVENT_IDS.betPlaced,
  label: 'Bet Placed',
- description: 'Fires when a bet is placed — reserved for activity-based promotions.',
- // placement-triggered promos TBD — no launch promo consumes this event.
+ description: 'Fires when a bet is placed. Reserved for activity-based promotions.',
+ // Placement-triggered promos TBD: no launch promo consumes this event.
  params: [
  { name: 'Bet Type', type: 'enum', group: 'bet', options: ['Single', 'Multibet'] },
  { name: 'Channel', type: 'enum', group: 'bet', options: ['Web', 'Mobile Web', 'App', 'USSD'] },
@@ -80,7 +80,7 @@ export const EVENT_CATALOG: EventCategory[] = [
  {
  id: QUALIFICATION_EVENT_IDS.betSettled,
  label: 'Bet Settled',
- description: 'Fires when all selections are resulted — use for outcome-based promotions.',
+ description: 'Fires when all selections are resulted. Use for outcome-based promotions.',
  params: [
  { name: 'Stake', type: 'float', group: 'bet' },
  { name: 'Bet Type', type: 'enum', group: 'bet', options: ['Single', 'Multibet'] },
@@ -174,7 +174,7 @@ export function getCatalogEvent(eventId: string): CatalogEvent | undefined {
 }
 
 /**
- * Display label for an event ID — 'Unknown Event' for an empty ID, the raw
+ * Display label for an event ID: 'Unknown Event' for an empty ID, the raw
  * ID for a nonempty unrecognized ID (legacy fallback behavior).
  */
 export function catalogEventLabel(eventId: string): string {

@@ -1,5 +1,5 @@
 /**
- * Wizard draft model — New Promotion flow (/admin/promotions/new).
+ * Wizard draft model: New Promotion flow (/admin/promotions/new).
  * A single typed PromotionDraft is persisted to localStorage (promo_draft_v2).
  * Step 1 (Basics) is template-driven: selecting a template writes its full
  * prefill (src/data/promotion-templates.ts) over a fresh base draft.
@@ -238,8 +238,8 @@ export function sanitizeQualification(value: unknown): Qualification {
 
 export function baseSlots(): BannerSlot[] {
  return [
- { id: 1, kind: 'fixed', label: 'Promotions page — desktop', placement: 'Promotions page', device: 'Desktop', fileName: '', preview: '' },
- { id: 2, kind: 'fixed', label: 'Promotions page — mobile', placement: 'Promotions page', device: 'Mobile', fileName: '', preview: '' },
+ { id: 1, kind: 'fixed', label: 'Promotions page · desktop', placement: 'Promotions page', device: 'Desktop', fileName: '', preview: '' },
+ { id: 2, kind: 'fixed', label: 'Promotions page · mobile', placement: 'Promotions page', device: 'Mobile', fileName: '', preview: '' },
  ];
 }
 

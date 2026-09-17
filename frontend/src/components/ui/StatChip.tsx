@@ -10,7 +10,7 @@ active: boolean;
 onClick: () => void;
 }
 
-/** Filterable stat chip — Unity Chips. */
+/** Filterable stat chip: Unity Chips. */
 export function StatChip({ label, value, active, onClick }: StatChipProps) {
   return (
     <button

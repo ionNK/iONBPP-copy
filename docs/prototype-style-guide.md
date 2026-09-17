@@ -34,6 +34,7 @@ dark theme.
 | scrim | rgba(0,21,40,0.45) | Opacity/50% (black-based, approx) |
 | progressActive | #47AA39 | Border/Green + Badges/success (Light UI) — Progress foreground-active (stepper completed) |
 | selectionBg | rgba(0,21,40,0.03) | Black-based 3% opacity — selected-card fill |
+| activeFill | rgba(0,21,40,0.05) | Black-based 5% opacity — active list item fill |
 | shadowRaise | 0 8px 20px rgba(0,21,40,0.08) | Hover raise shadow for selectable cards |
 | radiusSm | 8px | Radius/Small |
 | radiusMd | 14px | Radius/Medium |
@@ -61,13 +62,31 @@ pressed=yellowActive), SecondaryButton (navyDeep bg + white text),
 GhostButton (ghostBorder), DestructiveGhostButton, FilterSelect,
 Toggle (Unity Switch: navy track when on, ghostBorder track when off;
 `disabled` renders a locked state, e.g. mandatory business rules),
-EvidenceCard, ComingSoon (teaser card for unreleased "Soon" nav routes:
+EvidenceCard, ComingSoon (teaser card for unreleased "TBC" nav routes:
 white card radiusMd max-w 640, 20px/600 title + ghost navy "Coming soon"
 Badge, 14px textSecondary description, 14px bullets with 16px lucide Check,
 optional "Until then" notice = offWhite panel + Info icon + 12px text).
+DateRangePicker / DateTimeField / TimeField (Unity Date Picker; replaces
+every native `type="date|time|datetime-local"` input). Trigger = ghost
+field (ghostBorder, radiusSm, lucide Calendar 16px, 14px text: range
+"Jan 11, 2026 - Feb 2, 2026", single "20 Aug 2026, 10:00"). Popover =
+portal anchored below (white, 1px border, radiusMd, shadowRaise; Esc /
+outside click close, focus trapped; z-index 35). Shared internal
+CalendarGrid: Sunday-first, 32×32 day cells 14px radiusSm, today = 1px
+ghostBorder ring, hover offWhite, selected = yellow fill + navy 600,
+in-range = activeFill, out-of-month/disabled = textSecondary at 0.5;
+arrow keys move (roving tabIndex), Enter selects. Range popover: preset
+column (Today … This year, active = activeFill; collapses to a
+FilterSelect and a single month below 1024px), two grids, footer with two
+read-only offWhite date fields + GhostButton Cancel / PrimaryButton
+Apply — selection is a draft until Apply. DateTimeField `showTime` adds a
+24h hour / 5-minute FilterSelect row + 12px `timezoneLabel` (no AM/PM,
+Africa/Lusaka). TimeField is the standalone hour:minute row. Value API is
+`Date | null`; `toIsoDate/Time/DateTime` + `parseIsoDateTime` adapt to
+consumers that persist the old input strings.
 These correspond to Unity's Button (Default/Secondary/Ghost/
-Destructive variants), Badge (Pill), Chips, Switch, and Table components.
-Never re-declare them inside page files.
+Destructive variants), Badge (Pill), Chips, Switch, Date Picker and Table
+components. Never re-declare them inside page files.
 
 ## Internal Tool Shell (house style)
 
@@ -82,7 +101,7 @@ All internal tools follow this shell, modeled on the Admin Portal design:
   group labels — no expandable modules, no chevrons in nav.
   Item states: default `textSecondary`; hover bg `T.offWhite`; active bg
   `rgba(0,21,40,0.05)` + `textPrimary` 600. No accent indicator bars.
-  Unreleased items: reduced emphasis + "Soon" pill.
+  Unreleased items: reduced emphasis + "TBC" pill.
   The sidebar carries NO user identity block (no avatar/profile footer) —
   user identity lives exclusively in the global top bar.
 - **CONTENT:** `T.offWhite` canvas; page title 20px/600 + 14px `textSecondary`

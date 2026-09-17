@@ -5,11 +5,11 @@ import { usePathname } from 'next/navigation';
 import { CoachMarks } from '@/components/ui';
 import type { CoachMarkStep } from '@/components/ui';
 
-/** First-run flag — completing OR skipping sets "true". Never cleared by the app. */
+/** First-run flag: completing OR skipping sets "true". Never cleared by the app. */
 const STORAGE_KEY = 'onboarding.v1.completed';
 
 /* Targets = data-tour attributes on the Sidebar items and the promotions
- * primary button. Step 5 lives on /admin/promotions only — CoachMarks falls
+ * primary button. Step 5 lives on /admin/promotions only, so CoachMarks falls
  * back to a centered card elsewhere. */
 const STEPS: CoachMarkStep[] = [
   {
@@ -30,7 +30,7 @@ const STEPS: CoachMarkStep[] = [
   {
     target: 'nav-journeys',
     title: 'On the roadmap',
-    body: 'Items marked "Soon" are planned. Click any of them to see what they will do and how to work in the meantime.',
+    body: 'Items marked "TBC" are planned. Click any of them to see what they will do and how to work in the meantime.',
   },
   {
     target: 'new-promotion',
@@ -53,12 +53,12 @@ function markCompleted(): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, 'true');
   } catch {
-    /* Prototype mock — storage failures are non-fatal. */
+    /* Prototype mock: storage failures are non-fatal. */
   }
 }
 
 /**
- * First-run onboarding — mounted once in the admin shell (app/admin/layout.tsx).
+ * First-run onboarding: mounted once in the admin shell (app/admin/layout.tsx).
  * Opens on the first authenticated load only; suppressed on /admin/login,
  * which overlays the shell with its own full-viewport surface.
  */

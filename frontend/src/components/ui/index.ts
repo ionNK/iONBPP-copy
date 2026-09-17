@@ -22,3 +22,7 @@ export { Toggle } from './Toggle';
 export type { ToggleProps } from './Toggle';
 export { ZambiaFlag } from './ZambiaFlag';
 export type { ZambiaFlagProps } from './ZambiaFlag';
+export { DateRangePicker } from './DateRangePicker';
+export type { DateRangePickerProps, DateRange } from './DateRangePicker';
+export { DateTimeField, TimeField, parseIsoDateTime, toIsoDate, toIsoDateTime, toIsoTime } from './DateTimeField';
+export type { DateTimeFieldProps, TimeFieldProps } from './DateTimeField';

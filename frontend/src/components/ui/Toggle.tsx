@@ -6,12 +6,12 @@ import './ui.css';
 export interface ToggleProps {
 checked: boolean;
 onChange?: (checked: boolean) => void;
-/** Locked state (e.g. mandatory business rules) — renders dimmed, non-interactive. */
+/** Locked state (e.g. mandatory business rules), renders dimmed and non-interactive. */
 disabled?: boolean;
 ariaLabel: string;
 }
 
-/** Toggle switch — Unity Switch control (navy track when on). */
+/** Toggle switch: Unity Switch control (navy track when on). */
 export function Toggle({ checked, onChange, disabled, ariaLabel }: ToggleProps) {
 return (
 <button

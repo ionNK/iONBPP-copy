@@ -6,14 +6,14 @@ import './ui.css';
 
 export interface BadgeProps {
 color: string;
-/** Ghost variant — white fill, ghostBorder outline, colored text (e.g. Pending approval). */
+/** Ghost variant: white fill, ghostBorder outline, colored text (e.g. Pending approval). */
 ghost?: boolean;
 /** Override the text colour (e.g. dark foreground on the yellow warning badge). */
 textColor?: string;
 children: ReactNode;
 }
 
-/** Pill badge — Unity Badge (Pill shape). */
+/** Pill badge: Unity Badge (Pill shape). */
 export function Badge({ color, ghost, textColor, children }: BadgeProps) {
   return (
     <span

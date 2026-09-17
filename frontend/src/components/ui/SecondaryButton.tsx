@@ -9,7 +9,7 @@ children: ReactNode;
 onClick: () => void;
 }
 
-/** Secondary button — Unity Button/Secondary: navyDeep background + white text. */
+/** Secondary button: Unity Button/Secondary, navyDeep background + white text. */
 export function SecondaryButton({ children, onClick }: SecondaryButtonProps) {
   return (
     <button

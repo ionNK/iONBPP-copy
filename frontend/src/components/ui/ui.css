@@ -325,3 +325,243 @@ flex: none;
   align-items: center;
   gap: 8px;
 }
+
+/* Date pickers (DateRangePicker / DateTimeField / TimeField) — colors from T inline. */
+.ui-picker {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+/* Trigger: GhostButton-styled field with a lucide Calendar icon. */
+.ui-picker__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  min-height: 36px;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ui-picker__trigger--block {
+  width: 100%;
+}
+
+.ui-picker__trigger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ui-picker__trigger svg {
+  flex: none;
+}
+
+.ui-picker__trigger-text {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Popover: portal on document.body, above the promotions drawer (20/21)
+   and confirm modals (30/31), below CoachMarks (40+). */
+.ui-picker__popover {
+  position: fixed;
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+}
+
+.ui-picker__body {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.ui-picker__time {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.ui-picker__time-selects {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.ui-picker__tz {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.ui-picker__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.ui-picker__footer-value {
+  font-size: 14px;
+  min-width: 0;
+}
+
+.ui-picker__footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+/* Read-only date fields (range footer). */
+.ui-picker__readonly {
+  display: inline-flex;
+  align-items: center;
+  min-width: 120px;
+  min-height: 32px;
+  padding: 4px 12px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* CalendarGrid */
+.ui-cal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 224px; /* 7 × 32px cells */
+}
+
+.ui-cal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ui-cal__title {
+  flex: 1;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.ui-cal__nav,
+.ui-cal__nav-spacer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+}
+
+.ui-cal__nav {
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.ui-cal__weekdays,
+.ui-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 32px);
+}
+
+.ui-cal__weekday {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  font-size: 12px;
+}
+
+.ui-cal__day {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.ui-cal__day:disabled {
+  cursor: not-allowed;
+}
+
+.ui-cal__day:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+/* DateRangePicker: presets column + two months (single month when compact). */
+.ui-range {
+  display: flex;
+  align-items: stretch;
+}
+
+.ui-range__presets {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 8px;
+  min-width: 140px;
+}
+
+.ui-range__preset {
+  padding: 8px 12px;
+  border: none;
+  font-size: 14px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.ui-range__main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.ui-range__months {
+  display: flex;
+  gap: 24px;
+}
+
+.ui-range__fields {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* TimeField: inline hour : minute selects. */
+.ui-timefield {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.ui-timefield--disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}

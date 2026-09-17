@@ -10,7 +10,7 @@ onClick: () => void;
 disabled?: boolean;
 }
 
-/** Primary button — Unity Button/Default: yellow background + navy text. */
+/** Primary button: Unity Button/Default, yellow background + navy text. */
 export function PrimaryButton({ children, onClick, disabled }: PrimaryButtonProps) {
   return (
     <button

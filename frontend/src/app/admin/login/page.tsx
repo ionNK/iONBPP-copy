@@ -44,7 +44,7 @@ export default function LoginPage() {
         <motion.img
           className="ds-login__hero"
           src="/assets/login/hero-main.png"
-          alt="Ionix Boost CRM — Built for Champions. Made for You"
+          alt="Ionix Boost CRM: Built for Champions. Made for You"
           initial={{ opacity: 0, x: -24 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}

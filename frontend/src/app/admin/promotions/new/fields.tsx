@@ -1,6 +1,6 @@
 /**
  * Shared page-level form helpers for the New Promotion wizard (steps 1–7).
- * Composition only — primitives come from @/components/ui; colors from T.
+ * Composition only: primitives come from @/components/ui; colors from T.
  */
 import type { CSSProperties, ReactNode } from 'react';
 import T from '@/theme/tokens';
@@ -44,7 +44,7 @@ export const inputStyle = (error?: string): CSSProperties => ({
 });
 
 
-/** Number input with a ZMW suffix — shared money control for the wizard. */
+/** Number input with a ZMW suffix, shared money control for the wizard. */
 export function MoneyInput({ value, onChange, error, placeholder, ariaLabel }: {
 value: string; onChange: (value: string) => void; error?: string; placeholder?: string; ariaLabel: string;
 }) {

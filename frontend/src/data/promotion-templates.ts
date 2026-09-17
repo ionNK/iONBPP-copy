@@ -121,7 +121,7 @@ export function getPromotionType(id: PromotionTypeId | ''): PromotionTypeOption 
  return PROMOTION_TYPES.find((type) => type.id === id);
 }
 
-/** Disabled types show a "Soon" suffix and cannot be picked. */
+/** Disabled types show a "TBC" suffix and cannot be picked. */
 export function isTypeSelectable(id: PromotionTypeId): boolean {
  return PROMOTION_TYPES.some((type) => type.id === id && type.enabled);
 }

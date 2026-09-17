@@ -1,11 +1,11 @@
 import type { Promo } from '@/lib/promotions';
 
-/** Budget alert threshold — BR-6: alert at >=90%, never block. */
+/** Budget alert threshold (BR-6): alert at >=90%, never block. */
 export const ALERT_RATIO = 0.9;
 
 export type DashboardPeriod = '7d' | '30d' | 'month';
 
-/** Donut breakdown dimensions. `provider` is derived from type — see PROVIDER_BY_TYPE. */
+/** Donut breakdown dimensions. `provider` is derived from type, see PROVIDER_BY_TYPE. */
 export type SpendDimension = 'type' | 'provider' | 'market';
 
 export interface DashboardPoint {
@@ -16,13 +16,13 @@ export interface DashboardPoint {
  alerts: number;
 }
 
-/** One donut slice / legend row — `name` is the category value in the selected dimension. */
+/** One donut slice / legend row: `name` is the category value in the selected dimension. */
 export interface CategorySpend {
  name: string;
  amount: number;
 }
 
-/** Global dashboard filter — every surface narrows to promos whose dimension value matches. */
+/** Global dashboard filter: every surface narrows to promos whose dimension value matches. */
 export interface DashboardFilter {
  dimension: SpendDimension;
  value: string;
@@ -32,7 +32,7 @@ const PERIOD_DAYS: Record<DashboardPeriod, number> = { '7d': 7, '30d': 30, month
 const DAYS_REPORTED = 15;
 
 /**
- * Fixed "today" for schedule maths — the same 15 September the period series
+ * Fixed "today" for schedule maths: the same 15 September the period series
  * reports through (DAYS_REPORTED). The year is pinned so results never drift.
  */
 const REPORT_YEAR = 2026;
@@ -42,29 +42,29 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
 /**
- * Provider is NOT a field on Promo — it is DERIVED from the promotion type.
+ * Provider is NOT a field on Promo; it is DERIVED from the promotion type.
  * Aviator/crash → Spribe; sportsbook → Sportsbook; casino → Provider TBC;
  * wallet-level offers → Platform. Unknown types fall back to Provider TBC.
  */
 const PROVIDER_FALLBACK = 'Provider TBC';
 const PROVIDER_BY_TYPE: Record<string, string> = {
  /* Aviator / crash */
- 'Freebet — Welcome': 'Spribe',
+ 'Freebet · Welcome': 'Spribe',
  'Welcome Offer': 'Spribe',
  Leaderboard: 'Spribe',
  Missions: 'Spribe',
  /* Sportsbook */
- 'Cashback — Multibet': 'Sportsbook',
- 'Cashback — Bet Insurance': 'Sportsbook',
+ 'Cashback · Multibet': 'Sportsbook',
+ 'Cashback · Bet Insurance': 'Sportsbook',
  Cashback: 'Sportsbook',
  'Odds Boost': 'Sportsbook',
- 'Freebet — Rain': 'Sportsbook',
- 'Freebet — Event': 'Sportsbook',
+ 'Freebet · Rain': 'Sportsbook',
+ 'Freebet · Event': 'Sportsbook',
  'Freebet Award': 'Sportsbook',
  /* Casino */
  'Free Spins': PROVIDER_FALLBACK,
  Jackpot: PROVIDER_FALLBACK,
- /* Wallet-level — not tied to a game provider */
+ /* Wallet-level, not tied to a game provider */
  'Deposit Match': 'Platform',
  Referral: 'Platform',
  'Referral Reward': 'Platform',
@@ -142,7 +142,7 @@ function scheduleBounds(schedule: string): { start: number | null; end: number |
 const withinNextDays = (date: number | null, days: number) =>
  date !== null && date >= REPORT_TODAY && date <= REPORT_TODAY + days * DAY_MS;
 
-/** Active promotions whose end date falls within the next `days` — ongoing has no end and is excluded. */
+/** Active promotions whose end date falls within the next `days`: ongoing has no end and is excluded. */
 export function endingWithin(promos: Promo[], days = 7): Promo[] {
  return promos.filter((promo) => promo.status === 'active' && withinNextDays(scheduleBounds(promo.schedule).end, days));
 }

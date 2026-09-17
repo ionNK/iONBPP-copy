@@ -11,7 +11,7 @@ small?: boolean;
 ariaLabel?: string;
 }
 
-/** Ghost button — Unity Button/Ghost: ghostBorder outline on white. */
+/** Ghost button: Unity Button/Ghost, ghostBorder outline on white. */
 export function GhostButton({ children, onClick, small, ariaLabel }: GhostButtonProps) {
   return (
     <button

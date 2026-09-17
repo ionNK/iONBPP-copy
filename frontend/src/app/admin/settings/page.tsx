@@ -4,19 +4,23 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Check, CircleCheck, Minus, Pencil, Plus, RotateCcw, Trash2, UserX, X } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, ChevronRight, Circle, CircleCheck, CirclePlay, ExternalLink, FlaskConical, LifeBuoy, Mail, Minus, Pencil, Play, Plus, Printer, RotateCcw, Trash2, UserX, X } from 'lucide-react';
 import './settings.css';
 import T from '@/theme/tokens';
 import { Badge, DestructiveGhostButton, FilterSelect, GhostButton, PrimaryButton, Toggle } from '@/components/ui';
-import { createDefaultSettings, loadSettings, saveSettings } from '@/lib/settings';
+import { DEFAULT_SETTINGS, createDefaultSettings, loadSettings, saveSettings } from '@/lib/settings';
 import type { ApproverRole, DigestFrequency, ProviderCode, Settings } from '@/lib/settings';
+import { loadPromotions } from '@/lib/promotions';
+import { GLOSSARY, MANUAL_SECTIONS, TUTORIAL_VIDEOS, loadTutorialProgress, markTutorialProgress } from '@/data/manual';
+import type { ManualBlock, TutorialProgress, TutorialVideo } from '@/data/manual';
+import VideoModal from '@/components/settings/VideoModal';
 import { USER_ROLES, USER_SEED } from '@/data/users';
 import type { AdminUser, UserRole, UserStatus } from '@/data/users';
 /* Version is read from the workspace manifest at build time (frontend/package.json). */
 import pkg from '../../../../package.json';
 
 /* ---- Tabs (state lives in the URL: /admin/settings?tab=…) ---- */
-type TabId = 'general' | 'budget' | 'approvals' | 'metadata' | 'users' | 'about';
+type TabId = 'general' | 'budget' | 'approvals' | 'metadata' | 'users' | 'tutorials' | 'about';
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'general', label: 'General' },
@@ -24,6 +28,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'approvals', label: 'Approvals' },
   { id: 'metadata', label: 'Award metadata' },
   { id: 'users', label: 'Users & roles' },
+  { id: 'tutorials', label: 'Tutorials' },
   { id: 'about', label: 'About' },
 ];
 
@@ -46,7 +51,7 @@ function mergeFields(base: Settings, source: Settings, keys: (keyof Settings)[])
   return { ...base, ...patch };
 }
 
-/* Typed option lists — FilterSelect returns a string; pickOption narrows it back to the union. */
+/* Typed option lists: FilterSelect returns a string; pickOption narrows it back to the union. */
 const TIMEZONES: Settings['timezone'][] = ['Africa/Lusaka', 'UTC'];
 const DATE_FORMATS: Settings['dateFormat'][] = ['DD MMM YYYY', 'YYYY-MM-DD'];
 const DIGEST_FREQUENCIES: DigestFrequency[] = ['Immediate', 'Daily', 'Weekly'];
@@ -60,7 +65,7 @@ function pickOption<Opt extends string>(options: readonly Opt[], value: string, 
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, Number.isFinite(n) ? n : min));
 
-/* Same key FirstRunTour reads on mount (frontend/src/app/admin/FirstRunTour.tsx — not exported there). */
+/* Same key FirstRunTour reads on mount (frontend/src/app/admin/FirstRunTour.tsx, not exported there). */
 const ONBOARDING_KEY = 'onboarding.v1.completed';
 
 /* BR-6 alert threshold bounds. */
@@ -79,7 +84,7 @@ const nameFromEmail = (email: string) =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ') || 'Invited user';
 
-/* ---- Users & roles (mock — in-memory for the session) ---- */
+/* ---- Users & roles (mock, in-memory for the session) ---- */
 const USER_STATUS: Record<UserStatus, { color: string; ghost?: boolean }> = {
   Active: { color: T.success },
   Invited: { color: T.textSecondary, ghost: true },
@@ -124,6 +129,24 @@ const ABOUT_ROWS: [string, string, string | null][] = [
   ['Design system', 'Unity (light-surface admin adaptation)', 'docs/prototype-style-guide.md · docs/unity-design-system.md'],
   ['Market', 'Zambia · ZMW', null],
 ];
+
+/* ---- Tutorials tab: checklist definitions. Completion is derived from state
+ * where the app already has a signal (promotions list, saved settings) and
+ * from `tutorials.v1.progress` for steps whose destination pages are not
+ * instrumented yet (bulk upload, approvals, simulator). Following a checklist
+ * link marks the bulk-upload / approvals items as an interim measure; the
+ * simulator item is only marked by the simulator itself. ---- */
+type ChecklistId = 'promotion' | 'threshold' | 'bulkUpload' | 'approvals' | 'simulation';
+
+const CHECKLIST: { id: ChecklistId; label: string; helper: string; href: string; mark?: keyof TutorialProgress }[] = [
+  { id: 'promotion', label: 'Create your first promotion', helper: 'Walk through the seven-step wizard and save a draft.', href: '/admin/promotions/new' },
+  { id: 'threshold', label: 'Set a budget alert threshold', helper: 'Change the workspace default in Budget & alerts.', href: '/admin/settings?tab=budget' },
+  { id: 'bulkUpload', label: 'Upload a bulk award file', helper: 'Vet a CSV of manual awards before crediting.', href: '/admin/promotions/bulk-upload', mark: 'bulkUpload' },
+  { id: 'approvals', label: 'Approve an award', helper: 'Review a pending item as the checker.', href: '/admin/promotions/approvals', mark: 'approvals' },
+  { id: 'simulation', label: 'Run a simulation', helper: 'Test a promotion against sample player events.', href: '/admin/simulator' },
+];
+
+const SUPPORT_EMAIL = 'support@ionix.zm';
 
 /* ---- Shared inline styles (tokens only) ---- */
 const inputStyle: CSSProperties = { border: `1px solid ${T.ghostBorder}`, borderRadius: T.radiusSm, color: T.textPrimary, background: T.white };
@@ -180,6 +203,32 @@ function IconButton({ label, onClick, children }: { label: string; onClick: () =
   );
 }
 
+/* Manual body: typed blocks from data/manual.ts rendered with Unity type sizes only. */
+function ManualBlocks({ blocks }: { blocks: ManualBlock[] }) {
+  return (
+    <>
+      {blocks.map((block, i) => {
+        if (block.type === 'h') return <h4 key={i} className="settings-manual__subheading" style={{ color: T.textPrimary }}>{block.text}</h4>;
+        if (block.type === 'ul') {
+          return (
+            <ul key={i} className="settings-manual__list" style={{ color: T.textPrimary }}>
+              {block.items.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          );
+        }
+        if (block.type === 'note') {
+          return (
+            <p key={i} className="settings-manual__note" style={{ background: T.offWhite, borderRadius: T.radiusSm, color: T.textPrimary }}>
+              {block.text}
+            </p>
+          );
+        }
+        return <p key={i} className="settings-manual__text" style={{ color: T.textPrimary }}>{block.text}</p>;
+      })}
+    </>
+  );
+}
+
 /* Card footer shared by the four persisted cards. */
 function CardActions({ dirty, onReset, onSave }: { dirty: boolean; onReset: () => void; onSave: () => void }) {
   return (
@@ -209,12 +258,20 @@ function SettingsContent() {
   const [userForm, setUserForm] = useState<UserForm | null>(null);
   const [userError, setUserError] = useState<string | null>(null);
 
+  /* Tutorials tab: checklist inputs + manual / video UI state. */
+  const [progress, setProgress] = useState<TutorialProgress>({});
+  const [promoCount, setPromoCount] = useState(0);
+  const [manualSection, setManualSection] = useState(MANUAL_SECTIONS[0].id);
+  const [openVideo, setOpenVideo] = useState<TutorialVideo | null>(null);
+
   /* Hydrate from localStorage after mount (SSR renders defaults). */
   useEffect(() => {
     const stored = loadSettings();
     /* eslint-disable react-hooks/set-state-in-effect -- mount-only hydration from localStorage */
     setSaved(stored);
     setDraft(stored);
+    setProgress(loadTutorialProgress());
+    setPromoCount(loadPromotions().length);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
@@ -248,7 +305,7 @@ function SettingsContent() {
     showNotice('Settings saved');
   };
 
-  /* Reset restores + persists the card's defaults — confirm-before-commit. */
+  /* Reset restores + persists the card's defaults: confirm-before-commit. */
   const requestReset = (card: CardId, cardTitle: string) =>
     setConfirm({
       title: `Reset ${cardTitle} to defaults?`,
@@ -268,7 +325,7 @@ function SettingsContent() {
       },
     });
 
-  /* ---- Provider codes (BR-4) — persisted with the Award metadata card ---- */
+  /* ---- Provider codes (BR-4), persisted with the Award metadata card ---- */
   const addProvider = () => {
     if (!providerForm) return;
     const code = providerForm.code.trim().toUpperCase();
@@ -346,6 +403,25 @@ function SettingsContent() {
 
   /* ---- About: replay tour. FirstRunTour only reads the flag on mount (shell level), so
    * we clear the flag and hard-navigate to /admin/promotions to remount the shell. ---- */
+  /* ---- Tutorials: derived checklist state ---- */
+  const checklistDone: Record<ChecklistId, boolean> = {
+    promotion: promoCount > 0,
+    threshold: saved.alertThreshold !== DEFAULT_SETTINGS.alertThreshold,
+    bulkUpload: progress.bulkUpload === true,
+    approvals: progress.approvals === true,
+    simulation: progress.simulation === true,
+  };
+  const checklistCount = CHECKLIST.filter((item) => checklistDone[item.id]).length;
+
+  /* Interim: following the link counts for steps whose pages are not instrumented yet. */
+  const followChecklist = (mark?: keyof TutorialProgress) => {
+    if (!mark) return;
+    markTutorialProgress(mark);
+    setProgress(loadTutorialProgress());
+  };
+
+  const activeManual = MANUAL_SECTIONS.find((section) => section.id === manualSection) ?? MANUAL_SECTIONS[0];
+
   const requestReplayTour = () =>
     setConfirm({
       title: 'Replay onboarding tour?',
@@ -355,7 +431,7 @@ function SettingsContent() {
         try {
           window.localStorage.removeItem(ONBOARDING_KEY);
         } catch {
-          /* Prototype mock — storage failures are non-fatal. */
+          /* Prototype mock: storage failures are non-fatal. */
         }
         setConfirm(null);
         window.location.assign('/admin/promotions');
@@ -364,7 +440,7 @@ function SettingsContent() {
 
   return (
     <div className="settings-page" style={{ background: T.offWhite }}>
-      {/* Page top bar — title + subtitle only (no primary action) + URL-linked tab bar. */}
+      {/* Page top bar: title + subtitle only (no primary action) + URL-linked tab bar. */}
       <div style={{ background: T.white, borderBottom: `1px solid ${T.border}` }}>
         <div className="settings-topbar">
           <h1 className="settings-title" style={{ color: T.textPrimary }}>Settings</h1>
@@ -411,7 +487,7 @@ function SettingsContent() {
                 <FilterSelect label={draft.market} options={MARKETS} onChange={() => update({ market: 'Zambia' })} />
                 <p className="settings-control-hint" style={{ color: T.textSecondary }}>More markets soon</p>
               </FieldRow>
-              <FieldRow label="Currency display" helper="Fixed by the market — Zambian Kwacha.">
+              <FieldRow label="Currency display" helper="Fixed by the market: Zambian Kwacha.">
                 <div className="settings-readonly" style={{ border: `1px solid ${T.border}`, borderRadius: T.radiusSm, background: T.offWhite, color: T.textSecondary }}>
                   ZMW · K 1,250.00
                 </div>
@@ -428,10 +504,10 @@ function SettingsContent() {
           {tab === 'budget' && (
             <Card
               title="Budget & alerts"
-              description="BR-6 — budget thresholds raise alerts; they never stop a promotion from awarding."
+              description="BR-6: budget thresholds raise alerts; they never stop a promotion from awarding."
               footer={<CardActions dirty={isDirty('budget')} onReset={() => requestReset('budget', 'Budget & alerts')} onSave={() => save('budget')} />}
             >
-              <FieldRow label="Alert threshold (%)" helper="Alerts notify — they never block awarding.">
+              <FieldRow label="Alert threshold (%)" helper="Alerts notify; they never block awarding.">
                 <input
                   type="number"
                   className="settings-input"
@@ -468,7 +544,7 @@ function SettingsContent() {
           {tab === 'approvals' && (
             <Card
               title="Approvals"
-              description="BR-8 — maker-checker rules for manual awards and automated promotions."
+              description="BR-8: maker-checker rules for manual awards and automated promotions."
               footer={<CardActions dirty={isDirty('approvals')} onReset={() => requestReset('approvals', 'Approvals')} onSave={() => save('approvals')} />}
             >
               <FieldRow label="Require approval for all manual awards" helper="Mandatory business rule">
@@ -504,7 +580,7 @@ function SettingsContent() {
           {tab === 'metadata' && (
             <Card
               title="Award metadata"
-              description="BR-4 — every award posts to the ledger with the metadata below. These rules are locked."
+              description="BR-4: every award posts to the ledger with the metadata below. These rules are locked."
               footer={<CardActions dirty={isDirty('metadata')} onReset={() => requestReset('metadata', 'Award metadata')} onSave={() => save('metadata')} />}
             >
               <FieldRow label="Product vertical required" helper="Required by the ledger for reconciliation">
@@ -560,7 +636,7 @@ function SettingsContent() {
                     ))}
                     {draft.providers.length === 0 && (
                       <tr>
-                        <td colSpan={4} className="settings-empty" style={{ color: T.textSecondary }}>No provider codes — add one to continue stamping awards.</td>
+                        <td colSpan={4} className="settings-empty" style={{ color: T.textSecondary }}>No provider codes. Add one to continue stamping awards.</td>
                       </tr>
                     )}
                   </tbody>
@@ -603,7 +679,7 @@ function SettingsContent() {
 
           {tab === 'users' && (
             <>
-              {/* Role matrix — static, informational. */}
+              {/* Role matrix: static, informational. */}
               <Card title="Role permissions" description="What each role can do in ionix Boost. Roles are assigned per user below.">
                 <div className="settings-users-table-wrap" style={tableFrameStyle}>
                   <table className="settings-role-matrix">
@@ -620,7 +696,7 @@ function SettingsContent() {
                         <tr key={role} style={i < USER_ROLES.length - 1 ? { borderBottom: `1px solid ${T.border}` } : undefined}>
                           <td style={{ color: T.textPrimary, fontWeight: 500 }}>{role}</td>
                           {ROLE_MATRIX[role].map((allowed, col) => (
-                            <td key={MATRIX_COLUMNS[col]} aria-label={`${role} — ${MATRIX_COLUMNS[col]}: ${allowed ? 'allowed' : 'not allowed'}`}>
+                            <td key={MATRIX_COLUMNS[col]} aria-label={`${role} · ${MATRIX_COLUMNS[col]}: ${allowed ? 'allowed' : 'not allowed'}`}>
                               {allowed ? <Check size={16} style={{ color: T.success }} aria-hidden="true" /> : <Minus size={16} style={{ color: T.textSecondary }} aria-hidden="true" />}
                             </td>
                           ))}
@@ -711,6 +787,163 @@ function SettingsContent() {
             </>
           )}
 
+          {tab === 'tutorials' && (
+            <div className="settings-tutorials">
+              {/* 1. Getting-started checklist: derived + persisted completion. */}
+              <Card
+                title="Getting started"
+                description="Five steps to learn the workspace. Progress is saved in this browser."
+                action={<Badge color={checklistCount === CHECKLIST.length ? T.success : T.navy} ghost>{checklistCount} of {CHECKLIST.length} done</Badge>}
+              >
+                <ol className="settings-checklist">
+                  {CHECKLIST.map((item) => {
+                    const done = checklistDone[item.id];
+                    return (
+                      <li key={item.id} className="settings-checklist__item" style={{ borderTopColor: T.border }}>
+                        {done ? (
+                          <CircleCheck size={20} style={{ color: T.success }} aria-hidden="true" />
+                        ) : (
+                          <Circle size={20} style={{ color: T.textSecondary }} aria-hidden="true" />
+                        )}
+                        <div className="settings-checklist__copy">
+                          <div className="settings-checklist__label" style={{ color: T.textPrimary }}>
+                            {item.label}
+                            <span className="settings-visually-hidden">{done ? ' (done)' : ' (not done)'}</span>
+                          </div>
+                          <p className="settings-checklist__helper" style={{ color: T.textSecondary }}>{item.helper}</p>
+                        </div>
+                        <Link
+                          href={item.href}
+                          className="settings-checklist__link"
+                          style={{ color: T.textPrimary }}
+                          onClick={() => followChecklist(item.mark)}
+                        >
+                          {done ? 'Revisit' : 'Start'} <ArrowRight size={14} aria-hidden="true" />
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </Card>
+
+              {/* 2. How-to videos: MP4s are not shipped yet; the modal shows a notice when a file is missing. */}
+              <Card title="How-to videos" description="Short walkthroughs of the main flows.">
+                <ul className="settings-videos">
+                  {TUTORIAL_VIDEOS.map((video) => (
+                    <li key={video.slug}>
+                      <button
+                        type="button"
+                        className="settings-video"
+                        style={{ border: `1px solid ${T.border}`, borderRadius: T.radiusSm, background: T.white, color: T.textPrimary }}
+                        onClick={() => setOpenVideo(video)}
+                        aria-label={`Play ${video.title}, ${video.duration}`}
+                      >
+                        <span className="settings-video__thumb" style={{ background: T.navy, borderRadius: T.radiusSm }}>
+                          <Play size={16} style={{ color: T.yellow }} aria-hidden="true" />
+                        </span>
+                        <span className="settings-video__copy">
+                          <span className="settings-video__title">{video.title}</span>
+                          <span className="settings-video__duration" style={{ color: T.textSecondary }}>{video.duration}</span>
+                        </span>
+                        <CirclePlay size={16} style={{ color: T.textSecondary }} aria-hidden="true" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+              {/* 3. User manual: section list + body; Print renders every section (see @media print). */}
+              <div className="settings-tutorials__wide">
+                <Card
+                  title="User manual"
+                  description="How the platform works, section by section."
+                  action={
+                    <GhostButton small onClick={() => window.print()} ariaLabel="Print the user manual">
+                      <Printer size={16} aria-hidden="true" /> Print manual
+                    </GhostButton>
+                  }
+                >
+                  <div className="settings-manual">
+                    <nav className="settings-manual__nav" aria-label="Manual sections">
+                      {MANUAL_SECTIONS.map((section) => {
+                        const active = section.id === activeManual.id;
+                        return (
+                          <button
+                            key={section.id}
+                            type="button"
+                            className={`settings-manual__nav-item${active ? ' settings-manual__nav-item--active' : ''}`}
+                            style={{ color: active ? T.textPrimary : T.textSecondary, background: active ? T.activeFill : 'transparent', borderRadius: T.radiusSm }}
+                            aria-current={active ? 'true' : undefined}
+                            onClick={() => setManualSection(section.id)}
+                          >
+                            <BookOpen size={14} aria-hidden="true" />
+                            <span>{section.title}</span>
+                            <ChevronRight size={14} aria-hidden="true" />
+                          </button>
+                        );
+                      })}
+                    </nav>
+                    <div className="settings-manual__body">
+                      {MANUAL_SECTIONS.map((section) => (
+                        <article
+                          key={section.id}
+                          className={`settings-manual__section${section.id === activeManual.id ? ' settings-manual__section--active' : ''}`}
+                        >
+                          <h3 className="settings-manual__heading" style={{ color: T.textPrimary }}>{section.title}</h3>
+                          <ManualBlocks blocks={section.blocks} />
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* 4. Simulator hand-off: opening the link never counts as a completed simulation. */}
+              <Card title="Promotion simulator" description="Test how a promotion behaves against sample player events before it goes live.">
+                <div className="settings-simulator" style={{ background: T.offWhite, borderRadius: T.radiusSm }}>
+                  <FlaskConical size={20} style={{ color: T.navy }} aria-hidden="true" />
+                  <p style={{ color: T.textPrimary }}>Pick a promotion, replay bets and deposits, and see which players would qualify and what it would cost.</p>
+                  <Link href="/admin/simulator" className="settings-inline-link" style={{ color: T.textPrimary }}>
+                    Open the simulator <ExternalLink size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+              </Card>
+              {/* 5. Glossary: styled native disclosure (no accordion primitive exists yet). */}
+              <Card title="Glossary" description="Terms used across promotions, awards and the ledger.">
+                <div className="settings-glossary">
+                  {GLOSSARY.map(([term, definition]) => (
+                    <details key={term} className="settings-glossary__item" style={{ borderTopColor: T.border }}>
+                      <summary className="settings-glossary__term" style={{ color: T.textPrimary }}>
+                        <span>{term}</span>
+                        <ChevronRight size={16} className="settings-glossary__chevron" style={{ color: T.textSecondary }} aria-hidden="true" />
+                      </summary>
+                      <p className="settings-glossary__definition" style={{ color: T.textSecondary }}>{definition}</p>
+                    </details>
+                  ))}
+                </div>
+              </Card>
+
+              {/* 6. Support. */}
+              <Card title="Need help?" description="Product support for ionix Boost in Zambia.">
+                <div className="settings-support">
+                  <div className="settings-support__item" style={{ border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
+                    <Mail size={16} style={{ color: T.navy }} aria-hidden="true" />
+                    <div>
+                      <div className="settings-support__label" style={{ color: T.textPrimary }}>Email support</div>
+                      <a href={`mailto:${SUPPORT_EMAIL}`} className="settings-inline-link" style={{ color: T.textPrimary }}>{SUPPORT_EMAIL}</a>
+                    </div>
+                  </div>
+                  <div className="settings-support__item" style={{ border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
+                    <LifeBuoy size={16} style={{ color: T.navy }} aria-hidden="true" />
+                    <div>
+                      <div className="settings-support__label" style={{ color: T.textPrimary }}>Onboarding tour</div>
+                      <p className="settings-support__meta" style={{ color: T.textSecondary }}>Replay the five-step tour from the About tab at any time.</p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
+
           {tab === 'about' && (
             <Card title="About" description="Build and design-system details for this prototype.">
               <div className="settings-about-list">
@@ -734,7 +967,10 @@ function SettingsContent() {
         </div>
       </div>
 
-      {/* Confirm dialog — confirm-before-commit for reset, delete, deactivate and replay. */}
+      {/* Tutorials: how-to video player (portal; Escape / scrim click closes, focus is trapped). */}
+      {openVideo && <VideoModal video={openVideo} onClose={() => setOpenVideo(null)} />}
+
+      {/* Confirm dialog: confirm-before-commit for reset, delete, deactivate and replay. */}
       {confirm && (
         <div role="dialog" aria-modal="true" aria-labelledby="settings-confirm-title">
           <div className="settings-modal__scrim" style={{ background: T.scrim }} onClick={() => setConfirm(null)} />

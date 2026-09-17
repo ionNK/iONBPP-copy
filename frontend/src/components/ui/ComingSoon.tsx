@@ -9,11 +9,11 @@ export interface ComingSoonProps {
   title: string;
   description: string;
   bullets: string[];
-  /** Optional interim guidance — rendered as an "Until then" notice (offWhite panel + icon). */
+  /** Optional interim guidance, rendered as an "Until then" notice (offWhite panel + icon). */
   until?: string;
 }
 
-/** Feature teaser card for unreleased ("Soon") nav destinations — white card, Radius/Medium. */
+/** Feature teaser card for unreleased ("TBC") nav destinations: white card, Radius/Medium. */
 export function ComingSoon({ title, description, bullets, until }: ComingSoonProps) {
   return (
     <section

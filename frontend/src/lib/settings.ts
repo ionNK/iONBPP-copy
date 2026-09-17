@@ -77,6 +77,6 @@ export function saveSettings(settings: Settings): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   } catch {
-    /* Prototype mock — storage failures are non-fatal. */
+    /* Prototype mock: storage failures are non-fatal. */
   }
 }

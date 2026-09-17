@@ -12,7 +12,7 @@ action?: ReactNode;
 children?: ReactNode;
 }
 
-/** Evidence attachment card — white surface, border, Radius/Small. */
+/** Evidence attachment card: white surface, border, Radius/Small. */
 export function EvidenceCard({ title, meta, icon, action, children }: EvidenceCardProps) {
   return (
     <div

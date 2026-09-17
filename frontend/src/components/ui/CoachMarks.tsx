@@ -73,7 +73,7 @@ function place(anchor: Rect, cardHeight: number) {
 }
 
 /**
- * Step-by-step coach marks — scrim + one card anchored to a `[data-tour]`
+ * Step-by-step coach marks: scrim + one card anchored to a `[data-tour]`
  * element (spotlight via box-shadow, no SVG masking). Rendered through a
  * portal on document.body so it sits above the TopBar/Sidebar shell.
  * Escape / scrim click = skip; focus moves into the card on every step.

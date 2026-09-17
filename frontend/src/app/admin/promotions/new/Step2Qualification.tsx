@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Step 2 — Qualification (rules-only model).
+ * Step 2: Qualification (rules-only model).
  * Trigger rules are the single source of truth for conditions and restrictions.
  * Counting and eligibility remain separate groups within draft.qualification.
  */
@@ -34,7 +34,7 @@ import { inputStyle } from './fields';
 interface Step2QualificationProps {
  draft: PromotionDraft;
  errors: Record<string, string>;
- /** Field edit — marks the draft dirty and clears that field's error. */
+ /** Field edit, marks the draft dirty and clears that field's error. */
  onEdit: <K extends keyof PromotionDraft>(key: K, value: PromotionDraft[K]) => void;
 }
 
@@ -140,7 +140,7 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  ),
  });
 
- /* Group 1 — Qualifying bet */
+ /* Group 1: Qualifying bet */
  const addTrigger = (eventId: EventId) => {
  commit({
  ...qualification,
@@ -241,7 +241,7 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  }));
  };
 
- /* Group 2 — How often */
+ /* Group 2: How often */
  const addCountingRule = (param: EventParam) => {
  commit({
  ...qualification,
@@ -266,7 +266,7 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  });
  };
 
- /* Group 3 — Who's eligible */
+ /* Group 3: Who's eligible */
  const setAudience = (audience: Qualification['eligibility']['audience']) => {
  commit({
  ...qualification,
@@ -301,7 +301,7 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  if (isZeroArityOperator(rule.operator)) {
  return (
  <span className="np-rule-novalue" style={{ color: T.textSecondary }}>
- — no value —
+ · no value ·
  </span>
  );
  }
@@ -621,7 +621,7 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  ))}
  </select>
  {draft.vertical && (
- <span className="np-trigger-card__title">— {draft.vertical}</span>
+ <span className="np-trigger-card__title">· {draft.vertical}</span>
  )}
  </label>
  <GhostButton
@@ -724,7 +724,7 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  id={`np-restrictions-${trigger.id}`}
  style={{ color: T.textPrimary, fontSize: 14, fontWeight: 500, margin: 0 }}
  >
- Restrictions — bets that never qualify
+ Restrictions: bets that never qualify
  </h4>
  <div
  style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}
@@ -768,8 +768,8 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  >
  <Info size={16} style={{ color: T.textSecondary }} />
  <span style={{ color: T.textPrimary }}>
- Settled means all selections are resulted — bets with pending legs wait.
- Cancelled/postponed legs count as odds 1.00 — platform standard.
+ Settled means all selections are resulted; bets with pending legs wait.
+ Cancelled/postponed legs count as odds 1.00, which is the platform standard.
  </span>
  </div>
  )}
@@ -793,7 +793,7 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  </p>
  {qualification.counting.length === 0 && (
  <p className="np-hint" style={{ color: T.textSecondary, marginTop: 8 }}>
- No counting conditions — each qualifying event can award, subject to award limits.
+ No counting conditions. Each qualifying event can award, subject to award limits.
  </p>
  )}
  <div className="np-rule-list">
@@ -908,7 +908,7 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  className="np-hint"
  style={{ color: T.textSecondary, marginTop: 4 }}
  >
- The player can qualify on any of the days in the window — they don&apos;t
+ The player can qualify on any of the days in the window; they don&apos;t
  have to be back-to-back.
  </p>
  </div>

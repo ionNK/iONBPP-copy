@@ -610,7 +610,7 @@ No dark surfaces remain in the admin shell.
   transform: rotate(180deg);
 }
 
-/* Badge-style "Soon" pill — 12px Caption on Radius/Extra Large */
+/* Badge-style "TBC" pill — 12px Caption on Radius/Extra Large */
 .ds-sidenav__pill {
   padding: 2px 8px;
   border-radius: 999px; /* Radius/Extra Large — T.radiusPill */

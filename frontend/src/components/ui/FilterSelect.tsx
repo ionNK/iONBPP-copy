@@ -5,7 +5,7 @@ import type { CSSProperties } from 'react';
 import T from '@/theme/tokens';
 import './ui.css';
 
-/* Inline lucide chevron-down path — lucide-react is not a dependency yet. */
+/* Inline lucide chevron-down path: lucide-react is not a dependency yet. */
 function ChevronDownIcon({ size = 16, style }: { size?: number; style?: CSSProperties }) {
   return (
     <svg
@@ -31,7 +31,7 @@ options: string[];
 onChange: (value: string) => void;
 }
 
-/** Dropdown filter select — Unity Dropdown Menu trigger + menu. */
+/** Dropdown filter select: Unity Dropdown Menu trigger + menu. */
 export function FilterSelect({ label, options, onChange }: FilterSelectProps) {
   const [open, setOpen] = useState(false);
   return (

@@ -1,5 +1,5 @@
 /**
- * Step 2 (Qualification) rules model — the single source of truth.
+ * Step 2 (Qualification) rules model: the single source of truth.
  * `qualification.triggers[].rules[]` holds every condition; Section 1 widgets
  * are views over rules tagged `source: 'widget'` + `widgetId`, and every
  * mutation here is pure so the component never edits rules by hand.
@@ -67,7 +67,7 @@ export interface WidgetDefinition {
   params: Record<string, string>;
   /** Value stored when a toggle widget is on. */
   toggleValue?: string;
-  /** Owned by the Aviator second trigger — never offered on the primary trigger. */
+  /** Owned by the Aviator second trigger, never offered on the primary trigger. */
   secondaryTrigger?: boolean;
 }
 
@@ -80,7 +80,7 @@ export const qualifyingEventOptions: readonly string[] = [
   qualificationEventIds.aviatorCrash,
 ];
 
-/** Widget table — a widget renders only when the selected event exposes its param (see widgetParamFor). */
+/** Widget table: a widget renders only when the selected event exposes its param (see widgetParamFor). */
 export const qualificationWidgets: WidgetDefinition[] = [
   {
     id: qualificationWidgetIds.minimumStake,
@@ -180,7 +180,7 @@ export function widgetDefinition(widgetId: string): WidgetDefinition | undefined
   return qualificationWidgets.find((widget) => widget.id === widgetId);
 }
 
-/** Catalog param a widget binds to on the given event — undefined means "hide this widget". */
+/** Catalog param a widget binds to on the given event: undefined means "hide this widget". */
 export function widgetParamFor(eventId: string, widgetId: string): EventParam | undefined {
   const widget = widgetDefinition(widgetId);
   const name = widget?.params[eventId] ?? widget?.params.default;

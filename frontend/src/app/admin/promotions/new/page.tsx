@@ -9,7 +9,7 @@ Check, ChevronLeft, CircleCheck, FileText, ImagePlus, Info, Plus, Trash2, Triang
 import '../promotions.css';
 import './new.css';
 import T from '@/theme/tokens';
-import { Badge, GhostButton, PrimaryButton, Toggle } from '@/components/ui';
+import { Badge, DateTimeField, GhostButton, PrimaryButton, TimeField, Toggle, parseIsoDateTime, toIsoDate, toIsoTime } from '@/components/ui';
 import { addPromotion, nextPromoId, setListNotice } from '@/lib/promotions';
 import type { Promo } from '@/lib/promotions';
 import { BET_RESTRICTIONS, catalogEventLabel } from '@/data/event-catalog';
@@ -22,7 +22,7 @@ import { Field, inputStyle } from './fields';
 import { Step1Basics } from './Step1Basics';
 import { Step2Qualification } from './Step2Qualification';
 
-/* Draft model lives in ./draft — a single PromotionDraft persisted to
+/* Draft model lives in ./draft: a single PromotionDraft persisted to
  * localStorage (DRAFT_KEY), prefilled from the template catalog. */
 
 const STEPS = ['Basics', 'Qualification', 'Award', 'Budget', 'Schedule', 'Content', 'Review'];
@@ -31,14 +31,14 @@ const EXTRA_PLACEMENTS = ['Homepage', 'Casino', 'Crash'];
 const DEVICES = ['Desktop', 'Mobile'];
 
 /* Template prefills and seed data come from src/data/promotion-templates.ts
- * (see draft.ts — templateDraft overlays a full prefill on a fresh base draft). */
+ * (see draft.ts: templateDraft overlays a full prefill on a fresh base draft). */
 
 /** Review readback follows operator arity, without leaking stale range bounds. */
 function qualificationRuleSummary(rule: TriggerRule): string {
   const label = `${rule.param} ${rule.operator}`;
   if (isZeroArityOperator(rule.operator)) return label;
-  if (isRangeOperator(rule.operator)) return `${label} ${rule.value || '—'} – ${rule.value2 || '—'}`;
-  return `${label} ${rule.value || '—'}`;
+  if (isRangeOperator(rule.operator)) return `${label} ${rule.value || '·'} – ${rule.value2 || '·'}`;
+  return `${label} ${rule.value || '·'}`;
 }
 
 /** Read each OR branch independently; another trigger cannot cover its exclusions. */
@@ -51,7 +51,7 @@ function qualificationRestrictionRows(rules: TriggerRule[], index: number): [str
     : [];
   for (const restriction of BET_RESTRICTIONS) {
     if (!active.includes(restriction)) {
-      rows.push([`Trigger ${index + 1} — ${restriction.param} warning`, `⚠ ${restriction.warning}`]);
+      rows.push([`Trigger ${index + 1} · ${restriction.param} warning`, `⚠ ${restriction.warning}`]);
     }
   }
   return rows;
@@ -109,7 +109,7 @@ status,
 }
 
 /* ------------------------------------------------------------------ */
-/* Small page-level form helpers (composition only — primitives come   */
+/* Small page-level form helpers (composition only; primitives come   */
 /* from @/components/ui). Colors come from T; layout from new.css.     */
 /* ------------------------------------------------------------------ */
 
@@ -151,7 +151,7 @@ restored.current = true;
 try {
 const raw = window.localStorage.getItem(DRAFT_KEY);
 if (raw) {
-/* Legacy drafts (preset-based flow) carried removed keys — strip them. */
+/* Legacy drafts (preset-based flow) carried removed keys; strip them. */
 const parsed = JSON.parse(raw) as Partial<PromotionDraft> & {
 preset?: unknown;
 id?: unknown;
@@ -160,7 +160,7 @@ provider?: unknown;
 };
 const { preset, id, market, provider, ...rest } = parsed;
 void preset; void id; void market; void provider;
-/* Legacy drafts may carry the removed 'custom' template — sanitize. */
+/* Legacy drafts may carry the removed 'custom' template; sanitize. */
 const tpl = rest.template;
 /* eslint-disable-next-line react-hooks/set-state-in-effect -- mount-only hydration from localStorage */
 setDraft({
@@ -172,7 +172,7 @@ qualification: sanitizeQualification(rest.qualification),
 });
 }
 } catch {
-/* Corrupt draft — start clean. */
+/* Corrupt draft: start clean. */
 }
 }, []);
 
@@ -215,14 +215,14 @@ window.localStorage.removeItem(DRAFT_KEY);
 }
 };
 
-/* Template apply — full prefill over a fresh base draft. Step 1 owns the
+/* Template apply: full prefill over a fresh base draft. Step 1 owns the
  * dirty-guard and confirm panel, calling this only when committed. */
 const applyTemplate = (id: TemplateId) => {
 setErrors({});
 setDraft(templateDraft(id));
 };
 
-/* Template detach — unlocks Promotion type but keeps every field value. */
+/* Template detach: unlocks Promotion type but keeps every field value. */
 const detachTemplate = () => update({ template: null });
 
 const goToStep = (step: number) => {
@@ -310,12 +310,12 @@ const showTcsWarning = draft.template === 'cashback' || draft.qualification.trig
 
 return (
 <div className="promo-page" style={{ background: T.offWhite }}>
-{/* Top bar — Internal Tool Shell: title + subtitle, discard action right */}
+{/* Top bar: Internal Tool Shell title + subtitle, discard action right */}
 <div className="promo-topbar" style={{ background: T.white, borderBottom: `1px solid ${T.border}` }}>
 <div>
 <h1 className="promo-title" style={{ color: T.textPrimary }}>Create a promotion</h1>
 <p className="promo-subtitle" style={{ color: T.textSecondary }}>
-Step {draft.step} of {STEPS.length} — {STEPS[draft.step - 1]}
+Step {draft.step} of {STEPS.length} · {STEPS[draft.step - 1]}
 </p>
 </div>
 <GhostButton onClick={() => setConfirmDiscard(true)}>
@@ -326,7 +326,7 @@ Step {draft.step} of {STEPS.length} — {STEPS[draft.step - 1]}
 <div className="promo-container">
 {/* ============ WIZARD ============ */}
 <div className="np-wizard">
-{/* Stepper — completed = green + white check, current = navy, upcoming = ghost */}
+{/* Stepper: completed = green + white check, current = navy, upcoming = ghost */}
 <ol className="np-stepper" aria-label="Promotion setup progress">
 {STEPS.map((label, i) => {
 const n = i + 1;
@@ -361,7 +361,7 @@ style={{ color: current ? T.textPrimary : T.textSecondary, fontWeight: current ?
 </ol>
 
 <div className="np-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
-{/* ---------- STEP 1 — BASICS ---------- */}
+{/* ---------- STEP 1: BASICS ---------- */}
 {draft.step === 1 && (
 <Step1Basics
 draft={draft}
@@ -372,11 +372,11 @@ onDetachTemplate={detachTemplate}
 />
 )}
 
-{/* ---------- STEP 2 — QUALIFICATION ---------- */}
+{/* ---------- STEP 2: QUALIFICATION ---------- */}
 {draft.step === 2 && <Step2Qualification draft={draft} errors={errors} onEdit={setField} />}
 
 
-{/* ---------- STEP 3 — AWARD ---------- */}
+{/* ---------- STEP 3: AWARD ---------- */}
 {draft.step === 3 && (
 <>
 <h2 className="np-card__heading" style={{ color: T.textPrimary }}>Award</h2>
@@ -526,7 +526,7 @@ onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
 )}
 
 
-{/* Caps — both reward types */}
+{/* Caps: both reward types */}
 <Field label="Max awards per day">
 <input
 type="number"
@@ -570,14 +570,11 @@ style={{ accentColor: T.navy }}
 />
 {label}
 {value === 'next-day' && (
-<input
-type="time"
-className="np-input"
-style={{ ...inputStyle(), width: 110 }}
+<TimeField
 value={draft.creditTime}
 disabled={draft.creditTiming !== 'next-day'}
-aria-label="Next-day credit time"
-onChange={(e) => setField('creditTime', e.target.value)}
+ariaLabel="Next-day credit time"
+onChange={(v) => setField('creditTime', v)}
 />
 )}
 </label>
@@ -624,7 +621,7 @@ onChange={(e) => setField('restrictedProduct', e.target.value)}
 </>
 )}
 
-{/* ---------- STEP 4 — BUDGET ---------- */}
+{/* ---------- STEP 4: BUDGET ---------- */}
 {draft.step === 4 && (
 <>
 <h2 className="np-card__heading" style={{ color: T.textPrimary }}>Budget</h2>
@@ -664,29 +661,22 @@ Budgets alert the business when spend reaches the threshold. They never block aw
 )}
 
 
-{/* ---------- STEP 5 — SCHEDULE ---------- */}
+{/* ---------- STEP 5: SCHEDULE ---------- */}
 {draft.step === 5 && (
 <>
 <h2 className="np-card__heading" style={{ color: T.textPrimary }}>Schedule</h2>
 <div className="np-form-grid">
-<Field label="Start date" required error={errors.startDate}>
-<input
-type="date"
-className="np-input"
-style={inputStyle(errors.startDate)}
-value={draft.startDate}
-aria-label="Start date"
-onChange={(e) => setField('startDate', e.target.value)}
-/>
-</Field>
-<Field label="Start time" required error={errors.startTime}>
-<input
-type="time"
-className="np-input"
-style={inputStyle(errors.startTime)}
-value={draft.startTime}
-aria-label="Start time"
-onChange={(e) => setField('startTime', e.target.value)}
+<Field label="Start" required error={errors.startDate || errors.startTime} hint="Date and time (24h), Africa/Lusaka.">
+<DateTimeField
+showTime
+timezoneLabel="Africa/Lusaka"
+value={parseIsoDateTime(draft.startDate, draft.startTime)}
+invalid={!!(errors.startDate || errors.startTime)}
+ariaLabel="Start date and time"
+onChange={(d) => {
+setField('startDate', d ? toIsoDate(d) : '');
+setField('startTime', d ? toIsoTime(d) : '');
+}}
 />
 </Field>
 <Field label="End" full>
@@ -700,23 +690,21 @@ onChange={() => setField('endMode', 'date')}
 style={{ accentColor: T.navy }}
 />
 On date
-<input
-type="date"
-className="np-input"
-style={{ ...inputStyle(errors.endDate), width: 150 }}
-value={draft.endDate}
-disabled={draft.endMode !== 'date'}
-aria-label="End date"
-onChange={(e) => setField('endDate', e.target.value)}
-/>
-<input
-type="time"
-className="np-input"
-style={{ ...inputStyle(errors.endTime), width: 110 }}
-value={draft.endTime}
-disabled={draft.endMode !== 'date'}
-aria-label="End time"
-onChange={(e) => setField('endTime', e.target.value)}
+{/* Never disabled: a disabled button swallows the click, so the picker would
+ * not open and the radio would not flip either (native date inputs behaved the
+ * same way). Applying a date selects "On date"; while Ongoing, show the placeholder. */}
+<DateTimeField
+showTime
+timezoneLabel="Africa/Lusaka"
+block={false}
+value={draft.endMode === 'date' ? parseIsoDateTime(draft.endDate, draft.endTime) : null}
+invalid={!!(errors.endDate || errors.endTime)}
+ariaLabel="End date and time"
+onChange={(d) => {
+setField('endDate', d ? toIsoDate(d) : '');
+setField('endTime', d ? toIsoTime(d) : '');
+if (d) setField('endMode', 'date');
+}}
 />
 </label>
 <label className="np-radio-row" style={{ color: T.textPrimary }}>
@@ -749,19 +737,19 @@ aria-label="Timezone"
 )}
 
 
-{/* ---------- STEP 6 — CONTENT (CMS) ---------- */}
+{/* ---------- STEP 6: CONTENT (CMS) ---------- */}
 {draft.step === 6 && (
 <>
 <h2 className="np-card__heading" style={{ color: T.textPrimary }}>Content</h2>
 
-{/* 1 — TILE */}
+{/* 1: TILE */}
 <div className="np-section" style={{ borderTop: 'none', marginTop: 12, paddingTop: 0 }}>
 <h3 className="np-section__title" style={{ color: T.textPrimary }}>Tile</h3>
 <Field
 label="Short description"
 required
 error={errors.shortDescription}
-hint="One sentence shown on the promo tile. 'Read More' is added automatically — do not include it."
+hint="One sentence shown on the promo tile. 'Read More' is added automatically, so do not include it."
 full
 >
 <textarea
@@ -778,7 +766,7 @@ onChange={(e) => setField('shortDescription', e.target.value.slice(0, 80))}
 </Field>
 </div>
 
-{/* 2 — BANNERS */}
+{/* 2: BANNERS */}
 <div className="np-section" style={{ borderTop: `1px solid ${T.border}` }}>
 <h3 className="np-section__title" style={{ color: T.textPrimary }}>Banners</h3>
 <p className="np-hint" style={{ color: T.textSecondary }}>
@@ -797,7 +785,7 @@ onMouseLeave={(e) => (e.currentTarget.style.background = T.white)}
 type="file"
 accept="image/*"
 style={{ display: 'none' }}
-aria-label={`Upload banner — ${slot.label}`}
+aria-label={`Upload banner: ${slot.label}`}
 onChange={(e) => pickBanner(slot.id, e.target.files?.[0] ?? null)}
 />
 <span className="np-slot__label" style={{ color: T.textPrimary }}>{slot.label}</span>
@@ -861,7 +849,7 @@ onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
 </div>
 
 
-{/* 3 — TERMS & CONDITIONS */}
+{/* 3: TERMS & CONDITIONS */}
 <div className="np-section" style={{ borderTop: `1px solid ${T.border}` }}>
 <h3 className="np-section__title" style={{ color: T.textPrimary }}>Terms &amp; Conditions</h3>
 <div className="np-slot-grid" style={{ gridTemplateColumns: '1fr' }}>
@@ -904,7 +892,7 @@ Upload the final signed-off version. For cashback promotions, ensure the cash-ou
 )}
 </div>
 
-{/* 4 — VISIBILITY PREVIEW */}
+{/* 4: VISIBILITY PREVIEW */}
 <div className="np-section" style={{ borderTop: `1px solid ${T.border}` }}>
 <h3 className="np-section__title" style={{ color: T.textPrimary }}>Visibility preview</h3>
 <p className="np-hint" style={{ color: T.textSecondary }}>How the promo tile appears to players.</p>
@@ -925,7 +913,7 @@ style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.r
 )}
 
 
-{/* ---------- STEP 7 — REVIEW ---------- */}
+{/* ---------- STEP 7: REVIEW ---------- */}
 {draft.step === 7 && (
 <>
 <h2 className="np-card__heading" style={{ color: T.textPrimary }}>Review</h2>
@@ -935,9 +923,9 @@ title="Basics"
 step={1}
 onEdit={goToStep}
 rows={[
-['Name', draft.name.trim() || '—'],
+['Name', draft.name.trim() || '·'],
 ['Type', typeLabel(draft)],
-['Product vertical', draft.vertical || '—'],
+['Product vertical', draft.vertical || '·'],
 ]}
 />
 <ReviewSection
@@ -951,7 +939,7 @@ const visibleRules = trigger.rules.filter((rule) => !BET_RESTRICTIONS.some((rest
 return [
 [
 `Trigger ${index + 1}${index > 0 ? ' (OR)' : ''}`,
-`${catalogEventLabel(trigger.eventId)} — ${visibleRules.length > 0 ? visibleRules.map(qualificationRuleSummary).join(' AND ') : 'No conditions'}`,
+`${catalogEventLabel(trigger.eventId)}: ${visibleRules.length > 0 ? visibleRules.map(qualificationRuleSummary).join(' AND ') : 'No conditions'}`,
 ],
 ...qualificationRestrictionRows(trigger.rules, index),
 ];
@@ -967,7 +955,7 @@ draft.qualification.counting.length > 0
 'Eligibility',
 draft.qualification.eligibility.audience === 'all'
 ? 'All players'
-: `New customers within ${draft.qualification.eligibility.windowDays ?? '—'} days of registration${draft.qualification.eligibility.nonConsecutive ? ' (days need not be consecutive)' : ''}`,
+: `New customers within ${draft.qualification.eligibility.windowDays ?? '·'} days of registration${draft.qualification.eligibility.nonConsecutive ? ' (days need not be consecutive)' : ''}`,
 ],
 
 ]}
@@ -981,16 +969,16 @@ rows={[
 ['Reward type', draft.rewardType === 'freebet' ? 'Freebet' : 'Cash'],
 ...(draft.rewardType === 'freebet'
 ? ([
-['Freebets', `${draft.freebetCount || '—'} × K ${draft.freebetValue || '—'}`],
-['Expiry', `${draft.freebetExpiryHours || '—'} hours`],
+['Freebets', `${draft.freebetCount || '·'} × K ${draft.freebetValue || '·'}`],
+['Expiry', `${draft.freebetExpiryHours || '·'} hours`],
 ] as [string, string][])
 : ([
-['Payout', draft.payoutMode === 'fixed' ? `Fixed — K ${draft.fixedAmount || '—'}` : `Tier matrix (${draft.tiers.length} rows)`],
-...(draft.payoutMode === 'tiers' ? ([['Payout cap', draft.payoutCap ? `K ${draft.payoutCap}` : '—']] as [string, string][]) : []),
+['Payout', draft.payoutMode === 'fixed' ? `Fixed: K ${draft.fixedAmount || '·'}` : `Tier matrix (${draft.tiers.length} rows)`],
+...(draft.payoutMode === 'tiers' ? ([['Payout cap', draft.payoutCap ? `K ${draft.payoutCap}` : '·']] as [string, string][]) : []),
 ] as [string, string][])),
 [
 'Caps',
-`${draft.maxAwardsPerDay || '—'}/day · ${draft.lifetimeCount || '—'} lifetime · K ${draft.lifetimeValue || '—'} lifetime value`,
+`${draft.maxAwardsPerDay || '·'}/day · ${draft.lifetimeCount || '·'} lifetime · K ${draft.lifetimeValue || '·'} lifetime value`,
 ],
 ['Credit timing', draft.creditTiming === 'instant' ? 'Instant' : draft.creditTiming === 'next-day' ? `Next day at ${draft.creditTime || '14:00'}` : 'Manual'],
 ...(draft.rewardType === 'freebet'
@@ -1013,9 +1001,9 @@ title="Budget"
 step={4}
 onEdit={goToStep}
 rows={[
-['Budget amount', draft.budget ? `K ${draft.budget}` : '—'],
+['Budget amount', draft.budget ? `K ${draft.budget}` : '·'],
 ['Alert threshold', `${draft.alertThreshold || '90'}%`],
-['Alert recipients', draft.alertRecipients || '—'],
+['Alert recipients', draft.alertRecipients || '·'],
 ]}
 />
 <ReviewSection
@@ -1023,8 +1011,8 @@ title="Schedule"
 step={5}
 onEdit={goToStep}
 rows={[
-['Start', draft.startDate ? `${draft.startDate} ${draft.startTime || ''}`.trim() : '—'],
-['End', draft.endMode === 'ongoing' ? 'Ongoing' : `${draft.endDate || '—'} ${draft.endTime || ''}`.trim()],
+['Start', draft.startDate ? `${draft.startDate} ${draft.startTime || ''}`.trim() : '·'],
+['End', draft.endMode === 'ongoing' ? 'Ongoing' : `${draft.endDate || '·'} ${draft.endTime || ''}`.trim()],
 ['Timezone', 'Africa/Lusaka (CAT)'],
 ]}
 />
@@ -1036,12 +1024,12 @@ badge={
 contentIncomplete ? (
 <Badge color={T.yellow} textColor={T.textPrimary}>
 <TriangleAlert size={12} style={{ marginRight: 4 }} />
-Content incomplete — required before publish
+Content incomplete: required before publish
 </Badge>
 ) : undefined
 }
 rows={[
-['Short description', draft.shortDescription || '—'],
+['Short description', draft.shortDescription || '·'],
 ['Banners', `${bannersFilled}/${draft.bannerSlots.length} slots filled`],
 ['T&Cs', draft.tcsFileName || 'Not uploaded'],
 ]}
@@ -1052,7 +1040,7 @@ rows={[
 </div>
 
 
-{/* Footer — Back / Continue per step; Review adds Save draft + Submit */}
+{/* Footer: Back / Continue per step; Review adds Save draft + Submit */}
 <div className="np-wizard-footer">
 <GhostButton onClick={() => (draft.step === 1 ? router.push('/admin/promotions') : goToStep(draft.step - 1))}>
 <ChevronLeft size={16} /> Back
@@ -1073,7 +1061,7 @@ rows={[
 </div>
 </div>
 
-{/* Submit confirm — confirm-before-commit (maker-checker). */}
+{/* Submit confirm: confirm-before-commit (maker-checker). */}
 {confirmSubmit && (
 <div role="dialog" aria-modal="true" aria-labelledby="np-submit-title">
 <div className="promo-modal__scrim" style={{ background: T.scrim }} onClick={() => setConfirmSubmit(false)} />
@@ -1092,7 +1080,7 @@ This will submit the promotion for checker approval. It will not go live until a
 </div>
 )}
 
-{/* Discard confirm — destructive-adjacent: clears the persisted draft. */}
+{/* Discard confirm (destructive-adjacent): clears the persisted draft. */}
 {confirmDiscard && (
 <div role="dialog" aria-modal="true" aria-labelledby="np-discard-title">
 <div className="promo-modal__scrim" style={{ background: T.scrim }} onClick={() => setConfirmDiscard(false)} />

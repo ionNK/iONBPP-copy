@@ -14,24 +14,24 @@ active: { label: 'Active', color: T.success },
 scheduled: { label: 'Scheduled', color: T.blue },
 expired: { label: 'Expired', color: T.darkGrey },
 draft: { label: 'Draft', color: T.draft },
-/* Maker-checker queue state — ghost pill with navy text. */
+/* Maker-checker queue state: ghost pill with navy text. */
 pending: { label: 'Pending approval', color: T.navy, ghost: true },
 };
 
 const STATUSES = ['All statuses', 'Active', 'Scheduled', 'Expired', 'Draft', 'Pending approval'];
 
-/* Type filter reset option — the type list itself is derived from the data. */
+/* Type filter reset option: the type list itself is derived from the data. */
 const ALL_TYPES = 'All types';
 
-/* Table pagination — house style: page size 10. */
+/* Table pagination, house style: page size 10. */
 const PAGE_SIZE = 10;
 
 const fmtK = (n: number) => `K ${n.toLocaleString()}`;
 
-/* Budget cell — BR-6: alert threshold, never enforcement */
+/* Budget cell (BR-6): alert threshold, never enforcement */
 function BudgetCell({ budget, spend }: { budget: number | null; spend: number | null }) {
 if (budget == null || spend == null) {
-return <span className="promo-budget__empty" style={{ color: T.textSecondary }}>—</span>;
+return <span className="promo-budget__empty" style={{ color: T.textSecondary }}>·</span>;
 }
 const pct = Math.min((spend / budget) * 100, 100);
 const alerted = spend / budget >= 0.9;
@@ -81,7 +81,7 @@ promos.forEach((p) => c[p.status]++);
 return c;
 }, [promos]);
 
-/* Unique promotion types present in the data, sorted — drives the type select. */
+/* Unique promotion types present in the data, sorted; drives the type select. */
 const typeOptions = useMemo(
 () => [ALL_TYPES, ...Array.from(new Set(promos.map((p) => p.type))).sort((a, b) => a.localeCompare(b))],
 [promos],
@@ -127,7 +127,7 @@ setDeleteTarget(null);
 
 return (
 <div className="promo-page" style={{ background: T.offWhite }}>
-{/* Page top bar — Internal Tool Shell: title + subtitle, primary action right */}
+{/* Page top bar: Internal Tool Shell title + subtitle, primary action right */}
 <div className="promo-topbar" style={{ background: T.white, borderBottom: `1px solid ${T.border}` }}>
 <div>
 <h1 className="promo-title" style={{ color: T.textPrimary }}>Promotions</h1>
@@ -160,7 +160,7 @@ onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
 </div>
 )}
 
-{/* Stat chips — clicking a chip filters the table by status */}
+{/* Stat chips: clicking a chip filters the table by status */}
 <div className="promo-chips">
 <StatChip label="Active" value={counts.active} active={chip === 'active'} onClick={() => setChip(chip === 'active' ? null : 'active')} />
 <StatChip label="Scheduled" value={counts.scheduled} active={chip === 'scheduled'} onClick={() => setChip(chip === 'scheduled' ? null : 'scheduled')} />
@@ -170,7 +170,7 @@ onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
 <StatChip label="Total promotions" value={promos.length} active={chip === null} onClick={() => setChip(null)} />
 </div>
 
-{/* Filters — search + status + type selects */}
+{/* Filters: search + status + type selects */}
 <div className="promo-filters" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
 <div className="promo-search" style={{ border: `1px solid ${T.ghostBorder}`, borderRadius: T.radiusSm }}>
 <Search size={16} style={{ color: T.textSecondary }} />
@@ -190,7 +190,7 @@ onChange={(value) => setTypeFilter(value === ALL_TYPES ? null : value)}
 </div>
 
 
-{/* Table — row click opens the detail drawer */}
+{/* Table: row click opens the detail drawer */}
 <div style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm, overflow: 'hidden' }}>
 <div className="promo-table-scroll">
 <table className="promo-table">
@@ -272,7 +272,7 @@ onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
 </div>
 )}
 
-{/* Pagination footer — page size 10, buttons disabled at boundaries */}
+{/* Pagination footer: page size 10, buttons disabled at boundaries */}
 {filtered.length > 0 && (
 <div className="promo-pagination" style={{ borderTop: `1px solid ${T.border}` }}>
 <button
@@ -305,7 +305,7 @@ Next ›
 </div>
 
 
-{/* Detail drawer — house style: scrim + right-side 520px panel. */}
+{/* Detail drawer, house style: scrim + right-side 520px panel. */}
 {selected && (
 <div role="dialog" aria-modal="true" aria-label={`${selected.name} details`}>
 <div className="promo-drawer__scrim" style={{ background: T.scrim }} onClick={() => setSelected(null)} />
@@ -355,8 +355,8 @@ onClick={() => setDrawerTab(tab)}
 ['Type', selected.type],
 ['Schedule', selected.schedule],
 ['Status', STATUS[selected.status].label],
-['Budget', selected.budget != null ? fmtK(selected.budget) : '—'],
-['Spend', selected.spend != null ? fmtK(selected.spend) : '—'],
+['Budget', selected.budget != null ? fmtK(selected.budget) : '·'],
+['Spend', selected.spend != null ? fmtK(selected.spend) : '·'],
 ].map(([label, value]) => (
 <div key={label}>
 <div className="promo-drawer__label" style={{ color: T.textSecondary }}>{label}</div>
@@ -379,7 +379,7 @@ No activity recorded yet for this promotion.
 </div>
 )}
 
-{/* Delete confirm — confirm-before-commit for the destructive action. */}
+{/* Delete confirm: confirm-before-commit for the destructive action. */}
 {deleteTarget && (
 <div role="dialog" aria-modal="true" aria-labelledby="promo-delete-title">
 <div className="promo-modal__scrim" style={{ background: T.scrim }} onClick={() => setDeleteTarget(null)} />

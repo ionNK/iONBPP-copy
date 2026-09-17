@@ -14,7 +14,7 @@ import type { DashboardFilter, SpendDimension } from '@/lib/dashboard';
 import '../promotions/promotions.css';
 import './dashboard.css';
 
-/* Status pill colours — same mapping as the promotions list. */
+/* Status pill colours: same mapping as the promotions list. */
 const STATUS: Record<PromoStatus, { label: string; color: string; ghost?: boolean }> = {
   active: { label: 'Active', color: T.success },
   scheduled: { label: 'Scheduled', color: T.blue },
@@ -31,19 +31,19 @@ const PERIODS: { value: Period; label: string }[] = [
 ];
 
 const fmtK = (n: number) => `K ${Math.round(n).toLocaleString()}`;
-/* Axis tick format — compact thousands ("K 120k"). */
+/* Axis tick format: compact thousands ("K 120k"). */
 const fmtAxisK = (n: number) => (n >= 1000 ? `K ${Math.round(n / 1000)}k` : `K ${Math.round(n)}`);
 const fmtPct = (n: number) => `${Math.round(n)}%`;
 const fmtCount = (n: number) => `${Math.round(n)}`;
 
-/* Donut breakdown dimensions — the segmented control in the "Spend by …" card. */
+/* Donut breakdown dimensions: the segmented control in the "Spend by …" card. */
 const DIMENSIONS: { value: SpendDimension; label: string }[] = [
   { value: 'type', label: 'Type' },
   { value: 'provider', label: 'Provider' },
   { value: 'market', label: 'Market' },
 ];
 
-/* Stable category-to-palette mapping — palette entries are Unity-backed tokens. */
+/* Stable category-to-palette mapping: palette entries are Unity-backed tokens. */
 const categoryColour = (name: string, order: string[]) => dashboardPalette[Math.max(0, order.indexOf(name)) % dashboardPalette.length];
 
 /* Token hex → translucent tint. Only ever fed T.* values, so no colour literals live in this file. */
@@ -80,10 +80,10 @@ function deriveActivity(promos: Promo[]): ActivityItem[] {
 
 const relativeTime = (m: number) => (m < 60 ? `${m}m ago` : m < 1440 ? `${Math.round(m / 60)}h ago` : `${Math.round(m / 1440)}d ago`);
 
-/* Reduced motion — read once per render on the client; SSR defaults to false. */
+/* Reduced motion: read once per render on the client; SSR defaults to false. */
 const prefersReducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* Count-up hook — 300ms rAF tween from 0 to `target`; re-runs when target
+/* Count-up hook: 300ms rAF tween from 0 to `target`; re-runs when target
  * changes. Under reduced motion the target is returned directly (no tween). */
 function useCountUp(target: number, reduced: boolean): number {
   const [value, setValue] = useState(0);
@@ -104,7 +104,7 @@ function useCountUp(target: number, reduced: boolean): number {
 
 /* ---------------------------------------------------------------------------
  * Custom tooltip. Recharts' TooltipProps generics fight the payload shape
- * — props typed as `any` on purpose (pragmatic cast, see report).
+ * Props are typed as `any` on purpose (pragmatic cast, see report).
  * ------------------------------------------------------------------------- */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ChartTooltip(props: any) {
@@ -127,10 +127,10 @@ function ChartTooltip(props: any) {
   );
 }
 
-/* Shared axis tick style — Caption 12px, textSecondary. */
+/* Shared axis tick style: Caption 12px, textSecondary. */
 const TICK = { fontSize: 12, fill: T.textSecondary };
 
-/* Legend entry — hand-rolled so the "Budget pace" swatch can be dashed. */
+/* Legend entry: hand-rolled so the "Budget pace" swatch can be dashed. */
 function LegendItem({ label, color, dashed }: { label: string; color: string; dashed?: boolean }) {
   return (
     <span className="dash-legend__item" style={{ color: T.textSecondary }}>
@@ -140,7 +140,7 @@ function LegendItem({ label, color, dashed }: { label: string; color: string; da
   );
 }
 
-/* Filtered-empty notice — offWhite panel + Info icon + Footnote text. */
+/* Filtered-empty notice: offWhite panel + Info icon + Footnote text. */
 function FilteredEmpty({ value }: { value: string }) {
   return (
     <div className="dash-notice" style={{ background: T.offWhite, border: `1px solid ${T.border}`, borderRadius: T.radiusSm, color: T.textSecondary }}>
@@ -150,7 +150,7 @@ function FilteredEmpty({ value }: { value: string }) {
   );
 }
 
-/* "Needs attention" card — whole card is a link; 0 counts are de-emphasised, not hidden. */
+/* "Needs attention" card: whole card is a link; 0 counts are de-emphasised, not hidden. */
 interface AttentionCardProps {
   label: string;
   count: number;
@@ -186,7 +186,7 @@ function AttentionCard({ label, count, icon: Icon, accent, onOpen }: AttentionCa
   );
 }
 
-/* Delta pill — ▲/▼ with good/bad tint. `invert` flips the semantics (alerts up = bad). */
+/* Delta pill: ▲/▼ with good/bad tint. `invert` flips the semantics (alerts up = bad). */
 function DeltaPill({ pct, invert }: { pct: number; invert?: boolean }) {
   const up = pct >= 0;
   const good = invert ? !up : up;
@@ -197,7 +197,7 @@ function DeltaPill({ pct, invert }: { pct: number; invert?: boolean }) {
   );
 }
 
-/* KPI card — count-up value, delta pill, 36px sparkline. */
+/* KPI card: count-up value, delta pill, 36px sparkline. */
 interface KpiCardProps {
   label: string;
   value: number;
@@ -267,7 +267,7 @@ export default function DashboardPage() {
     return c;
   }, [filtered]);
 
-  /* "Needs attention" counts — schedule maths pinned to the report date in lib/dashboard. */
+  /* "Needs attention" counts: schedule maths pinned to the report date in lib/dashboard. */
   const needs = useMemo(
     () => ({
       pending: counts.pending,
@@ -291,7 +291,7 @@ export default function DashboardPage() {
   );
   const pace = totalBudget / 2; /* linear month pace at day 15 of 30 */
 
-  /* Donut + legend (respects filter — a filtered donut shows the single category). */
+  /* Donut + legend (respects filter; a filtered donut shows the single category). */
   const breakdown = useMemo(() => spendByDimension(filtered, dimension), [filtered, dimension]);
   const breakdownTotal = breakdown.reduce((s, c) => s + c.amount, 0);
   const hovered = hoverName ? breakdown.find((c) => c.name === hoverName) : null;
@@ -315,7 +315,7 @@ export default function DashboardPage() {
 
   const activity = useMemo(() => deriveActivity(filtered), [filtered]);
 
-  /* KPI deltas — second half of the window vs first half. */
+  /* KPI deltas: second half of the window vs first half. */
   const halfDelta = (key: 'spend' | 'active' | 'alerts') => {
     if (series.length < 2) return 0;
     const half = Math.floor(series.length / 2);
@@ -342,7 +342,7 @@ export default function DashboardPage() {
 
   return (
     <div className="promo-page" style={{ background: T.offWhite }}>
-      {/* Top bar — Internal Tool Shell: title + market flag + subtitle; period control right. */}
+      {/* Top bar: Internal Tool Shell title + market flag + subtitle; period control right. */}
       <div className="promo-topbar" style={{ background: T.white, borderBottom: `1px solid ${T.border}` }}>
         <div>
           <div className="promo-title-row">
@@ -380,7 +380,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="promo-container">
-        {/* Needs attention — four action cards; each links through to the relevant list. */}
+        {/* Needs attention: four action cards; each links through to the relevant list. */}
         <nav className="dash-attention" aria-label="Needs attention">
           <AttentionCard label="Pending approvals" count={needs.pending} icon={ClipboardCheck} accent={T.blue} onOpen={goToApprovals} />
           <AttentionCard label="Budget alerts" count={needs.alerts} icon={AlertTriangle} accent={T.destructiveActive} onOpen={goToList} />
@@ -388,7 +388,7 @@ export default function DashboardPage() {
           <AttentionCard label="Starting in 7 days" count={needs.starting} icon={CalendarPlus} accent={T.progressActive} onOpen={goToList} />
         </nav>
 
-        {/* KPI cards — count-up values, delta pills, 36px sparklines. */}
+        {/* KPI cards: count-up values, delta pills, 36px sparklines. */}
         <div className="dash-kpis">
           <KpiCard
             label="Total spend"
@@ -435,7 +435,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="dash-grid">
-          {/* Hero — Spend over time (cumulative area) vs linear budget pace. */}
+          {/* Hero: Spend over time (cumulative area) vs linear budget pace. */}
           <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
             <div className="dash-card__header">
               <div>
@@ -445,14 +445,14 @@ export default function DashboardPage() {
                   {' '}Cumulative spend · budget {fmtK(totalBudget)} · {aheadOfPace ? 'ahead of' : 'under'} pace
                 </p>
               </div>
-              {/* Card-owned HTML legend (top-right, 12px) — carries the "Budget pace" name. */}
+              {/* Card-owned HTML legend (top-right, 12px); carries the "Budget pace" name. */}
               <div className="dash-legend">
                 <LegendItem label="Spend" color={T.yellow} />
                 <LegendItem label="Budget pace" color={T.destructiveActive} dashed />
               </div>
             </div>
 
- {/* right margin 24 — the final "15 Sep" tick is centred on the last point,
+ {/* right margin 24: the final "15 Sep" tick is centred on the last point,
  so it needs room past the plot edge or the SVG boundary clips it. */}
             <div className="dash-chart">
               <ResponsiveContainer width="100%" height="100%">
@@ -467,7 +467,7 @@ export default function DashboardPage() {
                   <XAxis dataKey="day" tick={TICK} tickLine={false} axisLine={false} interval={period === '7d' ? 0 : 1} />
                   <YAxis tick={TICK} tickLine={false} axisLine={false} tickFormatter={fmtAxisK} width={64} />
                   <Tooltip cursor={{ stroke: T.ghostBorder }} content={<ChartTooltip formatter={fmtK} />} />
-                  {/* Budget pace — dashed, no label (legend above carries the name). */}
+                  {/* Budget pace: dashed, no label (legend above carries the name). */}
                   <ReferenceLine y={pace} stroke={T.destructiveActive} strokeDasharray="4 4" />
                   <Area
                     type="monotone"
@@ -486,14 +486,14 @@ export default function DashboardPage() {
 
           </section>
 
-          {/* Awards credited per day — bar chart */}
+          {/* Awards credited per day: bar chart */}
           <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
             <div className="dash-card__header">
               <div>
                 <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Spend by {dimension}</h2>
                 <p className="dash-card__caption" style={{ color: T.textSecondary }}>Click a segment to filter the dashboard</p>
               </div>
-              {/* Dimension toggle — same segmented control as the period switch. */}
+              {/* Dimension toggle: same segmented control as the period switch. */}
               <div className="dash-segmented" role="group" aria-label="Spend breakdown" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusPill }}>
                 {DIMENSIONS.map((opt) => {
                   const active = opt.value === dimension;
@@ -546,7 +546,7 @@ export default function DashboardPage() {
                       </Pie>
                     </PieChart>
                   </ResponsiveContainer>
-                  {/* Centre label — plain HTML over the chart (not a Recharts label). */}
+                  {/* Centre label: plain HTML over the chart (not a Recharts label). */}
                   <div className="dash-donut__centre">
                     <span className="dash-donut__label" style={{ color: T.textSecondary }}>{hovered ? hovered.name : 'Total'}</span>
                     <span className="dash-donut__amount" style={{ color: T.textPrimary }}>{fmtK(hovered ? hovered.amount : breakdownTotal)}</span>
@@ -556,7 +556,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Legend rows — clickable filters, mirror hover dimming. */}
+                {/* Legend rows: clickable filters, mirror hover dimming. */}
                 <div className="dash-type-legend">
                   {breakdown.map((c) => (
                     <button
@@ -581,7 +581,7 @@ export default function DashboardPage() {
           </section>
         </div>
 
-        {/* Budget vs spend by promotion — horizontal bars, top 6 by spend. */}
+        {/* Budget vs spend by promotion: horizontal bars, top 6 by spend. */}
         <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
           <div className="dash-card__header">
             <div>
@@ -632,13 +632,13 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* Budget attention — promotions at/over the 90% alert threshold. */}
+        {/* Budget attention: promotions at/over the 90% alert threshold. */}
         <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
           <div className="dash-card__header">
             <div>
               <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Budget attention</h2>
               <p className="dash-card__caption" style={{ color: T.textSecondary }}>
-                Promotions at or above 90% of budget. Alerts warn — they never block awarding.
+                Promotions at or above 90% of budget. Alerts warn; they never block awarding.
               </p>
             </div>
             <GhostButton small onClick={goToList}>View all promotions</GhostButton>
@@ -680,7 +680,7 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* Recent activity — alerts, activations, scheduled and expired promotions. */}
+        {/* Recent activity: alerts, activations, scheduled and expired promotions. */}
         <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
           <div className="dash-card__header">
             <div>

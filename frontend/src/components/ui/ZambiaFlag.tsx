@@ -2,7 +2,7 @@ import T from '@/theme/tokens';
 import './ui.css';
 
 export interface ZambiaFlagProps {
- /** Rendered width in px — 20 in page top bars, 16 in table rows. */
+ /** Rendered width in px: 20 in page top bars, 16 in table rows. */
  size?: number;
 }
 

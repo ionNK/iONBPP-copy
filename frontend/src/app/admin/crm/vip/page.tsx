@@ -6,7 +6,7 @@ import '../../promotions/promotions.css';
 export default function VipPage() {
   return (
     <div className="promo-page" style={{ background: T.offWhite }}>
-      {/* Page top bar — Internal Tool Shell: title + subtitle */}
+      {/* Page top bar: Internal Tool Shell title + subtitle */}
       <div className="promo-topbar" style={{ background: T.white, borderBottom: `1px solid ${T.border}` }}>
         <div>
           <h1 className="promo-title" style={{ color: T.textPrimary }}>VIP</h1>

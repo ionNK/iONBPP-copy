@@ -22,19 +22,19 @@ status: PromoStatus;
 }
 
 export const PROMO_SEED: Promo[] = [
-{ id: 'PR-001', name: 'Aviator Welcome Offer', type: 'Freebet — Welcome', market: 'Zambia', schedule: '01 Sep – ongoing', budget: 50000, spend: 31200, status: 'active' },
-{ id: 'PR-002', name: 'Money Back (Sportsbook Cashback)', type: 'Cashback — Multibet', market: 'Zambia', schedule: '01 Sep – ongoing', budget: 120000, spend: 118400, status: 'active' },
+{ id: 'PR-001', name: 'Aviator Welcome Offer', type: 'Freebet · Welcome', market: 'Zambia', schedule: '01 Sep – ongoing', budget: 50000, spend: 31200, status: 'active' },
+{ id: 'PR-002', name: 'Money Back (Sportsbook Cashback)', type: 'Cashback · Multibet', market: 'Zambia', schedule: '01 Sep – ongoing', budget: 120000, spend: 118400, status: 'active' },
 { id: 'PR-003', name: 'Aviator Challenges', type: 'Leaderboard', market: 'Zambia', schedule: '15 Sep – 30 Sep', budget: 100000, spend: 0, status: 'scheduled' },
 { id: 'PR-004', name: 'Weekend Acca Boost', type: 'Odds Boost', market: 'Zambia', schedule: 'Draft', budget: null, spend: null, status: 'draft' },
 { id: 'PR-005', name: 'August Crash Missions', type: 'Missions', market: 'Zambia', schedule: '01 Aug – 31 Aug', budget: 80000, spend: 74100, status: 'expired' },
 { id: 'PR-006', name: 'First Deposit Boost', type: 'Deposit Match', market: 'Zambia', schedule: '01 Sep – 31 Oct', budget: 60000, spend: 12400, status: 'active' },
 { id: 'PR-007', name: 'Midweek Free Spins', type: 'Free Spins', market: 'Zambia', schedule: '10 Sep – ongoing', budget: 25000, spend: 23100, status: 'active' },
-{ id: 'PR-008', name: 'Rain Bonus — Lusaka', type: 'Freebet — Rain', market: 'Zambia', schedule: '20 Sep – 30 Sep', budget: 15000, spend: 0, status: 'scheduled' },
+{ id: 'PR-008', name: 'Rain Bonus · Lusaka', type: 'Freebet · Rain', market: 'Zambia', schedule: '20 Sep – 30 Sep', budget: 15000, spend: 0, status: 'scheduled' },
 { id: 'PR-009', name: 'Referral Reload', type: 'Referral', market: 'Zambia', schedule: 'Draft', budget: null, spend: null, status: 'draft' },
 { id: 'PR-010', name: 'Jackpot Happy Hour', type: 'Jackpot', market: 'Zambia', schedule: '01 Jul – 31 Jul', budget: 40000, spend: 38750, status: 'expired' },
-{ id: 'PR-011', name: 'Cashout Insurance', type: 'Cashback — Bet Insurance', market: 'Zambia', schedule: '01 Sep – ongoing', budget: 75000, spend: 40200, status: 'active' },
-{ id: 'PR-012', name: 'National Day Special', type: 'Freebet — Event', market: 'Zambia', schedule: '24 Oct – 25 Oct', budget: 30000, spend: 0, status: 'scheduled' },
-{ id: 'PR-013', name: 'USSD Onboarding Offer', type: 'Freebet — Welcome', market: 'Zambia', schedule: '15 Jun – 15 Aug', budget: 20000, spend: 19800, status: 'expired' },
+{ id: 'PR-011', name: 'Cashout Insurance', type: 'Cashback · Bet Insurance', market: 'Zambia', schedule: '01 Sep – ongoing', budget: 75000, spend: 40200, status: 'active' },
+{ id: 'PR-012', name: 'National Day Special', type: 'Freebet · Event', market: 'Zambia', schedule: '24 Oct – 25 Oct', budget: 30000, spend: 0, status: 'scheduled' },
+{ id: 'PR-013', name: 'USSD Onboarding Offer', type: 'Freebet · Welcome', market: 'Zambia', schedule: '15 Jun – 15 Aug', budget: 20000, spend: 19800, status: 'expired' },
 ];
 
 const LIST_KEY = 'promo_list_v1';
@@ -56,7 +56,7 @@ export function savePromotions(list: Promo[]): void {
 try {
 window.localStorage.setItem(LIST_KEY, JSON.stringify(list));
 } catch {
-/* Prototype mock — storage quota failures are non-fatal. */
+/* Prototype mock: storage quota failures are non-fatal. */
 }
 }
 
@@ -65,7 +65,7 @@ export function addPromotion(promo: Promo): void {
 savePromotions([promo, ...loadPromotions()]);
 }
 
-/** Next promotion ID — "PR-" + zero-padded next number from the mock data. */
+/** Next promotion ID: "PR-" + zero-padded next number from the mock data. */
 export function nextPromoId(): string {
 const max = loadPromotions().reduce((m, p) => {
 const n = parseInt(p.id.replace(/^PR-/, ''), 10);

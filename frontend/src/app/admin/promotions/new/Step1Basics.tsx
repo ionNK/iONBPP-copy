@@ -1,10 +1,10 @@
 'use client';
 
 /**
- * Step 1 — Basics.
+ * Step 1: Basics.
  * Creating from scratch is the default: the Details section (name,
  * promotion type, vertical) renders first with the type select unlocked.
- * Templates are opt-in — the "Use template" button toggles an inline panel
+ * Templates are opt-in: the "Use template" button toggles an inline panel
  * of template cards (full prefill, confirm-before-commit over dirty edits).
  * An applied template locks the type ("Set by template") and shows a
  * detachable chip next to the heading; detaching keeps all field values.
@@ -34,11 +34,11 @@ cashback: RotateCcw,
 interface Step1BasicsProps {
 draft: PromotionDraft;
 errors: Record<string, string>;
-/** Field edit — marks the draft dirty and clears that field's error. */
+/** Field edit, marks the draft dirty and clears that field's error. */
 onEdit: <K extends keyof PromotionDraft>(key: K, value: PromotionDraft[K]) => void;
 /** Writes the template's full prefill into the draft. */
 onApplyTemplate: (id: TemplateId) => void;
-/** Detaches the template — unlocks the type, keeps every field value. */
+/** Detaches the template, unlocks the type and keeps every field value. */
 onDetachTemplate: () => void;
 }
 
@@ -75,7 +75,7 @@ setPendingTemplate(null);
 
 return (
 <>
-{/* Heading row — Basics + applied-template chip + Use template toggle */}
+{/* Heading row: Basics + applied-template chip + Use template toggle */}
 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
 <h2 className="np-card__heading" style={{ color: T.textPrimary }}>Basics</h2>
@@ -108,7 +108,7 @@ Use template
 </GhostButton>
 </div>
 
-{/* Template panel — opt-in; a card applies the template's full prefill */}
+{/* Template panel: opt-in; a card applies the template's full prefill */}
 {panelOpen && (
 <div
 style={{
@@ -147,7 +147,7 @@ onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; }}
 </div>
 )}
 
-{/* Details — name, type (locked while a template is attached), vertical */}
+{/* Details: name, type (locked while a template is attached), vertical */}
 <div className="np-form-grid">
 <Field label="Name" required error={errors.name} full>
 <input
@@ -176,7 +176,7 @@ onChange={(e) => onEdit('type', e.target.value as PromotionTypeId | '')}
 <option value="">Select a type</option>
 {PROMOTION_TYPES.map((t) => (
 <option key={t.id} value={t.id} disabled={!isTypeSelectable(t.id)}>
-{isTypeSelectable(t.id) ? t.label : `${t.label} (Soon)`}
+{isTypeSelectable(t.id) ? t.label : `${t.label} (TBC)`}
 </option>
 ))}
 </select>
@@ -200,7 +200,7 @@ onChange={(e) => onEdit('vertical', e.target.value as ProductVertical | '')}
 </Field>
 </div>
 
-{/* Confirm-before-commit — applying a template replaces the configuration */}
+{/* Confirm-before-commit: applying a template replaces the configuration */}
 {pendingTemplate && (
 <div role="dialog" aria-modal="true" aria-labelledby="np-apply-template-title">
 <div

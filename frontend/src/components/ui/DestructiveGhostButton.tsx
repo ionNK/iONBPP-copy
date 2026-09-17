@@ -10,7 +10,7 @@ onClick?: () => void;
 small?: boolean;
 }
 
-/** Ghost button in the destructive colour — Unity Button Ghost × Destructive. */
+/** Ghost button in the destructive colour: Unity Button Ghost × Destructive. */
 export function DestructiveGhostButton({ children, onClick, small }: DestructiveGhostButtonProps) {
   return (
     <button
