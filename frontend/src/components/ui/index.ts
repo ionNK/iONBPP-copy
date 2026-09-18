@@ -20,6 +20,8 @@ export { EvidenceCard } from './EvidenceCard';
 export type { EvidenceCardProps } from './EvidenceCard';
 export { Toggle } from './Toggle';
 export type { ToggleProps } from './Toggle';
+export { Checkbox } from './Checkbox';
+export type { CheckboxProps } from './Checkbox';
 export { ChannelChips } from './ChannelChips';
 export type { ChannelChipsProps } from './ChannelChips';
 export { ZambiaFlag } from './ZambiaFlag';

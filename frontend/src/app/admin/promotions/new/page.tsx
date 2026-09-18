@@ -400,7 +400,6 @@ type="radio"
 name="rewardType"
 checked={draft.rewardType === value}
 onChange={() => setField('rewardType', value)}
-style={{ accentColor: T.navy }}
 />
 {label}
 </label>
@@ -452,7 +451,6 @@ type="radio"
 name="payoutMode"
 checked={draft.payoutMode === value}
 onChange={() => setField('payoutMode', value)}
-style={{ accentColor: T.navy }}
 />
 {label}
 </label>
@@ -573,7 +571,6 @@ type="radio"
 name="creditTiming"
 checked={draft.creditTiming === value}
 onChange={() => setField('creditTiming', value)}
-style={{ accentColor: T.navy }}
 />
 {label}
 {value === 'next-day' && (
@@ -693,7 +690,6 @@ type="radio"
 name="endMode"
 checked={draft.endMode === 'date'}
 onChange={() => setField('endMode', 'date')}
-style={{ accentColor: T.navy }}
 />
 On date
 {/* Never disabled: a disabled button swallows the click, so the picker would
@@ -718,7 +714,6 @@ type="radio"
 name="endMode"
 checked={draft.endMode === 'ongoing'}
 onChange={() => setField('endMode', 'ongoing')}
-style={{ accentColor: T.navy }}
 />
 Ongoing
 </label>

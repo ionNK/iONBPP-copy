@@ -58,6 +58,11 @@ successBg: 'rgba(0,118,0,0.08)',
  * manual's active section in Settings → Tutorials.
  */
 activeFill: 'rgba(0,21,40,0.05)',
+/**
+ * Focus ring for interactive controls (e.g. Checkbox): Unity black-based
+ * opacity ramp at 25% (sibling of ghostBorder's 15% and scrim's 45%).
+ */
+focusRing: 'rgba(0,21,40,0.25)',
 
  /** Hover raise shadow for selectable cards. */
  shadowRaise: '0 8px 20px rgba(0,21,40,0.08)',

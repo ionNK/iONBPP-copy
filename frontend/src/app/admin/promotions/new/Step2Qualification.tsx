@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { Info, Plus, Trash2, TriangleAlert, X } from 'lucide-react';
 import T from '@/theme/tokens';
-import { DestructiveGhostButton, GhostButton } from '@/components/ui';
+import { Checkbox, DestructiveGhostButton, GhostButton } from '@/components/ui';
 import {
  BET_RESTRICTIONS,
  BOOLEAN_OPTIONS,
@@ -366,23 +366,20 @@ const toggleChannel = (channel: Channel, checked: boolean) => {
  }}
  >
  {options.map((option) => (
- <label key={option} className="np-radio-row" style={{ color: T.textPrimary }}>
- <input
- type="checkbox"
+ <Checkbox
+ key={option}
  checked={selected.includes(option)}
- style={{ accentColor: T.navy }}
- onChange={(e) => {
+ label={option}
+ onChange={(checked) => {
  const remaining = selected.filter(
  (value) => value !== option && options.includes(value),
  );
  onChange({
  ...rule,
- value: (e.target.checked ? [...remaining, option] : remaining).join(','),
+ value: (checked ? [...remaining, option] : remaining).join(','),
  });
  }}
  />
- {option}
- </label>
  ))}
  </div>
  );
@@ -583,16 +580,17 @@ style={{ marginTop: 12 }}
 {CHANNELS.map((channel) => {
 const Icon = CHANNEL_ICONS[channel];
 return (
-<label key={channel} className="np-radio-row" style={{ color: T.textPrimary }}>
-<input
-type="checkbox"
+<Checkbox
+key={channel}
 checked={draft.channels.includes(channel)}
-style={{ accentColor: T.navy }}
-onChange={(e) => toggleChannel(channel, e.target.checked)}
-/>
+onChange={(checked) => toggleChannel(channel, checked)}
+label={
+<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
 <Icon size={14} aria-hidden="true" style={{ color: T.textSecondary }} />
 {CHANNEL_LABELS[channel]}
-</label>
+</span>
+}
+/>
 );
 })}
 </div>
@@ -790,23 +788,16 @@ style={{ borderTop: `1px solid ${T.border}` }}
  style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}
  >
  {BET_RESTRICTIONS.map((restriction) => (
- <label
+ <Checkbox
  key={restriction.param}
- className="np-radio-row"
- style={{ color: T.textPrimary }}
- >
- <input
- type="checkbox"
  checked={hasRestriction(trigger, restriction.param)}
- style={{ accentColor: T.navy }}
- onChange={(e) => setRestriction(
+ label={restriction.label}
+ onChange={(checked) => setRestriction(
  trigger.id,
  restriction.param,
- e.target.checked,
+ checked,
  )}
  />
- {restriction.label}
- </label>
  ))}
  </div>
  </section>
@@ -909,7 +900,6 @@ style={{ borderTop: `1px solid ${T.border}` }}
  name="eligibility"
  checked={eligibility.audience === 'all'}
  onChange={() => setAudience('all')}
- style={{ accentColor: T.navy }}
  />
  All players
  </label>
@@ -919,7 +909,6 @@ style={{ borderTop: `1px solid ${T.border}` }}
  name="eligibility"
  checked={eligibility.audience === 'new_customers'}
  onChange={() => setAudience('new_customers')}
- style={{ accentColor: T.navy }}
  />
  New customers
  </label>
@@ -953,24 +942,14 @@ style={{ borderTop: `1px solid ${T.border}` }}
  {errors.eligibilityDays}
  </p>
  )}
- <label className="np-radio-row" style={{ color: T.textPrimary, marginTop: 12 }}>
- <input
- type="checkbox"
+ <div style={{ marginTop: 12 }}>
+ <Checkbox
  checked={Boolean(eligibility.nonConsecutive)}
- aria-describedby="np-non-consecutive-hint"
- style={{ accentColor: T.navy }}
- onChange={(e) => setNonConsecutive(e.target.checked)}
+ label="Missing a day doesn't disqualify the player"
+ description="The player can qualify on any of the days in the window; they don't have to be back-to-back."
+ onChange={(checked) => setNonConsecutive(checked)}
  />
- Missing a day doesn&apos;t disqualify the player
- </label>
- <p
- id="np-non-consecutive-hint"
- className="np-hint"
- style={{ color: T.textSecondary, marginTop: 4 }}
- >
- The player can qualify on any of the days in the window; they don&apos;t
- have to be back-to-back.
- </p>
+ </div>
  </div>
  )}
 

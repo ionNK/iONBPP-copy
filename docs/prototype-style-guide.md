@@ -62,6 +62,10 @@ pressed=yellowActive), SecondaryButton (navyDeep bg + white text),
 GhostButton (ghostBorder), DestructiveGhostButton, FilterSelect,
 Toggle (Unity Switch: navy track when on, ghostBorder track when off;
 `disabled` renders a locked state, e.g. mandatory business rules),
+Checkbox (Unity Checkbox: visually hidden native input + 18px custom box;
+navy fill with white Check/Minus icon when checked/indeterminate, white fill
+with ghostBorder outline when unchecked; optional `label` plus 12px
+`description`),
 ChannelChips (read-only 12px channel pills with lucide surface icons; neutral
 `offWhite` fill and `border` outline; use in promotion tables, summaries and
 content previews),

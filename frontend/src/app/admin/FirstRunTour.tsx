@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import T from '@/theme/tokens';
-import { CoachMarks } from '@/components/ui';
+import { Checkbox, CoachMarks } from '@/components/ui';
 import type { CoachMarkStep } from '@/components/ui';
 
 /**
@@ -163,15 +163,11 @@ export default function FirstRunTour() {
           Shown {shownCount} of {MAX_SHOWS}
         </span>
         {isLast && (
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, lineHeight: 1.5, color: T.textPrimary, cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={dismissForever}
-              onChange={(e) => toggleDismissForever(e.target.checked)}
-              style={{ width: 16, height: 16, margin: 0, accentColor: T.navy }}
-            />
-            Don&apos;t show again
-          </label>
+          <Checkbox
+            checked={dismissForever}
+            onChange={toggleDismissForever}
+            label="Don't show again"
+          />
         )}
       </div>
     ),

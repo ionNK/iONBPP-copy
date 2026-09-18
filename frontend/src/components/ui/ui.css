@@ -584,3 +584,61 @@ flex: none;
   opacity: 0.6;
   pointer-events: none;
 }
+
+/* Checkbox: visually hidden native input + custom box (colors inline from T). */
+.ui-checkbox {
+position: relative;
+display: inline-flex;
+align-items: flex-start;
+gap: 8px;
+font-size: 14px;
+line-height: 1.5;
+cursor: pointer;
+}
+
+.ui-checkbox--disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+
+.ui-checkbox__input {
+position: absolute;
+width: 1px;
+height: 1px;
+margin: -1px;
+padding: 0;
+border: 0;
+overflow: hidden;
+clip: rect(0 0 0 0);
+clip-path: inset(50%);
+white-space: nowrap;
+}
+
+.ui-checkbox__box {
+flex: none;
+box-sizing: border-box;
+width: 18px;
+height: 18px;
+margin-top: 2px;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.ui-checkbox__input:focus-visible + .ui-checkbox__box {
+outline: 2px solid var(--ui-checkbox-ring);
+outline-offset: 2px;
+}
+
+.ui-checkbox__text {
+display: flex;
+flex-direction: column;
+gap: 2px;
+min-width: 0;
+}
+
+.ui-checkbox__description {
+font-size: 12px;
+line-height: 1.5;
+}
