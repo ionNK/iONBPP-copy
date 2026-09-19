@@ -45,7 +45,7 @@ const STEPS: CoachMarkStep[] = [
     body: 'Maker-checker: awards and changes wait here for a second pair of eyes before anything is credited.',
   },
   {
-    target: 'nav-journeys',
+    target: 'nav-lifecycles',
     title: 'On the roadmap',
     body: 'Items marked "TBC" are planned. Click any of them to see what they will do and how to work in the meantime.',
   },

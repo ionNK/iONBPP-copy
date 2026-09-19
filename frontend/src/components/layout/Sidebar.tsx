@@ -53,7 +53,7 @@ items: [
 label: 'Promotions',
 items: [
 { label: 'All Promotions', href: '/admin/promotions', icon: <Gift size={16} />, tour: 'nav-promotions' },
-{ label: 'Journeys', href: '/admin/promotions/journeys', icon: <Route size={16} />, comingSoon: true, tour: 'nav-journeys' },
+{ label: 'Lifecycles', href: '/admin/promotions/lifecycles', icon: <Route size={16} />, comingSoon: true, tour: 'nav-lifecycles' },
       { label: 'Messaging', href: '/admin/promotions/messaging', icon: <MessageSquare size={16} />, comingSoon: true },
       { label: 'Gamification', href: '/admin/promotions/gamification', icon: <Trophy size={16} />, comingSoon: true },
       { label: 'Bulk Upload', href: '/admin/promotions/bulk-upload', icon: <Upload size={16} />, tour: 'nav-bulk-upload' },

@@ -17,7 +17,7 @@ export default function SaferGamblingPage() {
       <div className="promo-container">
         <ComingSoon
           title="Safer Gambling"
-          description="Safer-gambling indicators surfaced across the platform, with automatic exclusion from promotions, journeys and bulk uploads."
+          description="Safer-gambling indicators surfaced across the platform, with automatic exclusion from promotions, lifecycles and bulk uploads."
           bullets={[
             'Player-level risk flags visible in the Player 360',
             'Automatic exclusion lists applied to all award paths',
