@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import T from '@/theme/tokens';
-import { ChannelChips, PrimaryButton } from '@/components/ui';
+import { PrimaryButton } from '@/components/ui';
+import { channelSummary } from '@/lib/promotions';
 import type { Channel } from '@/lib/promotions';
 
 const customerPreview = {
@@ -111,7 +112,7 @@ channels,
           )}
           <div className="content-preview__body">
             {(type || market) && <span className="content-preview__badge" style={{ border: `1px solid ${customerPreview.border}`, color: customerPreview.text }}>{[type, market].filter(Boolean).join(' · ')}</span>}
-            {channels && channels.length > 0 && <ChannelChips channels={channels} compact />}
+            {channels && channels.length > 0 && <span className="content-preview__badge" style={{ border: `1px solid ${customerPreview.border}`, color: customerPreview.text }}>{channelSummary(channels)}</span>}
 <h4 className="content-preview__title" style={{ color: customerPreview.text }}>{title?.trim() || 'Promotion title'}</h4>
             <p className="content-preview__description" style={{ color: customerPreview.secondary }}>{shortDescription || 'Short description will appear here.'}</p>
             <div className="content-preview__cta"><PrimaryButton onClick={() => undefined}>{ctaLabel || 'Opt in'}</PrimaryButton></div>

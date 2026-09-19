@@ -19,8 +19,9 @@ export interface CheckboxProps {
 
 /**
  * Checkbox: Unity Checkbox control. A visually hidden native input keeps
- * keyboard, form and a11y semantics; the custom 18px box carries the
- * navy/white check styling previously done with browser-native styling in the wizard.
+ * keyboard, form and a11y semantics; the custom 18px box (4px radius) carries
+ * the Figma selection state: Unity success green fill with a white
+ * Check/Minus icon when checked/indeterminate.
  */
 export function Checkbox({ checked, onChange, label, description, disabled, indeterminate, id, name }: CheckboxProps) {
     const autoId = useId();
@@ -54,10 +55,10 @@ export function Checkbox({ checked, onChange, label, description, disabled, inde
                 aria-hidden="true"
                 style={
                     {
-                        background: filled ? T.navy : T.white,
-                        border: `1px solid ${filled || (hovered && !disabled) ? T.navy : T.ghostBorder}`,
-                        borderRadius: T.radiusSm,
-                        '--ui-checkbox-ring': T.focusRing,
+                        background: filled ? T.progressActive : T.white,
+                        border: `1px solid ${filled || (hovered && !disabled) ? T.progressActive : T.ghostBorder}`,
+                        borderRadius: T.radiusXs,
+                        '--ui-checkbox-ring': T.progressActive,
                     } as CSSProperties
                 }
             >

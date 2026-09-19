@@ -20,8 +20,8 @@ import type {
 import { QUALIFICATION_EVENT_IDS, isNumericType } from '@/data/event-catalog';
 import type { EventId } from '@/data/event-catalog';
 import { isRangeOperator, isZeroArityOperator } from '@/data/operator-catalog';
-import { CHANNELS, allChannels } from '@/lib/promotions';
-import type { Channel } from '@/lib/promotions';
+import { CHANNELS, DEFAULT_BET_TIMING, allChannels, normalizeBetTiming } from '@/lib/promotions';
+import type { BetTiming, Channel } from '@/lib/promotions';
 
 export interface TriggerRule {
  id: string;
@@ -41,6 +41,8 @@ export interface Trigger {
 export interface Qualification {
  triggers: Trigger[];
  counting: TriggerRule[];
+ /** Which bets can qualify: prematch, live or both (default both). */
+ betTiming: BetTiming;
  eligibility: {
  audience: 'all' | 'new_customers';
  windowDays?: number;
@@ -151,6 +153,7 @@ export function emptyQualification(): Qualification {
  return {
  triggers: [{ id: 'primary-trigger', eventId: QUALIFICATION_EVENT_IDS.betSettled, rules: [] }],
  counting: [],
+ betTiming: DEFAULT_BET_TIMING,
  eligibility: { audience: 'all' },
  };
 }
@@ -162,6 +165,7 @@ export function cloneQualification(qualification: Qualification): Qualification 
  rules: trigger.rules.map((rule) => ({ ...rule })),
  })),
  counting: qualification.counting.map((rule) => ({ ...rule })),
+ betTiming: qualification.betTiming,
  eligibility: { ...qualification.eligibility },
  };
 }
@@ -205,12 +209,16 @@ export function sanitizeQualification(value: unknown): Qualification {
  return sanitized ? [sanitized] : [];
  });
 
+ /* Drafts saved before bet timing existed carry no key and accept both. */
+ const betTiming = normalizeBetTiming(candidate.betTiming);
+
  const rawEligibility = candidate.eligibility;
 
  if (!rawEligibility || typeof rawEligibility !== 'object') {
  return {
  triggers,
  counting,
+ betTiming,
  eligibility: { audience: 'all' },
  };
  }
@@ -221,6 +229,7 @@ export function sanitizeQualification(value: unknown): Qualification {
  return {
  triggers,
  counting,
+ betTiming,
  eligibility: { audience: 'all' },
  };
  }
@@ -228,6 +237,7 @@ export function sanitizeQualification(value: unknown): Qualification {
  return {
  triggers,
  counting,
+ betTiming,
  eligibility: {
  audience: 'new_customers',
  ...(typeof eligibility.windowDays === 'number'

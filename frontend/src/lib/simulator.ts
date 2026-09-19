@@ -17,7 +17,7 @@ import type { PromotionTemplate, TemplatePrefill, TierRow } from '@/data/promoti
 import { getCatalogEvent } from '@/data/event-catalog';
 import type { EventId } from '@/data/event-catalog';
 import type { TriggerRule } from '@/app/admin/promotions/new/draft';
-import { CHANNEL_LABELS, channelSummary } from '@/lib/promotions';
+import { BET_TIMING_LABELS, CHANNEL_LABELS, betTimingAllows, channelSummary } from '@/lib/promotions';
 import type { Channel, Promo } from '@/lib/promotions';
 import type { Settings } from '@/lib/settings';
 
@@ -62,7 +62,13 @@ export interface ScenarioEvent {
   params: Record<string, string>;
   /** Vertical / provider context for ledger preview (not a catalog param). */
   gameCode: string;
+  /** Bet placed after the event started (live) rather than prematch. Only meaningful for bet events. */
+  isLive: boolean;
 }
+
+/** Events that carry a bet and therefore a bet timing. */
+export const BET_EVENT_IDS: readonly EventId[] = ['bet_placed', 'bet_settled'];
+export const isBetEvent = (eventId: EventId): boolean => BET_EVENT_IDS.includes(eventId);
 
 export interface Scenario {
   promoId: string;
@@ -76,7 +82,8 @@ events: ScenarioEvent[];
 
 /** Key fields the inline picker exposes per event (from the catalog). */
 export const PICKER_FIELDS: Record<EventId, string[]> = {
-  bet_placed: ['Bet Type', 'Stake', 'Odds', 'Channel', 'Live'],
+  /* 'Live' is driven by ScenarioEvent.isLive (the picker's "Live bet" field), not listed here. */
+ bet_placed: ['Bet Type', 'Stake', 'Odds', 'Channel'],
   bet_settled: ['Bet Type', 'Stake', 'Result', 'Losing Legs', 'Remaining Odds', 'Cash-out multiplier', 'Free Bet', 'Voided', 'Cancelled', 'Payout'],
   deposit: ['Amount', 'Method', 'First Deposit'],
   withdrawal: ['Amount', 'Status'],
@@ -84,7 +91,7 @@ export const PICKER_FIELDS: Record<EventId, string[]> = {
   login: ['Days Inactive', 'Platform'],
 };
 
-/** Game / provider codes offered by the picker (Settings → Award metadata). */
+/** Game / provider codes offered by the picker (mirrors PROVIDER_SEED in lib/settings). */
 export const GAME_CODES = ['SBK', 'SPR', 'SMS', 'IMN'];
 
 let eventSeq = 0;
@@ -94,7 +101,7 @@ export function newEventId(): string {
 }
 
 export function defaultEvent(eventId: EventId): ScenarioEvent {
-  const base: ScenarioEvent = { id: newEventId(), eventId, offsetMinutes: 0, params: {}, gameCode: 'SBK' };
+  const base: ScenarioEvent = { id: newEventId(), eventId, offsetMinutes: 0, params: {}, gameCode: 'SBK', isLive: false };
   const catalog = getCatalogEvent(eventId);
   for (const name of PICKER_FIELDS[eventId]) {
     const param = catalog?.params.find((p) => p.name === name);
@@ -118,18 +125,20 @@ export interface Preset {
   events: Omit<ScenarioEvent, 'id'>[];
 }
 
-const settledMultibet = (offset: number, params: Record<string, string>): Omit<ScenarioEvent, 'id'> => ({
-  eventId: 'bet_settled', offsetMinutes: offset, gameCode: 'SBK',
+const settledMultibet = (offset: number, params: Record<string, string>, isLive = false): Omit<ScenarioEvent, 'id'> => ({
+  eventId: 'bet_settled', offsetMinutes: offset, gameCode: 'SBK', isLive,
   params: { 'Bet Type': 'Multibet', Stake: '50', Result: 'Lost', 'Losing Legs': '1', 'Remaining Odds': '48', 'Cash-out multiplier': '', 'Free Bet': 'No', Voided: 'No', Cancelled: 'No', Payout: '0', ...params },
 });
 
 const aviatorBet = (offset: number): Omit<ScenarioEvent, 'id'> => ({
-  eventId: 'bet_settled', offsetMinutes: offset, gameCode: 'SPR',
+  eventId: 'bet_settled', offsetMinutes: offset, gameCode: 'SPR', isLive: false,
   params: { 'Bet Type': 'Single', Stake: '5', Result: 'Cashed Out', 'Losing Legs': '0', 'Remaining Odds': '', 'Cash-out multiplier': '2.4', 'Free Bet': 'No', Voided: 'No', Cancelled: 'No', Payout: '12' },
 });
 
 export const PRESETS: Preset[] = [
   { id: 'multibet-one-leg', label: 'Qualifying multibet loses by one leg', promoId: 'PR-002', personaId: 'active-depositor', events: [settledMultibet(-30, {})] },
+  /* PR-002 is prematch-only: an otherwise-qualifying live multibet fails at Trigger on bet timing. */
+  { id: 'money-back-live-bet', label: 'Money Back with a live bet (should not qualify)', promoId: 'PR-002', personaId: 'active-depositor', events: [settledMultibet(-30, {}, true)] },
   { id: 'aviator-qualifying-day', label: 'Aviator qualifying day (10 bets)', promoId: 'PR-001', personaId: 'new-today', events: Array.from({ length: 10 }, (_, i) => aviatorBet(-(10 - i) * 12)) },
   { id: 'aviator-partial-day', label: 'Aviator partial day (9 bets, should not qualify)', promoId: 'PR-001', personaId: 'new-today', events: Array.from({ length: 9 }, (_, i) => aviatorBet(-(9 - i) * 12)) },
   { id: 'cashed-out', label: 'Cashed-out bet (should not qualify)', promoId: 'PR-002', personaId: 'active-depositor', events: [settledMultibet(-30, { Result: 'Cashed Out', 'Cash-out multiplier': '1.6', 'Losing Legs': '0', Payout: '80' })] },
@@ -224,13 +233,15 @@ required: channelSummary(promo.channels),
   if (!triggers.length) triggerChecks.push(skipped('Trigger rules'));
   else if (!ordered.length) triggerChecks.push(check('Event sequence', false, 'no events', 'at least one qualifying event'));
   else {
-    const perEvent = ordered.map((event) => { const branches = triggers.filter((t) => t.eventId === event.eventId); const results = branches.map((t) => t.rules.map((rule) => ({ rule, ...evaluateRule(rule, event.params) }))); return { event, branches, results, qualifies: results.some((rules) => rules.every((r) => r.pass)) }; });
+    /* Bet timing is a promotion-level rule: a bet event only qualifies when its prematch/live timing is allowed. 'both' is still an evaluated (passing) check, never skipped. */
+    const perEvent = ordered.map((event) => { const branches = triggers.filter((t) => t.eventId === event.eventId); const results = branches.map((t) => t.rules.map((rule) => ({ rule, ...evaluateRule(rule, event.params) }))); const timingOk = !isBetEvent(event.eventId) || betTimingAllows(promo.betTiming, event.isLive); return { event, branches, results, timingOk, qualifies: timingOk && results.some((rules) => rules.every((r) => r.pass)) }; });
     qualifyingEvents = perEvent.filter((p) => p.qualifies).map((p) => p.event); const candidate = perEvent.find((p) => p.qualifies) ?? perEvent[perEvent.length - 1];
     triggerChecks.push(check('Event type', perEvent.some((p) => p.branches.length > 0), candidate.event.eventId, triggers.map((t) => t.eventId).join(' or ')));
+    if (isBetEvent(candidate.event.eventId)) triggerChecks.push({ ...check('Bet timing', candidate.timingOk, candidate.event.isLive ? 'Live' : 'Prematch', BET_TIMING_LABELS[promo.betTiming]), ...(candidate.timingOk ? {} : { reason: `Only ${BET_TIMING_LABELS[promo.betTiming].toLowerCase()} bets qualify for this promotion.` }) });
     for (const r of candidate.results[0] ?? []) triggerChecks.push(check(r.rule.param, r.pass, r.actual, ruleRequired(r.rule)));
     for (const rule of qualification?.counting ?? []) { const pool = /per day/i.test(rule.param) ? qualifyingEvents.filter((e) => Math.floor((now + e.offsetMinutes * 60_000) / DAY_MS) === Math.floor(lastEventAt / DAY_MS)) : qualifyingEvents; const value = /stake/i.test(rule.param) ? pool.reduce((sum, e) => sum + (toNumber(e.params.Stake) ?? 0), 0) : pool.length; const result = evaluateRule(rule, { [rule.param]: String(value) }); triggerChecks.push(check(rule.param, result.pass, /stake/i.test(rule.param) ? fmtK(value) : `counter ${value} of ${rule.value}`, ruleRequired(rule))); }
   }
-  stages.push({ id: 'trigger', title: 'Trigger', status: stageStatus(triggerChecks), checks: triggerChecks, summary: triggers.length ? `${qualifyingEvents.length} of ${ordered.length} events qualify` : 'No trigger rules configured', config: [['event', triggers.map((t) => t.eventId).join(', ') || '·'], ...(qualification?.counting ?? []).map((r): [string, string] => ['counting', `${r.param} ${ruleRequired(r)}`])], inputs: ordered.map((e, i): [string, string] => [`event ${i + 1}`, `${e.eventId} · ${Object.entries(e.params).filter(([, v]) => v !== '').map(([k, v]) => `${k}=${v}`).join(', ')}`]) });
+  stages.push({ id: 'trigger', title: 'Trigger', status: stageStatus(triggerChecks), checks: triggerChecks, summary: triggers.length ? `${qualifyingEvents.length} of ${ordered.length} events qualify` : 'No trigger rules configured', config: [['event', triggers.map((t) => t.eventId).join(', ') || '·'], ['betTiming', BET_TIMING_LABELS[promo.betTiming]], ...(qualification?.counting ?? []).map((r): [string, string] => ['counting', `${r.param} ${ruleRequired(r)}`])], inputs: ordered.map((e, i): [string, string] => [`event ${i + 1}`, `${e.eventId} · ${[...(isBetEvent(e.eventId) ? [`timing=${e.isLive ? 'Live' : 'Prematch'}`] : []), ...Object.entries(e.params).filter(([, v]) => v !== '').map(([k, v]) => `${k}=${v}`)].join(', ')}`]) });
   let rewardAmount = 0; let rewardKind: SimulationResult['reward']['kind'] = 'none'; let rewardLabel = 'No reward configured'; const rewardChecks: RuleCheck[] = [];
   if (!prefill.rewardType) rewardChecks.push(skipped('Reward type'));
   else if (prefill.rewardType === 'freebet') { rewardKind = 'freebet'; const count = toNumber(prefill.freebetCount ?? '') ?? 0; const value = toNumber(prefill.freebetValue ?? '') ?? 0; rewardAmount = count * value; rewardLabel = `${count} × ${fmtK(value)} freebet`; rewardChecks.push(check('Freebet count', count > 0, String(count), '> 0')); rewardChecks.push(check('Freebet value', value > 0, fmtK(value), '> 0')); rewardChecks.push(check('Computed amount', rewardAmount > 0, fmtK(rewardAmount), 'count × value')); }
@@ -258,7 +269,7 @@ required: channelSummary(promo.channels),
 export interface SimulationRun { id: string; createdAt: number; promoId: string; promoName: string; personaId: string; outcome: 'PASS' | 'FAIL'; failedAt: StageId | null; scenario: Scenario; }
 export const RUNS_KEY = 'simulator.v1.runs'; export const MAX_RUNS = 25;
 export function runId(createdAt: number): string { return `sim_${createdAt.toString(36)}`; }
-export function loadRuns(): SimulationRun[] { if (typeof window === 'undefined') return []; try { const parsed: unknown = JSON.parse(window.localStorage.getItem(RUNS_KEY) ?? '[]'); return Array.isArray(parsed) ? parsed.map((run) => ({ ...run, scenario: { ...run.scenario, channel: run.scenario?.channel ?? 'app' } })) as SimulationRun[] : []; } catch { return []; } }
+export function loadRuns(): SimulationRun[] { if (typeof window === 'undefined') return []; try { const parsed: unknown = JSON.parse(window.localStorage.getItem(RUNS_KEY) ?? '[]'); return Array.isArray(parsed) ? parsed.map((run) => ({ ...run, scenario: { ...run.scenario, channel: run.scenario?.channel ?? 'app', events: (run.scenario?.events ?? []).map((event: Partial<ScenarioEvent>) => ({ ...event, isLive: event.isLive === true })) } })) as SimulationRun[] : []; } catch { return []; } }
 export function saveRuns(runs: SimulationRun[]): void { if (typeof window === 'undefined') return; try { window.localStorage.setItem(RUNS_KEY, JSON.stringify(runs.slice(0, MAX_RUNS))); } catch { /* Prototype mock: storage failures are non-fatal. */ } }
 export function addRun(run: SimulationRun): SimulationRun[] { const next = [run, ...loadRuns()].slice(0, MAX_RUNS); saveRuns(next); return next; }
 /** Stamp and persist a run. The wall-clock read lives here (history bookkeeping), never inside simulate(). */

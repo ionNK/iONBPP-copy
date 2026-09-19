@@ -62,13 +62,21 @@ pressed=yellowActive), SecondaryButton (navyDeep bg + white text),
 GhostButton (ghostBorder), DestructiveGhostButton, FilterSelect,
 Toggle (Unity Switch: navy track when on, ghostBorder track when off;
 `disabled` renders a locked state, e.g. mandatory business rules),
-Checkbox (Unity Checkbox: visually hidden native input + 18px custom box;
-navy fill with white Check/Minus icon when checked/indeterminate, white fill
-with ghostBorder outline when unchecked; optional `label` plus 12px
-`description`),
-ChannelChips (read-only 12px channel pills with lucide surface icons; neutral
-`offWhite` fill and `border` outline; use in promotion tables, summaries and
-content previews),
+Checkbox (Unity Checkbox: visually hidden native input + 18px custom box
+with 4px radius; Unity success green selection state per Figma:
+progressActive fill and border with a white 14px Check/Minus icon when
+checked/indeterminate, white fill with ghostBorder outline when unchecked
+(hover border progressActive), progressActive focus ring at 35% alpha;
+optional `label` plus 12px `description`),
+Checkbox group pattern (no primitive; compose Checkbox inline): a parent
+Checkbox that is checked when every child is selected and `indeterminate`
+when only some are, followed by the children in a horizontal wrapping flex
+row (gap 12, indented 24px under the parent), 14px labels, no icons. Wrap
+in `role="group"` with `aria-label`; at-least-one validation and the 12px
+destructive error stay with the caller. Used for promotion Channels
+(All channels; Web, Mobile web, App, USSD); read-only channel summaries are
+plain text via `channelSummary()`: "All channels" for a full set,
+otherwise the labels joined by ", "),
 EvidenceCard, ComingSoon (teaser card for unreleased "TBC" nav routes:
 white card radiusMd max-w 640, 20px/600 title + ghost navy "Coming soon"
 Badge, 14px textSecondary description, 14px bullets with 16px lucide Check,

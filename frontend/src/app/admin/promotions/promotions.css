@@ -98,6 +98,31 @@ font-size: 14px;
   background: transparent;
 }
 
+/* Segmented control (channel filter, preview device toggle).
+   Same geometry as .dash-segmented; colours stay inline from T tokens. */
+.promo-segmented {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.promo-segmented__button {
+  border: 0;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .promo-segmented__button {
+    transition: none;
+  }
+}
+
 /* Budget cell */
 .promo-budget {
   min-width: 160px;

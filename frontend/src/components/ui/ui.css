@@ -76,25 +76,6 @@
   font-weight: 500;
 }
 
-/* ChannelChips */
-.ui-channel-chips {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.ui-channel-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  width: fit-content;
-  padding: 3px 8px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.5;
-  white-space: nowrap;
-}
-
 .promo-btn-primary:disabled {
  opacity: 0.5;
  cursor: not-allowed;
@@ -627,7 +608,9 @@ transition: background-color 0.12s ease, border-color 0.12s ease;
 }
 
 .ui-checkbox__input:focus-visible + .ui-checkbox__box {
-outline: 2px solid var(--ui-checkbox-ring);
+/* Unity success green at 35% alpha (Figma checkbox focus ring), derived from
+the progressActive token passed as --ui-checkbox-ring. */
+outline: 2px solid color-mix(in srgb, var(--ui-checkbox-ring) 35%, transparent);
 outline-offset: 2px;
 }
 

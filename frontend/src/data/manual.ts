@@ -45,7 +45,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         type: 'ul',
         items: [
           'Basics: name, promotion type and product vertical. Zambia is the implicit market.',
-          'Qualification: one or more triggers (bet placed, bet settled, deposit, registration and so on) with rules on stake, result, odds and player context. Free-bet, voided and cancelled stakes are excluded unless you choose otherwise.',
+          'Qualification: one or more triggers (bet placed, bet settled, deposit, registration and so on) with rules on stake, result, odds and player context. Free-bet, voided and cancelled stakes are excluded unless you choose otherwise. Bet timing sets whether prematch bets, live bets or both can qualify; the default is both.',
           'Award: a freebet (count, value, expiry) or cash (fixed amount or an odds-tier matrix).',
           'Budget: optional amount, alert threshold and alert recipients.',
           'Schedule: start date and time, then a fixed end or ongoing.',
@@ -108,16 +108,16 @@ export const MANUAL_SECTIONS: ManualSection[] = [
     id: 'dashboard',
     title: 'Dashboard',
     blocks: [
-      { type: 'p', text: 'The dashboard summarises total spend, budget utilisation, active promotions and budget alerts for the selected period.' },
-      { type: 'p', text: 'Use Needs attention to open pending approvals, budget alerts and promotions starting or ending soon. Spend charts can be viewed by promotion type, provider or market and used as filters.' },
+      { type: 'p', text: 'The dashboard summarises total spend and active promotions for the selected period, with a Budget attention list of promotions at or above the alert threshold.' },
+      { type: 'p', text: 'Use Needs attention to open pending approvals and promotions starting or ending soon. Spend charts can be viewed by promotion type, provider or channel and used as filters.' },
     ],
   },
   {
     id: 'settings',
     title: 'Settings',
     blocks: [
-      { type: 'p', text: 'Settings holds workspace defaults, budget alerts, approval controls, award metadata, users and roles, this learning centre and build information.' },
-      { type: 'p', text: 'Award metadata makes product vertical, provider code and promotion reference mandatory for ledger reconciliation. Add or remove provider codes in the Award metadata card, then save that card.' },
+      { type: 'p', text: 'Settings holds workspace formatting defaults, budget alerts, approval controls, users and roles, this learning centre and build information.' },
+      { type: 'p', text: 'Product vertical, provider code and promotion reference are always mandatory on every award for ledger reconciliation; these rules are fixed and not configurable.' },
     ],
   },
 
@@ -148,6 +148,7 @@ export const GLOSSARY = [
   ['Provider code', 'The short code that identifies the relevant game or product provider on an award record.'],
   ['Promo reference', 'The identifier linking an award ledger record back to its promotion.'],
   ['Network-level promotion', 'A promotion configured for the wider product network rather than a single provider or game.'],
+['Bet timing', 'Whether a promotion accepts prematch bets (placed before the event starts), live bets (placed after it starts) or both.'],
 ] as const;
 
 export type TutorialProgress = Partial<Record<'bulkUpload' | 'approvals' | 'simulation', boolean>>;

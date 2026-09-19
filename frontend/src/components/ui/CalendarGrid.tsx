@@ -62,17 +62,17 @@ export function withTime(day: Date, time: Date | null): Date {
   return new Date(day.getFullYear(), day.getMonth(), day.getDate(), time?.getHours() ?? 0, time?.getMinutes() ?? 0);
 }
 
-/** "Jan 11, 2026" — trigger format for DateRangePicker. */
+/** "Jan 11, 2026": trigger format for DateRangePicker. */
 export function fmtMedium(d: Date): string {
   return `${MONTH_SHORT[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-/** "20 Aug 2026" — trigger format for DateTimeField. */
+/** "20 Aug 2026": trigger format for DateTimeField. */
 export function fmtDayMonthYear(d: Date): string {
   return `${d.getDate()} ${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-/** "10:00" — 24h clock (Africa/Lusaka convention). */
+/** "10:00": 24h clock (Africa/Lusaka convention). */
 export function fmtTime24(d: Date): string {
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
@@ -314,7 +314,7 @@ export function ReadOnlyDateField({ value, ariaLabel }: { value: string; ariaLab
       aria-label={ariaLabel}
       style={{ background: T.offWhite, borderRadius: T.radiusSm, color: value ? T.textPrimary : T.textSecondary }}
     >
-      {value || '—'}
+      {value || '·'}
     </span>
   );
 }

@@ -9,10 +9,10 @@ Check, ChevronLeft, CircleCheck, FileText, ImagePlus, Info, Plus, Trash2, Triang
 import '../promotions.css';
 import './new.css';
 import T from '@/theme/tokens';
-import { Badge, ChannelChips, DateTimeField, GhostButton, PrimaryButton, TimeField, Toggle, parseIsoDateTime, toIsoDate, toIsoTime } from '@/components/ui';
+import { Badge, DateTimeField, GhostButton, PrimaryButton, TimeField, Toggle, parseIsoDateTime, toIsoDate, toIsoTime } from '@/components/ui';
 import { addPromotion, nextPromoId, setListNotice } from '@/lib/promotions';
 import type { Promo } from '@/lib/promotions';
-import { channelSummary, normalizeChannels } from '@/lib/promotions';
+import { BET_TIMING_LABELS, channelSummary, normalizeChannels } from '@/lib/promotions';
 import { BET_RESTRICTIONS, catalogEventLabel } from '@/data/event-catalog';
 import { isRangeOperator, isZeroArityOperator, QUALIFICATION_OPERATOR_VALUES } from '@/data/operator-catalog';
 import { getPromotionType } from '@/data/promotion-templates';
@@ -107,6 +107,7 @@ budget: d.budget ? Number(d.budget) : null,
 spend: null,
 status,
 channels: normalizeChannels(d.channels),
+betTiming: d.qualification.betTiming,
 };
 }
 
@@ -896,7 +897,7 @@ style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.r
 <p className="np-preview-tile__desc" style={{ color: T.textSecondary }}>
 {draft.shortDescription || 'Short description will appear here.'}
 </p>
-<ChannelChips channels={draft.channels} compact />
+<p className="np-preview-tile__desc" style={{ color: T.textSecondary }}>{channelSummary(draft.channels)}</p>
 <p className="np-preview-tile__more" style={{ color: T.navy }}>Read More</p>
 </div>
 </div>
@@ -942,6 +943,7 @@ draft.qualification.counting.length > 0
 : 'Each qualifying event (subject to award limits)',
 ],
 ['Channels', selectedChannelSummary],
+['Bet timing', BET_TIMING_LABELS[draft.qualification.betTiming]],
 [
 'Eligibility',
 draft.qualification.eligibility.audience === 'all'

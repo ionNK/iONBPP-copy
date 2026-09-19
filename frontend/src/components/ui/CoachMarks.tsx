@@ -199,7 +199,7 @@ export function CoachMarks({ steps, open, onComplete, footer }: CoachMarksProps)
           {step.body}
         </p>
         {footer && (
-          /* Spacer-scale 12 — same rhythm as the card gap. */
+          /* Spacer-scale 12: same rhythm as the card gap. */
           <div style={{ marginTop: 12 }}>{footer({ index, total, isLast })}</div>
         )}
         <div className="ui-coach-marks__actions">

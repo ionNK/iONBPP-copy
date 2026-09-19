@@ -8,7 +8,9 @@
 import { useState } from 'react';
 import { Info, Plus, Trash2, TriangleAlert, X } from 'lucide-react';
 import T from '@/theme/tokens';
-import { Checkbox, DestructiveGhostButton, GhostButton } from '@/components/ui';
+import { Checkbox, DestructiveGhostButton, FilterSelect, GhostButton } from '@/components/ui';
+import { BET_TIMINGS, BET_TIMING_LABELS, CHANNELS, CHANNEL_LABELS, allChannels } from '@/lib/promotions';
+import type { BetTiming, Channel } from '@/lib/promotions';
 import {
  BET_RESTRICTIONS,
  BOOLEAN_OPTIONS,
@@ -30,8 +32,6 @@ import {
 } from '@/data/operator-catalog';
 import type { PromotionDraft, Qualification, Trigger, TriggerRule } from './draft';
 import { inputStyle } from './fields';
-import { CHANNELS, CHANNEL_ICONS, CHANNEL_LABELS } from '@/lib/promotions';
-import type { Channel } from '@/lib/promotions';
 
 interface Step2QualificationProps {
  draft: PromotionDraft;
@@ -42,6 +42,12 @@ interface Step2QualificationProps {
 
 const REGISTRATION_EVENT: EventId = 'registration';
 const SETTLEMENT_PARAMS = ['Losing Legs', 'Remaining Odds'];
+
+const BET_TIMING_OPTIONS = BET_TIMINGS.map((timing) => BET_TIMING_LABELS[timing]);
+
+function betTimingFromLabel(label: string): BetTiming {
+  return BET_TIMINGS.find((timing) => BET_TIMING_LABELS[timing] === label) ?? 'both';
+}
 
 function newId(prefix: string): string {
  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -131,14 +137,6 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  );
 
  const commit = (next: Qualification) => onEdit('qualification', next);
-
-/* Group 0: Channels. Canonical order is preserved regardless of click order. */
-const toggleChannel = (channel: Channel, checked: boolean) => {
-  onEdit(
-    'channels',
-    CHANNELS.filter((item) => (item === channel ? checked : draft.channels.includes(item))),
-  );
-};
 
  const mapTrigger = (
  triggerId: string,
@@ -274,6 +272,26 @@ const toggleChannel = (channel: Channel, checked: boolean) => {
  ...qualification,
  counting: qualification.counting.filter((rule) => rule.id !== ruleId),
  });
+ };
+
+ /* Bet timing: prematch, live or both. */
+ const setBetTiming = (betTiming: BetTiming) => {
+ commit({ ...qualification, betTiming });
+ };
+
+ /* Channels: parent "All channels" plus one checkbox per surface, in canonical order. */
+ const allChannelsSelected = CHANNELS.every((channel) => draft.channels.includes(channel));
+ const someChannelsSelected = !allChannelsSelected && draft.channels.length > 0;
+
+ const setChannel = (channel: Channel, checked: boolean) => {
+ onEdit(
+ 'channels',
+ CHANNELS.filter((item) => item === channel ? checked : draft.channels.includes(item)),
+ );
+ };
+
+ const setAllChannels = (checked: boolean) => {
+ onEdit('channels', checked ? allChannels() : []);
  };
 
  /* Group 3: Who's eligible */
@@ -572,27 +590,26 @@ Where players can qualify for this promotion. At least one channel is required.
 </p>
 <div
 role="group"
-aria-labelledby="np-channels-title"
+aria-label="Channels"
 aria-describedby={errors.channels ? 'np-channels-error' : undefined}
-className="np-radio-group"
-style={{ marginTop: 12 }}
+style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}
 >
-{CHANNELS.map((channel) => {
-const Icon = CHANNEL_ICONS[channel];
-return (
+<Checkbox
+checked={allChannelsSelected}
+indeterminate={someChannelsSelected}
+label="All channels"
+onChange={(checked) => setAllChannels(checked)}
+/>
+<div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, paddingLeft: 24 }}>
+{CHANNELS.map((channel) => (
 <Checkbox
 key={channel}
 checked={draft.channels.includes(channel)}
-onChange={(checked) => toggleChannel(channel, checked)}
-label={
-<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-<Icon size={14} aria-hidden="true" style={{ color: T.textSecondary }} />
-{CHANNEL_LABELS[channel]}
-</span>
-}
+label={CHANNEL_LABELS[channel]}
+onChange={(checked) => setChannel(channel, checked)}
 />
-);
-})}
+))}
+</div>
 </div>
 {errors.channels && (
 <p
@@ -824,6 +841,25 @@ style={{ borderTop: `1px solid ${T.border}` }}
  </span>
  </div>
  )}
+
+ <div
+ className="np-field"
+ style={{ marginTop: 16, maxWidth: 320 }}
+ >
+ <span id="np-bet-timing-label" className="np-label" style={{ color: T.textPrimary }}>
+ Bet timing
+ </span>
+ <div role="group" aria-labelledby="np-bet-timing-label" aria-describedby="np-bet-timing-hint">
+ <FilterSelect
+ label={BET_TIMING_LABELS[qualification.betTiming]}
+ options={BET_TIMING_OPTIONS}
+ onChange={(label) => setBetTiming(betTimingFromLabel(label))}
+ />
+ </div>
+ <p id="np-bet-timing-hint" className="np-hint" style={{ color: T.textSecondary }}>
+ Live bets are placed after the event has started.
+ </p>
+ </div>
  </section>
 
  <section

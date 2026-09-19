@@ -58,6 +58,35 @@ export function channelSummary(channels: Channel[]): string {
   return enabled.map((channel) => CHANNEL_LABELS[channel]).join(', ');
 }
 
+/* ------------------------------------------------------------------ */
+/* Bet timing: which bets can qualify (prematch, live or both).        */
+/* ------------------------------------------------------------------ */
+
+export const BET_TIMINGS = ['prematch', 'live', 'both'] as const;
+export type BetTiming = typeof BET_TIMINGS[number];
+
+export const BET_TIMING_LABELS: Record<BetTiming, string> = {
+prematch: 'Prematch',
+live: 'Live',
+both: 'Prematch and live',
+};
+
+export const DEFAULT_BET_TIMING: BetTiming = 'both';
+
+export const isBetTiming = (value: unknown): value is BetTiming =>
+typeof value === 'string' && (BET_TIMINGS as readonly string[]).includes(value);
+
+/** Migration: rows and drafts persisted before bet timing existed accept both. */
+export function normalizeBetTiming(value: unknown): BetTiming {
+return isBetTiming(value) ? value : DEFAULT_BET_TIMING;
+}
+
+/** Whether a bet placed at the given timing qualifies under the rule. */
+export function betTimingAllows(rule: BetTiming, isLive: boolean): boolean {
+if (rule === 'both') return true;
+return rule === (isLive ? 'live' : 'prematch');
+}
+
 export interface Promo {
 id: string;
 name: string;
@@ -68,25 +97,28 @@ budget: number | null;
 spend: number | null;
 status: PromoStatus;
 channels: Channel[];
+/** Qualifying bet timing; 'both' unless the promotion restricts it. */
+betTiming: BetTiming;
 }
 
 /* Two seeds are channel-specific so the list, simulator and preview have a
  * restricted example: PR-001 (app + mobile web) and PR-013 (USSD only).
- * Every other seed is enabled on all four channels. */
+ * Every other seed is enabled on all four channels. Money Back (PR-002) is
+ * the one prematch-only seed; every other seed accepts prematch and live. */
 export const PROMO_SEED: Promo[] = [
-{ id: 'PR-001', name: 'Aviator Welcome Offer', type: 'Freebet · Welcome', market: 'Zambia', schedule: '01 Sep – ongoing', budget: 50000, spend: 31200, status: 'active', channels: ['app', 'mobile'] },
-{ id: 'PR-002', name: 'Money Back (Sportsbook Cashback)', type: 'Cashback · Multibet', market: 'Zambia', schedule: '01 Sep – ongoing', budget: 120000, spend: 118400, status: 'active', channels: allChannels() },
-{ id: 'PR-003', name: 'Aviator Challenges', type: 'Leaderboard', market: 'Zambia', schedule: '15 Sep – 30 Sep', budget: 100000, spend: 0, status: 'scheduled', channels: allChannels() },
-{ id: 'PR-004', name: 'Weekend Acca Boost', type: 'Odds Boost', market: 'Zambia', schedule: 'Draft', budget: null, spend: null, status: 'draft', channels: allChannels() },
-{ id: 'PR-005', name: 'August Crash Missions', type: 'Missions', market: 'Zambia', schedule: '01 Aug – 31 Aug', budget: 80000, spend: 74100, status: 'expired', channels: allChannels() },
-{ id: 'PR-006', name: 'First Deposit Boost', type: 'Deposit Match', market: 'Zambia', schedule: '01 Sep – 31 Oct', budget: 60000, spend: 12400, status: 'active', channels: allChannels() },
-{ id: 'PR-007', name: 'Midweek Free Spins', type: 'Free Spins', market: 'Zambia', schedule: '10 Sep – ongoing', budget: 25000, spend: 23100, status: 'active', channels: allChannels() },
-{ id: 'PR-008', name: 'Rain Bonus · Lusaka', type: 'Freebet · Rain', market: 'Zambia', schedule: '20 Sep – 30 Sep', budget: 15000, spend: 0, status: 'scheduled', channels: allChannels() },
-{ id: 'PR-009', name: 'Referral Reload', type: 'Referral', market: 'Zambia', schedule: 'Draft', budget: null, spend: null, status: 'draft', channels: allChannels() },
-{ id: 'PR-010', name: 'Jackpot Happy Hour', type: 'Jackpot', market: 'Zambia', schedule: '01 Jul – 31 Jul', budget: 40000, spend: 38750, status: 'expired', channels: allChannels() },
-{ id: 'PR-011', name: 'Cashout Insurance', type: 'Cashback · Bet Insurance', market: 'Zambia', schedule: '01 Sep – ongoing', budget: 75000, spend: 40200, status: 'active', channels: allChannels() },
-{ id: 'PR-012', name: 'National Day Special', type: 'Freebet · Event', market: 'Zambia', schedule: '24 Oct – 25 Oct', budget: 30000, spend: 0, status: 'scheduled', channels: allChannels() },
-{ id: 'PR-013', name: 'USSD Onboarding Offer', type: 'Freebet · Welcome', market: 'Zambia', schedule: '15 Jun – 15 Aug', budget: 20000, spend: 19800, status: 'expired', channels: ['ussd'] },
+{ id: 'PR-001', name: 'Aviator Welcome Offer', type: 'Freebet · Welcome', market: 'Zambia', schedule: '01 Sep – ongoing', budget: 50000, spend: 31200, status: 'active', channels: ['app', 'mobile'], betTiming: 'both' },
+{ id: 'PR-002', name: 'Money Back (Sportsbook Cashback)', type: 'Cashback · Multibet', market: 'Zambia', schedule: '01 Sep – ongoing', budget: 120000, spend: 118400, status: 'active', channels: allChannels(), betTiming: 'prematch' },
+{ id: 'PR-003', name: 'Aviator Challenges', type: 'Leaderboard', market: 'Zambia', schedule: '15 Sep – 30 Sep', budget: 100000, spend: 0, status: 'scheduled', channels: allChannels(), betTiming: 'both' },
+{ id: 'PR-004', name: 'Weekend Acca Boost', type: 'Odds Boost', market: 'Zambia', schedule: 'Draft', budget: null, spend: null, status: 'draft', channels: allChannels(), betTiming: 'both' },
+{ id: 'PR-005', name: 'August Crash Missions', type: 'Missions', market: 'Zambia', schedule: '01 Aug – 31 Aug', budget: 80000, spend: 74100, status: 'expired', channels: allChannels(), betTiming: 'both' },
+{ id: 'PR-006', name: 'First Deposit Boost', type: 'Deposit Match', market: 'Zambia', schedule: '01 Sep – 31 Oct', budget: 60000, spend: 12400, status: 'active', channels: allChannels(), betTiming: 'both' },
+{ id: 'PR-007', name: 'Midweek Free Spins', type: 'Free Spins', market: 'Zambia', schedule: '10 Sep – ongoing', budget: 25000, spend: 23100, status: 'active', channels: allChannels(), betTiming: 'both' },
+{ id: 'PR-008', name: 'Rain Bonus · Lusaka', type: 'Freebet · Rain', market: 'Zambia', schedule: '20 Sep – 30 Sep', budget: 15000, spend: 0, status: 'scheduled', channels: allChannels(), betTiming: 'both' },
+{ id: 'PR-009', name: 'Referral Reload', type: 'Referral', market: 'Zambia', schedule: 'Draft', budget: null, spend: null, status: 'draft', channels: allChannels(), betTiming: 'both' },
+{ id: 'PR-010', name: 'Jackpot Happy Hour', type: 'Jackpot', market: 'Zambia', schedule: '01 Jul – 31 Jul', budget: 40000, spend: 38750, status: 'expired', channels: allChannels(), betTiming: 'both' },
+{ id: 'PR-011', name: 'Cashout Insurance', type: 'Cashback · Bet Insurance', market: 'Zambia', schedule: '01 Sep – ongoing', budget: 75000, spend: 40200, status: 'active', channels: allChannels(), betTiming: 'both' },
+{ id: 'PR-012', name: 'National Day Special', type: 'Freebet · Event', market: 'Zambia', schedule: '24 Oct – 25 Oct', budget: 30000, spend: 0, status: 'scheduled', channels: allChannels(), betTiming: 'both' },
+{ id: 'PR-013', name: 'USSD Onboarding Offer', type: 'Freebet · Welcome', market: 'Zambia', schedule: '15 Jun – 15 Aug', budget: 20000, spend: 19800, status: 'expired', channels: ['ussd'], betTiming: 'both' },
 ];
 
 const LIST_KEY = 'promo_list_v1';
@@ -95,6 +127,7 @@ const NOTICE_KEY = 'promo_notice_v1';
 /**
  * Reads `promo_list_v1`. Rows persisted before the channels field existed
  * are migrated on load: a missing, empty or invalid `channels` becomes all four.
+ * A missing or invalid `betTiming` is treated as 'both'.
  */
 export function loadPromotions(): Promo[] {
 if (typeof window === 'undefined') return PROMO_SEED;
@@ -103,9 +136,10 @@ const raw = window.localStorage.getItem(LIST_KEY);
 if (!raw) return PROMO_SEED;
 const parsed: unknown = JSON.parse(raw);
 if (!Array.isArray(parsed)) return PROMO_SEED;
-return (parsed as Array<Omit<Promo, 'channels'> & { channels?: unknown }>).map((promo) => ({
+return (parsed as Array<Omit<Promo, 'channels' | 'betTiming'> & { channels?: unknown; betTiming?: unknown }>).map((promo) => ({
 ...promo,
 channels: normalizeChannels(promo.channels),
+betTiming: normalizeBetTiming(promo.betTiming),
 }));
 } catch {
 return PROMO_SEED;

@@ -4,14 +4,14 @@ import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { ChevronDown, ChevronUp, FlaskConical, History, Plus, Trash2 } from 'lucide-react';
 import T from '@/theme/tokens';
-import { Badge, DateTimeField, DestructiveGhostButton, PrimaryButton, parseIsoDateTime, toIsoDateTime } from '@/components/ui';
+import { Badge, Checkbox, DateTimeField, DestructiveGhostButton, PrimaryButton, parseIsoDateTime, toIsoDateTime } from '@/components/ui';
 import { EVENT_CATALOG, getCatalogEvent } from '@/data/event-catalog';
 import type { EventId } from '@/data/event-catalog';
 import { markTutorialProgress } from '@/data/manual';
 import { CHANNELS, CHANNEL_LABELS, loadPromotions, PROMO_SEED } from '@/lib/promotions';
 import type { Channel, Promo } from '@/lib/promotions';
 import { loadSettings } from '@/lib/settings';
-import { clearRuns, defaultEvent, fmtK, GAME_CODES, getPersona, loadRuns, newEventId, PERSONAS, PICKER_FIELDS, PRESETS, recordRun, simulate } from '@/lib/simulator';
+import { clearRuns, defaultEvent, fmtK, GAME_CODES, getPersona, isBetEvent, loadRuns, newEventId, PERSONAS, PICKER_FIELDS, PRESETS, recordRun, simulate } from '@/lib/simulator';
 import type { CheckStatus, Scenario, ScenarioEvent, SimulationResult, SimulationRun, StageId } from '@/lib/simulator';
 import './simulator.css';
 
@@ -67,7 +67,7 @@ return { ...current, channel, promoId };
 });
 setResult(null);
 };
-  const restore = (item: SimulationRun) => { setScenario({ ...item.scenario, channel: item.scenario.channel ?? 'app', events: item.scenario.events.map((event) => ({ ...event, id: newEventId(), params: { ...event.params } })) }); setResult(null); setTab('new'); };
+  const restore = (item: SimulationRun) => { setScenario({ ...item.scenario, channel: item.scenario.channel ?? 'app', events: item.scenario.events.map((event) => ({ ...event, id: newEventId(), isLive: event.isLive === true, params: { ...event.params } })) }); setResult(null); setTab('new'); };
   const run = () => {
     const output = simulate(promo, getPersona(scenario.personaId), scenario.events, scenario.fixedAt, loadSettings(), scenario.channel);
     setResult(output);
@@ -136,6 +136,7 @@ setResult(null);
                     <div className="sim-event-fields">
                       <label className="sim-field">Minutes from fixed time<input style={inputStyle} type="number" value={event.offsetMinutes} onChange={(e) => { updateEvent(event.id, { offsetMinutes: Number(e.target.value) || 0 }); setResult(null); }} /></label>
                       <label className="sim-field">Provider<select style={inputStyle} value={event.gameCode} onChange={(e) => { updateEvent(event.id, { gameCode: e.target.value }); setResult(null); }}>{GAME_CODES.map((code) => <option key={code}>{code}</option>)}</select></label>
+                {isBetEvent(event.eventId) && <div className="sim-field sim-field--checkbox"><Checkbox checked={event.isLive} label="Live bet" onChange={(checked) => { updateEvent(event.id, { isLive: checked }); setResult(null); }} /></div>}
                       {PICKER_FIELDS[event.eventId].map((name) => {
                         const param = eventDef?.params.find((item) => item.name === name);
                         const options = param?.type === 'boolean' ? ['Yes', 'No'] : param?.options;

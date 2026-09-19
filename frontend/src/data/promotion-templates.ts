@@ -74,6 +74,7 @@ export const PROMOTION_TEMPLATES: PromotionTemplate[] = [
  counting: [
  { id: 'tpl-wo-qualifying-bets-per-day', param: 'Qualifying bets per day', type: 'integer', operator: '>=', value: '10' },
  ],
+ betTiming: 'both',
  eligibility: { audience: 'new_customers', windowDays: 5, nonConsecutive: true },
  },
  rewardType: 'freebet',
@@ -107,6 +108,8 @@ export const PROMOTION_TEMPLATES: PromotionTemplate[] = [
  },
  ],
  counting: [],
+ /* Mirrors seed PR-002: Money Back is a prematch-only cashback. */
+ betTiming: 'prematch',
  eligibility: { audience: 'all' },
  },
  rewardType: 'cash', payoutMode: 'tiers', tiers: SEED_TIERS.map((t) => ({ ...t })),

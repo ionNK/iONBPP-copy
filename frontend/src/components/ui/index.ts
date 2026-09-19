@@ -22,8 +22,6 @@ export { Toggle } from './Toggle';
 export type { ToggleProps } from './Toggle';
 export { Checkbox } from './Checkbox';
 export type { CheckboxProps } from './Checkbox';
-export { ChannelChips } from './ChannelChips';
-export type { ChannelChipsProps } from './ChannelChips';
 export { ZambiaFlag } from './ZambiaFlag';
 export type { ZambiaFlagProps } from './ZambiaFlag';
 export { DateRangePicker } from './DateRangePicker';
