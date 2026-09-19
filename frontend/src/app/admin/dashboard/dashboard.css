@@ -14,14 +14,14 @@
   gap: 20px;
 }
 
-/* KPI row — 2-up until the 1024 breakpoint, then 4-up. */
+/* KPI row — two cards (Total spend, Active promotions), 2-up at every width. */
 .dash-kpis {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
-/* "Needs attention" strip — 2 × 2 until the 1024 breakpoint, then 4 × 1fr. */
+/* "Needs attention" strip — 2-up until the 1024 breakpoint, then 3 × 1fr. */
 .dash-attention {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -33,9 +33,8 @@
     grid-template-columns: 3fr 2fr;
   }
 
-  .dash-kpis,
   .dash-attention {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

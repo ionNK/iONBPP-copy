@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CircleCheck, Clock, Pencil, Plus, Search, Trash2, TriangleAlert, X } from 'lucide-react';
 import './promotions.css';
 import T from '@/theme/tokens';
-import { Badge, ChannelChips, DestructiveGhostButton, FilterSelect, GhostButton, PrimaryButton, StatChip } from '@/components/ui';
+import { Badge, DestructiveGhostButton, FilterSelect, GhostButton, PrimaryButton, StatChip } from '@/components/ui';
 import { CHANNELS, CHANNEL_LABELS, PROMO_SEED, channelSummary, consumeListNotice, loadPromotions, savePromotions } from '@/lib/promotions';
 import type { Channel, Promo, PromoStatus } from '@/lib/promotions';
 
@@ -20,9 +20,12 @@ pending: { label: 'Pending approval', color: T.navy, ghost: true },
 
 const STATUSES = ['All statuses', 'Active', 'Scheduled', 'Expired', 'Draft', 'Pending approval'];
 
-/* Type filter reset option: the type list itself is derived from the data. */
-const ALL_TYPES = 'All types';
+/* Channel filter: inline segmented control, "All channels" is the reset. */
 const ALL_CHANNELS = 'All channels';
+const CHANNEL_OPTIONS: { value: Channel | null; label: string }[] = [
+  { value: null, label: ALL_CHANNELS },
+  ...CHANNELS.map((channel) => ({ value: channel as Channel, label: CHANNEL_LABELS[channel] })),
+];
 
 /* Table pagination, house style: page size 10. */
 const PAGE_SIZE = 10;
@@ -59,7 +62,6 @@ export default function PromotionsList() {
 const router = useRouter();
 const [promos, setPromos] = useState<Promo[]>(PROMO_SEED);
 const [statusSel, setStatusSel] = useState('All statuses');
-const [typeFilter, setTypeFilter] = useState<string | null>(null);
 const [channelFilter, setChannelFilter] = useState<Channel | null>(null);
 const [chip, setChip] = useState<PromoStatus | null>(null);
 const [query, setQuery] = useState('');
@@ -83,29 +85,22 @@ promos.forEach((p) => c[p.status]++);
 return c;
 }, [promos]);
 
-/* Unique promotion types present in the data, sorted; drives the type select. */
-const typeOptions = useMemo(
-() => [ALL_TYPES, ...Array.from(new Set(promos.map((p) => p.type))).sort((a, b) => a.localeCompare(b))],
-[promos],
-);
-
 const filtered = useMemo(
 () =>
 promos.filter((p) => {
 if (chip && p.status !== chip) return false;
 if (statusSel !== 'All statuses' && STATUS[p.status].label !== statusSel) return false;
-if (typeFilter && p.type !== typeFilter) return false;
 if (channelFilter && !p.channels.includes(channelFilter)) return false;
 if (query && !`${p.id} ${p.name} ${p.type}`.toLowerCase().includes(query.toLowerCase())) return false;
 return true;
 }),
-[channelFilter, chip, statusSel, typeFilter, query, promos],
+[channelFilter, chip, statusSel, query, promos],
 );
 
 /* Re-filtering resets to the first page; deletions clamp via currentPage. */
 useEffect(() => {
 setPage(1);
-}, [channelFilter, chip, statusSel, typeFilter, query]);
+}, [channelFilter, chip, statusSel, query]);
 
 const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 const currentPage = Math.min(page, pageCount);
@@ -173,7 +168,7 @@ onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
 <StatChip label="Pending approval" value={counts.pending} active={chip === 'pending'} onClick={() => setChip(chip === 'pending' ? null : 'pending')} />
 </div>
 
-{/* Filters: search + status + type selects */}
+{/* Filters: search + status select + inline channel segmented control */}
 <div className="promo-filters" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
 <div className="promo-search" style={{ border: `1px solid ${T.ghostBorder}`, borderRadius: T.radiusSm }}>
 <Search size={16} style={{ color: T.textSecondary }} />
@@ -185,19 +180,26 @@ style={{ color: T.textPrimary }}
 />
 </div>
 <FilterSelect label={statusSel} options={STATUSES} onChange={setStatusSel} />
-<FilterSelect
-label={typeFilter ?? ALL_TYPES}
-options={typeOptions}
-onChange={(value) => setTypeFilter(value === ALL_TYPES ? null : value)}
-/>
-<FilterSelect
-label={channelFilter ? CHANNEL_LABELS[channelFilter] : ALL_CHANNELS}
-options={[ALL_CHANNELS, ...CHANNELS.map((channel) => CHANNEL_LABELS[channel])]}
-onChange={(value) => {
-const channel = CHANNELS.find((item) => CHANNEL_LABELS[item] === value);
-setChannelFilter(channel ?? null);
-}}
-/>
+{/* Channel filter: same segmented pattern as the dashboard period switch. */}
+<div className="promo-segmented" role="group" aria-label="Channel" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusPill }}>
+{CHANNEL_OPTIONS.map((opt) => {
+const active = opt.value === channelFilter;
+return (
+<button
+key={opt.label}
+type="button"
+className="promo-segmented__button"
+aria-pressed={active}
+onClick={() => setChannelFilter(opt.value)}
+style={{ background: active ? T.navy : 'transparent', color: active ? T.white : T.textSecondary, borderRadius: T.radiusPill }}
+onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = T.offWhite; }}
+onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+>
+{opt.label}
+</button>
+);
+})}
+</div>
 </div>
 
 
@@ -232,7 +234,7 @@ onMouseLeave={(e) => (e.currentTarget.style.background = T.white)}
 <div className="promo-id" style={{ color: T.textSecondary }}>{p.id}</div>
 </td>
 <td className="promo-cell" style={{ color: T.textPrimary }}>{p.type}</td>
-<td><ChannelChips channels={p.channels} compact /></td>
+<td className="promo-cell" style={{ color: T.textSecondary }}>{channelSummary(p.channels)}</td>
 <td className="promo-schedule" style={{ color: T.textSecondary }}>
 <span>
 <Clock size={12} />

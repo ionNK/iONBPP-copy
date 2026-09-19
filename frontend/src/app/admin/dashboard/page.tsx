@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, CalendarClock, CalendarPlus, ChevronRight, CircleAlert, CircleCheck, ClipboardCheck, Clock3, Info, TriangleAlert, Zap } from 'lucide-react';
+import { CalendarClock, CalendarPlus, ChevronRight, CircleAlert, CircleCheck, ClipboardCheck, Clock3, Info, TriangleAlert, Zap } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import T, { dashboardPalette } from '@/theme/tokens';
 import { Badge, GhostButton, ZambiaFlag } from '@/components/ui';
 import { PROMO_SEED, loadPromotions } from '@/lib/promotions';
 import type { Promo, PromoStatus } from '@/lib/promotions';
-import { ALERT_RATIO, activeBudgetAlerts, applyFilter, deriveDashboardSeries, dimensionValue, endingWithin, periodLabel, spendByDimension, startingWithin } from '@/lib/dashboard';
+import { ALERT_RATIO, applyFilter, deriveDashboardSeries, dimensionValue, endingWithin, periodLabel, spendByDimension, startingWithin } from '@/lib/dashboard';
 import type { DashboardFilter, SpendDimension } from '@/lib/dashboard';
 /* Shared page-skeleton structural classes (top bar, container, chips) */
 import '../promotions/promotions.css';
@@ -36,11 +36,11 @@ const fmtAxisK = (n: number) => (n >= 1000 ? `K ${Math.round(n / 1000)}k` : `K $
 const fmtPct = (n: number) => `${Math.round(n)}%`;
 const fmtCount = (n: number) => `${Math.round(n)}`;
 
-/* Donut breakdown dimensions: the segmented control in the "Spend by …" card. */
+/* Donut breakdown dimensions: the segmented control in the "Spend by …" card.
+ * Market is intentionally not offered (single-market workspace). */
 const DIMENSIONS: { value: SpendDimension; label: string }[] = [
   { value: 'type', label: 'Type' },
   { value: 'provider', label: 'Provider' },
-  { value: 'market', label: 'Market' },
   { value: 'channel', label: 'Channel' },
 ];
 
@@ -272,7 +272,6 @@ export default function DashboardPage() {
   const needs = useMemo(
     () => ({
       pending: counts.pending,
-      alerts: activeBudgetAlerts(filtered).length,
       ending: endingWithin(filtered).length,
       starting: startingWithin(filtered).length,
     }),
@@ -282,8 +281,6 @@ export default function DashboardPage() {
   const series = useMemo(() => deriveDashboardSeries(filtered, period), [filtered, period]);
   const totalBudget = useMemo(() => filtered.reduce((s, p) => s + (p.budget ?? 0), 0), [filtered]);
   const totalSpend = useMemo(() => filtered.reduce((s, p) => s + (p.spend ?? 0), 0), [filtered]);
-  const utilisation = totalBudget > 0 ? (totalSpend / totalBudget) * 100 : 0;
-  const last = series[series.length - 1];
 
   /* Hero: cumulative spend; daily deltas feed the spend sparkline. */
   const hero = useMemo(
@@ -317,7 +314,7 @@ export default function DashboardPage() {
   const activity = useMemo(() => deriveActivity(filtered), [filtered]);
 
   /* KPI deltas: second half of the window vs first half. */
-  const halfDelta = (key: 'spend' | 'active' | 'alerts') => {
+  const halfDelta = (key: 'spend' | 'active') => {
     if (series.length < 2) return 0;
     const half = Math.floor(series.length / 2);
     const recent = series.slice(-half).reduce((s, p) => s + p[key], 0);
@@ -381,10 +378,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="promo-container">
-        {/* Needs attention: four action cards; each links through to the relevant list. */}
+        {/* Needs attention: three action cards; each links through to the relevant list. */}
         <nav className="dash-attention" aria-label="Needs attention">
           <AttentionCard label="Pending approvals" count={needs.pending} icon={ClipboardCheck} accent={T.blue} onOpen={goToApprovals} />
-          <AttentionCard label="Budget alerts" count={needs.alerts} icon={AlertTriangle} accent={T.destructiveActive} onOpen={goToList} />
           <AttentionCard label="Ending in 7 days" count={needs.ending} icon={CalendarClock} accent={T.darkGrey} onOpen={goToList} />
           <AttentionCard label="Starting in 7 days" count={needs.starting} icon={CalendarPlus} accent={T.progressActive} onOpen={goToList} />
         </nav>
@@ -402,16 +398,6 @@ export default function DashboardPage() {
             reduced={reduced}
           />
           <KpiCard
-            label="Budget utilisation"
-            value={utilisation}
-            format={fmtPct}
-            deltaPct={series.length > 1 ? Math.round(last.utilisation - series[0].utilisation) : 0}
-            accent={T.navy}
-            series={series.map((p) => ({ day: p.day, v: p.utilisation }))}
-            chartKey={chartKey}
-            reduced={reduced}
-          />
-          <KpiCard
             label="Active promotions"
             value={counts.active}
             format={fmtCount}
@@ -420,18 +406,6 @@ export default function DashboardPage() {
             series={series.map((p) => ({ day: p.day, v: p.active }))}
             chartKey={chartKey}
             reduced={reduced}
-          />
-          <KpiCard
-            label="Budget alerts"
-            value={attention.length}
-            format={fmtCount}
-            deltaPct={halfDelta('alerts')}
-            invertDelta
-            accent={T.destructiveActive}
-            series={series.map((p) => ({ day: p.day, v: p.alerts }))}
-            chartKey={chartKey}
-            reduced={reduced}
-            onClick={goToList}
           />
         </div>
 

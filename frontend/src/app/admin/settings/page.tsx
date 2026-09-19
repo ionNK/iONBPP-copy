@@ -4,12 +4,12 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { ArrowRight, BookOpen, Check, ChevronRight, Circle, CircleCheck, CirclePlay, ExternalLink, FlaskConical, LifeBuoy, Mail, Minus, Pencil, Play, Plus, Printer, RotateCcw, Trash2, UserX, X } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, ChevronRight, Circle, CircleCheck, CirclePlay, ExternalLink, FlaskConical, LifeBuoy, Mail, Minus, Pencil, Play, Plus, Printer, RotateCcw, UserX, X } from 'lucide-react';
 import './settings.css';
 import T from '@/theme/tokens';
 import { Badge, DestructiveGhostButton, FilterSelect, GhostButton, PrimaryButton, Toggle } from '@/components/ui';
 import { DEFAULT_SETTINGS, createDefaultSettings, loadSettings, saveSettings } from '@/lib/settings';
-import type { ApproverRole, DigestFrequency, ProviderCode, Settings } from '@/lib/settings';
+import type { ApproverRole, DigestFrequency, Settings } from '@/lib/settings';
 import { loadPromotions } from '@/lib/promotions';
 import { GLOSSARY, MANUAL_SECTIONS, TUTORIAL_VIDEOS, loadTutorialProgress, markTutorialProgress } from '@/data/manual';
 import type { ManualBlock, TutorialProgress, TutorialVideo } from '@/data/manual';
@@ -21,13 +21,12 @@ import type { AdminUser, UserRole, UserStatus } from '@/data/users';
 import pkg from '../../../../package.json';
 
 /* ---- Tabs (state lives in the URL: /admin/settings?tab=…) ---- */
-type TabId = 'general' | 'budget' | 'approvals' | 'metadata' | 'users' | 'tutorials' | 'about';
+type TabId = 'general' | 'budget' | 'approvals' | 'users' | 'tutorials' | 'about';
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'general', label: 'General' },
   { id: 'budget', label: 'Budget & alerts' },
   { id: 'approvals', label: 'Approvals' },
-  { id: 'metadata', label: 'Award metadata' },
   { id: 'users', label: 'Users & roles' },
   { id: 'tutorials', label: 'Tutorials' },
   { id: 'about', label: 'About' },
@@ -35,14 +34,15 @@ const TABS: { id: TabId; label: string }[] = [
 
 const isTabId = (value: string | null): value is TabId => TABS.some((tab) => tab.id === value);
 
-/* ---- Persisted cards: which Settings keys each card owns (dirty / save / reset scope) ---- */
-type CardId = 'general' | 'budget' | 'approvals' | 'metadata';
+/* ---- Persisted cards: which Settings keys each card owns (dirty / save / reset scope).
+ * Market, timezone and provider codes stay in the Settings model (the simulator
+ * reads them) but are fixed for this single-market workspace and not editable here. ---- */
+type CardId = 'general' | 'budget' | 'approvals';
 
 const CARD_FIELDS: Record<CardId, (keyof Settings)[]> = {
-  general: ['market', 'timezone', 'dateFormat'],
+  general: ['dateFormat'],
   budget: ['alertThreshold', 'alertRecipients', 'digestFrequency', 'earlyWarning'],
   approvals: ['automatedApprovalThreshold', 'thresholdAmount', 'secondApprover', 'approverRole'],
-  metadata: ['providers'],
 };
 
 /* Copies `keys` from `source` onto `base` without indexed writes (keeps TS strict, no casts). */
@@ -53,11 +53,10 @@ function mergeFields(base: Settings, source: Settings, keys: (keyof Settings)[])
 }
 
 /* Typed option lists: FilterSelect returns a string; pickOption narrows it back to the union. */
-const TIMEZONES: Settings['timezone'][] = ['Africa/Lusaka', 'UTC'];
 const DATE_FORMATS: Settings['dateFormat'][] = ['DD MMM YYYY', 'YYYY-MM-DD'];
 const DIGEST_FREQUENCIES: DigestFrequency[] = ['Immediate', 'Daily', 'Weekly'];
 const APPROVER_ROLES: ApproverRole[] = ['Country Manager', 'Finance', 'Either'];
-const PROVIDER_VERTICALS = ['Crash', 'Casino', 'Sports', 'Virtuals'];
+/* User market assignment (Users & roles). */
 const MARKETS = ['Zambia'];
 
 function pickOption<Opt extends string>(options: readonly Opt[], value: string, fallback: Opt): Opt {
@@ -70,7 +69,6 @@ const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(mi
 const ALERT_MIN = 50;
 const ALERT_MAX = 100;
 
-const PROVIDER_CODE = /^[A-Z0-9]{2,4}$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /* "thandiwe.phiri@…" → "Thandiwe Phiri" for newly invited rows. */
@@ -104,12 +102,6 @@ interface UserForm {
   email: string;
   role: UserRole;
   market: string;
-}
-
-interface ProviderForm {
-  code: string;
-  name: string;
-  vertical: string;
 }
 
 interface ConfirmRequest {
@@ -249,9 +241,6 @@ function SettingsContent() {
   const noticeTimer = useRef<number | null>(null);
   const [confirm, setConfirm] = useState<ConfirmRequest | null>(null);
 
-  const [providerForm, setProviderForm] = useState<ProviderForm | null>(null);
-  const [providerError, setProviderError] = useState<string | null>(null);
-
   const [users, setUsers] = useState<AdminUser[]>(USER_SEED);
   const [userForm, setUserForm] = useState<UserForm | null>(null);
   const [userError, setUserError] = useState<string | null>(null);
@@ -296,10 +285,6 @@ function SettingsContent() {
     saveSettings(next);
     setSaved(next);
     setDraft((cur) => mergeFields(cur, next, CARD_FIELDS[card]));
-    if (card === 'metadata') {
-      setProviderForm(null);
-      setProviderError(null);
-    }
     showNotice('Settings saved');
   };
 
@@ -314,38 +299,8 @@ function SettingsContent() {
         saveSettings(next);
         setSaved(next);
         setDraft((cur) => mergeFields(cur, next, CARD_FIELDS[card]));
-        if (card === 'metadata') {
-          setProviderForm(null);
-          setProviderError(null);
-        }
         setConfirm(null);
         showNotice('Settings saved');
-      },
-    });
-
-  /* ---- Provider codes (BR-4), persisted with the Award metadata card ---- */
-  const addProvider = () => {
-    if (!providerForm) return;
-    const code = providerForm.code.trim().toUpperCase();
-    const name = providerForm.name.trim();
-    if (!PROVIDER_CODE.test(code)) return setProviderError('Code must be 2–4 uppercase letters or digits.');
-    if (draft.providers.some((p) => p.code === code)) return setProviderError(`Code ${code} is already in use.`);
-    if (!name) return setProviderError('Provider name is required.');
-    const provider: ProviderCode = { id: `provider-${code.toLowerCase()}-${Date.now()}`, code, name, vertical: providerForm.vertical };
-    update({ providers: [...draft.providers, provider] });
-    setProviderForm(null);
-    setProviderError(null);
-  };
-
-  const requestDeleteProvider = (provider: ProviderCode) =>
-    setConfirm({
-      title: `Delete provider ${provider.code}?`,
-      body: `${provider.name} will be removed from the provider codes list once you save the Award metadata card.`,
-      confirmLabel: 'Delete provider',
-      destructive: true,
-      onConfirm: () => {
-        update({ providers: draft.providers.filter((p) => p.id !== provider.id) });
-        setConfirm(null);
       },
     });
 
@@ -477,21 +432,9 @@ function SettingsContent() {
           {tab === 'general' && (
             <Card
               title="General"
-              description="Market, currency and formatting defaults for this workspace."
+              description="Formatting defaults for this workspace."
               footer={<CardActions dirty={isDirty('general')} onReset={() => requestReset('general', 'General')} onSave={() => save('general')} />}
             >
-              <FieldRow label="Default market" helper="The market new promotions are created in." stack>
-                <FilterSelect label={draft.market} options={MARKETS} onChange={() => update({ market: 'Zambia' })} />
-                <p className="settings-control-hint" style={{ color: T.textSecondary }}>More markets soon</p>
-              </FieldRow>
-              <FieldRow label="Currency display" helper="Fixed by the market: Zambian Kwacha.">
-                <div className="settings-readonly" style={{ border: `1px solid ${T.border}`, borderRadius: T.radiusSm, background: T.offWhite, color: T.textSecondary }}>
-                  ZMW · K 1,250.00
-                </div>
-              </FieldRow>
-              <FieldRow label="Timezone" helper="Used for schedules and report timestamps.">
-                <FilterSelect label={draft.timezone} options={TIMEZONES} onChange={(v) => update({ timezone: pickOption(TIMEZONES, v, 'Africa/Lusaka') })} />
-              </FieldRow>
               <FieldRow label="Date format" helper="Applies to tables, exports and the activity log.">
                 <FilterSelect label={draft.dateFormat} options={DATE_FORMATS} onChange={(v) => update({ dateFormat: pickOption(DATE_FORMATS, v, 'DD MMM YYYY') })} />
               </FieldRow>
@@ -571,106 +514,6 @@ function SettingsContent() {
               <FieldRow label="Approver roles" helper="Who can act as checker for pending items.">
                 <FilterSelect label={draft.approverRole} options={APPROVER_ROLES} onChange={(v) => update({ approverRole: pickOption(APPROVER_ROLES, v, 'Either') })} />
               </FieldRow>
-            </Card>
-          )}
-
-          {tab === 'metadata' && (
-            <Card
-              title="Award metadata"
-              description="BR-4: every award posts to the ledger with the metadata below. These rules are locked."
-              footer={<CardActions dirty={isDirty('metadata')} onReset={() => requestReset('metadata', 'Award metadata')} onSave={() => save('metadata')} />}
-            >
-              <FieldRow label="Product vertical required" helper="Required by the ledger for reconciliation">
-                <Toggle checked disabled ariaLabel="Product vertical required (locked)" />
-              </FieldRow>
-              <FieldRow label="Game provider code required" helper="Required by the ledger for reconciliation">
-                <Toggle checked disabled ariaLabel="Game provider code required (locked)" />
-              </FieldRow>
-              <FieldRow label="Promotion reference required" helper="Required by the ledger for reconciliation">
-                <Toggle checked disabled ariaLabel="Promotion reference required (locked)" />
-              </FieldRow>
-
-              <div className="settings-card__header" style={{ marginTop: 20 }}>
-                <div>
-                  <h2 className="settings-card__heading" style={{ color: T.textPrimary }}>Provider codes</h2>
-                  <p className="settings-card__description" style={{ color: T.textSecondary }}>Codes stamped on each award. Changes apply once you save this card.</p>
-                </div>
-                <div className="settings-card__action">
-                  <GhostButton
-                    small
-                    onClick={() => {
-                      setProviderError(null);
-                      setProviderForm((cur) => (cur ? null : { code: '', name: '', vertical: PROVIDER_VERTICALS[0] }));
-                    }}
-                  >
-                    <Plus size={16} /> Add provider
-                  </GhostButton>
-                </div>
-              </div>
-
-              <div className="settings-provider-table-wrap" style={tableFrameStyle}>
-                <table className="settings-table">
-                  <thead>
-                    <tr>
-                      {['Code', 'Provider name', 'Vertical'].map((h) => (
-                        <th key={h} style={thStyle}>{h}</th>
-                      ))}
-                      <th className="settings-table__actions" style={thStyle}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {draft.providers.map((provider, i) => (
-                      <tr key={provider.id} style={i < draft.providers.length - 1 ? { borderBottom: `1px solid ${T.border}` } : undefined}>
-                        <td style={{ color: T.textPrimary, fontWeight: 600 }}>{provider.code}</td>
-                        <td style={{ color: T.textPrimary }}>{provider.name}</td>
-                        <td style={{ color: T.textSecondary }}>{provider.vertical}</td>
-                        <td className="settings-table__actions">
-                          <DestructiveGhostButton small onClick={() => requestDeleteProvider(provider)}>
-                            <Trash2 size={14} /> Delete
-                          </DestructiveGhostButton>
-                        </td>
-                      </tr>
-                    ))}
-                    {draft.providers.length === 0 && (
-                      <tr>
-                        <td colSpan={4} className="settings-empty" style={{ color: T.textSecondary }}>No provider codes. Add one to continue stamping awards.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {providerForm && (
-                <>
-                  <div className="settings-inline-form" role="group" aria-label="New provider">
-                    <input
-                      type="text"
-                      className="settings-input"
-                      style={{ ...inputStyle, textTransform: 'uppercase' }}
-                      maxLength={4}
-                      value={providerForm.code}
-                      placeholder="CODE"
-                      aria-label="Provider code (max 4 characters)"
-                      onChange={(e) => setProviderForm({ ...providerForm, code: e.target.value.toUpperCase().slice(0, 4) })}
-                    />
-                    <input
-                      type="text"
-                      className="settings-input"
-                      style={inputStyle}
-                      value={providerForm.name}
-                      placeholder="Provider name"
-                      aria-label="Provider name"
-                      onChange={(e) => setProviderForm({ ...providerForm, name: e.target.value })}
-                    />
-                    <FilterSelect label={providerForm.vertical} options={PROVIDER_VERTICALS} onChange={(v) => setProviderForm({ ...providerForm, vertical: v })} />
-                    <div className="settings-actions">
-                      <GhostButton small onClick={() => { setProviderForm(null); setProviderError(null); }}>Cancel</GhostButton>
-                      <PrimaryButton onClick={addProvider}>Add</PrimaryButton>
-                    </div>
-                  </div>
-                  {providerError && <p className="settings-control-hint" role="alert" style={{ color: T.destructive }}>{providerError}</p>}
-                </>
-              )}
             </Card>
           )}
 
