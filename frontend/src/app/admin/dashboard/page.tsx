@@ -2,14 +2,18 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CalendarClock, CalendarPlus, ChevronRight, CircleAlert, CircleCheck, ClipboardCheck, Clock3, Info, TriangleAlert, Zap } from 'lucide-react';
+import { AlertTriangle, CalendarClock, CalendarPlus, ChevronRight, CircleAlert, CircleCheck, ClipboardCheck, Clock3, Info, TriangleAlert, Zap } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import T, { dashboardPalette } from '@/theme/tokens';
 import { Badge, GhostButton, ZambiaFlag } from '@/components/ui';
 import { PROMO_SEED, loadPromotions } from '@/lib/promotions';
 import type { Promo, PromoStatus } from '@/lib/promotions';
-import { ALERT_RATIO, applyFilter, deriveDashboardSeries, dimensionValue, endingWithin, periodLabel, spendByDimension, startingWithin } from '@/lib/dashboard';
+import { ALERT_RATIO, activeBudgetAlerts, applyFilter, deriveDashboardSeries, dimensionValue, endingWithin, periodLabel, spendByDimension, startingWithin } from '@/lib/dashboard';
 import type { DashboardFilter, SpendDimension } from '@/lib/dashboard';
+/* BR-6 budget surfaces (KPIs, pace line, budget bars, attention list, alert feed items)
+ * are gated on features.budgets. Code is retained; flip the flag to restore. */
+import { features } from '@/config/features';
+import { PromotionHealthCard } from '@/components/dashboard/PromotionHealthCard';
 /* Shared page-skeleton structural classes (top bar, container, chips) */
 import '../promotions/promotions.css';
 import './dashboard.css';
@@ -69,7 +73,8 @@ function deriveActivity(promos: Promo[]): ActivityItem[] {
   promos.forEach((p, i) => {
     const seed = (i + 1) * 37;
     const ratio = p.budget && p.spend ? p.spend / p.budget : 0;
-    if (p.status === 'active' && ratio >= ALERT_RATIO) {
+    /* Budget alert feed items are a BR-6 surface: only emitted when budgets are on. */
+    if (features.budgets && p.status === 'active' && ratio >= ALERT_RATIO) {
       items.push({ id: `${p.id}-alert`, kind: 'alert', title: `${p.name} reached ${Math.round(ratio * 100)}% of budget`, detail: `${p.id} · ${p.type}`, minutesAgo: 20 + (seed % 90) });
     }
     if (p.status === 'active') items.push({ id: `${p.id}-live`, kind: 'activation', title: `${p.name} went live`, detail: `${p.id} · ${p.type}`, minutesAgo: 180 + (seed % 600) });
@@ -272,6 +277,7 @@ export default function DashboardPage() {
   const needs = useMemo(
     () => ({
       pending: counts.pending,
+      alerts: activeBudgetAlerts(filtered).length,
       ending: endingWithin(filtered).length,
       starting: startingWithin(filtered).length,
     }),
@@ -281,6 +287,9 @@ export default function DashboardPage() {
   const series = useMemo(() => deriveDashboardSeries(filtered, period), [filtered, period]);
   const totalBudget = useMemo(() => filtered.reduce((s, p) => s + (p.budget ?? 0), 0), [filtered]);
   const totalSpend = useMemo(() => filtered.reduce((s, p) => s + (p.spend ?? 0), 0), [filtered]);
+  /* Budget KPIs (BR-6): rendered only when features.budgets is on. */
+  const utilisation = totalBudget > 0 ? (totalSpend / totalBudget) * 100 : 0;
+  const last = series[series.length - 1];
 
   /* Hero: cumulative spend; daily deltas feed the spend sparkline. */
   const hero = useMemo(
@@ -294,14 +303,22 @@ export default function DashboardPage() {
   const breakdownTotal = breakdown.reduce((s, c) => s + c.amount, 0);
   const hovered = hoverName ? breakdown.find((c) => c.name === hoverName) : null;
 
-  /* Bars: top 6 promos by spend. */
+  /* Bars: top 6 promos by spend. With budgets off the chart is spend-only, so a
+   * missing budget must not exclude a promotion; ratio is 0 (no alert outline). */
   const bars = useMemo(
     () =>
       filtered
-        .filter((p) => p.budget != null && p.spend != null && p.spend > 0)
+        .filter((p) => (features.budgets ? p.budget != null : true) && p.spend != null && p.spend > 0)
         .sort((a, b) => b.spend! - a.spend!)
         .slice(0, 6)
-        .map((p) => ({ id: p.id, name: p.name, category: dimensionValue(p, dimension), budget: p.budget!, spend: p.spend!, ratio: p.spend! / p.budget! })),
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          category: dimensionValue(p, dimension),
+          budget: p.budget ?? 0,
+          spend: p.spend!,
+          ratio: features.budgets && p.budget ? p.spend! / p.budget : 0,
+        })),
     [filtered, dimension],
   );
 
@@ -314,7 +331,7 @@ export default function DashboardPage() {
   const activity = useMemo(() => deriveActivity(filtered), [filtered]);
 
   /* KPI deltas: second half of the window vs first half. */
-  const halfDelta = (key: 'spend' | 'active') => {
+  const halfDelta = (key: 'spend' | 'active' | 'alerts') => {
     if (series.length < 2) return 0;
     const half = Math.floor(series.length / 2);
     const recent = series.slice(-half).reduce((s, p) => s + p[key], 0);
@@ -336,7 +353,8 @@ export default function DashboardPage() {
   const isFiltered = (value: string) => filter?.dimension === dimension && filter.value === value;
   const dim = (name: string) => (hoverName && hoverName !== name ? 0.4 : 1);
   const chartKey = `${period}-${dimension}-${filter?.value ?? 'all'}`;
-  const aheadOfPace = totalSpend > pace;
+  /* Pace comparison is budget-derived, so it is only meaningful when budgets are on. */
+  const aheadOfPace = features.budgets && totalSpend > pace;
 
   return (
     <div className="promo-page" style={{ background: T.offWhite }}>
@@ -378,15 +396,20 @@ export default function DashboardPage() {
       </div>
 
       <div className="promo-container">
-        {/* Needs attention: three action cards; each links through to the relevant list. */}
-        <nav className="dash-attention" aria-label="Needs attention">
+        {/* Needs attention: action cards; each links through to the relevant list.
+          * Budget alerts (BR-6) is the fourth card, shown only when budgets are on. */}
+        <nav className={`dash-attention${features.budgets ? ' dash-attention--budgets' : ''}`} aria-label="Needs attention">
           <AttentionCard label="Pending approvals" count={needs.pending} icon={ClipboardCheck} accent={T.blue} onOpen={goToApprovals} />
+          {features.budgets && (
+            <AttentionCard label="Budget alerts" count={needs.alerts} icon={AlertTriangle} accent={T.destructiveActive} onOpen={goToList} />
+          )}
           <AttentionCard label="Ending in 7 days" count={needs.ending} icon={CalendarClock} accent={T.darkGrey} onOpen={goToList} />
           <AttentionCard label="Starting in 7 days" count={needs.starting} icon={CalendarPlus} accent={T.progressActive} onOpen={goToList} />
         </nav>
 
-        {/* KPI cards: count-up values, delta pills, 36px sparklines. */}
-        <div className="dash-kpis">
+        {/* KPI cards: count-up values, delta pills, 36px sparklines.
+          * Budget utilisation and Budget alerts (BR-6) appear only when budgets are on. */}
+        <div className={`dash-kpis${features.budgets ? ' dash-kpis--budgets' : ''}`}>
           <KpiCard
             label="Total spend"
             value={totalSpend}
@@ -397,6 +420,18 @@ export default function DashboardPage() {
             chartKey={chartKey}
             reduced={reduced}
           />
+          {features.budgets && (
+            <KpiCard
+              label="Budget utilisation"
+              value={utilisation}
+              format={fmtPct}
+              deltaPct={series.length > 1 ? Math.round(last.utilisation - series[0].utilisation) : 0}
+              accent={T.navy}
+              series={series.map((p) => ({ day: p.day, v: p.utilisation }))}
+              chartKey={chartKey}
+              reduced={reduced}
+            />
+          )}
           <KpiCard
             label="Active promotions"
             value={counts.active}
@@ -407,6 +442,21 @@ export default function DashboardPage() {
             chartKey={chartKey}
             reduced={reduced}
           />
+          {features.budgets && (
+            <KpiCard
+              label="Budget alerts"
+              value={attention.length}
+              format={fmtCount}
+              deltaPct={halfDelta('alerts')}
+              invertDelta
+              accent={T.destructiveActive}
+              series={series.map((p) => ({ day: p.day, v: p.alerts }))}
+              chartKey={chartKey}
+              reduced={reduced}
+              onClick={goToList}
+            />
+          )}
+          <PromotionHealthCard />
         </div>
 
         <div className="dash-grid">
@@ -417,13 +467,15 @@ export default function DashboardPage() {
                 <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Spend over time</h2>
                 <p className="dash-card__caption" style={{ color: aheadOfPace ? T.destructive : T.textSecondary }}>
                   {aheadOfPace && <TriangleAlert size={12} aria-hidden="true" style={{ verticalAlign: 'middle' }} />}
-                  {' '}Cumulative spend · budget {fmtK(totalBudget)} · {aheadOfPace ? 'ahead of' : 'under'} pace
+                  {features.budgets
+                    ? <>{' '}Cumulative spend · budget {fmtK(totalBudget)} · {aheadOfPace ? 'ahead of' : 'under'} pace</>
+                    : <>Cumulative spend · {periodLabel(period)}</>}
                 </p>
               </div>
-              {/* Card-owned HTML legend (top-right, 12px); carries the "Budget pace" name. */}
+              {/* Card-owned HTML legend (top-right, 12px); carries the "Budget pace" name when budgets are on. */}
               <div className="dash-legend">
                 <LegendItem label="Spend" color={T.yellow} />
-                <LegendItem label="Budget pace" color={T.destructiveActive} dashed />
+                {features.budgets && <LegendItem label="Budget pace" color={T.destructiveActive} dashed />}
               </div>
             </div>
 
@@ -442,8 +494,8 @@ export default function DashboardPage() {
                   <XAxis dataKey="day" tick={TICK} tickLine={false} axisLine={false} interval={period === '7d' ? 0 : 1} />
                   <YAxis tick={TICK} tickLine={false} axisLine={false} tickFormatter={fmtAxisK} width={64} />
                   <Tooltip cursor={{ stroke: T.ghostBorder }} content={<ChartTooltip formatter={fmtK} />} />
-                  {/* Budget pace: dashed, no label (legend above carries the name). */}
-                  <ReferenceLine y={pace} stroke={T.destructiveActive} strokeDasharray="4 4" />
+                  {/* Budget pace: dashed, no label (legend above carries the name). BR-6, flag-gated. */}
+                  {features.budgets && <ReferenceLine y={pace} stroke={T.destructiveActive} strokeDasharray="4 4" />}
                   <Area
                     type="monotone"
                     dataKey="spend"
@@ -556,15 +608,20 @@ export default function DashboardPage() {
           </section>
         </div>
 
-        {/* Budget vs spend by promotion: horizontal bars, top 6 by spend. */}
+        {/* Budget vs spend by promotion: horizontal bars, top 6 by spend.
+          * With budgets off this becomes "Spend by promotion": no budget bar, legend or alert outline. */}
         <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
           <div className="dash-card__header">
             <div>
-              <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Budget vs spend by promotion</h2>
-              <p className="dash-card__caption" style={{ color: T.textSecondary }}>Top 6 by spend · red outline = at or above 90% of budget · click a bar to open the list</p>
+              <h2 className="dash-card__title" style={{ color: T.textPrimary }}>{features.budgets ? 'Budget vs spend by promotion' : 'Spend by promotion'}</h2>
+              <p className="dash-card__caption" style={{ color: T.textSecondary }}>
+                {features.budgets
+                  ? 'Top 6 by spend · red outline = at or above 90% of budget · click a bar to open the list'
+                  : 'Top 6 by spend · click a bar to open the list'}
+              </p>
             </div>
             <div className="dash-legend">
-              <LegendItem label="Budget" color={T.ghostBorder} />
+              {features.budgets && <LegendItem label="Budget" color={T.ghostBorder} />}
               <LegendItem label="Spend" color={T.navy} />
             </div>
           </div>
@@ -579,7 +636,9 @@ export default function DashboardPage() {
                   <XAxis type="number" tick={TICK} tickLine={false} axisLine={false} tickFormatter={fmtAxisK} />
                   <YAxis type="category" dataKey="name" tick={TICK} tickLine={false} axisLine={false} width={180} />
                   <Tooltip cursor={{ fill: T.selectionBg }} content={<ChartTooltip formatter={fmtK} />} />
-                  <Bar dataKey="budget" name="Budget" fill={T.chartTrack} radius={[0, 4, 4, 0]} cursor="pointer" onClick={goToList} isAnimationActive={!reduced} animationDuration={600} />
+                  {features.budgets && (
+                    <Bar dataKey="budget" name="Budget" fill={T.chartTrack} radius={[0, 4, 4, 0]} cursor="pointer" onClick={goToList} isAnimationActive={!reduced} animationDuration={600} />
+                  )}
                   <Bar
                     dataKey="spend"
                     name="Spend"
@@ -607,7 +666,8 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* Budget attention: promotions at/over the 90% alert threshold. */}
+        {/* Budget attention: promotions at/over the 90% alert threshold (BR-6). Hidden when budgets are off. */}
+        {features.budgets && (
         <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
           <div className="dash-card__header">
             <div>
@@ -654,13 +714,16 @@ export default function DashboardPage() {
             </ul>
           )}
         </section>
+        )}
 
-        {/* Recent activity: alerts, activations, scheduled and expired promotions. */}
+        {/* Recent activity: alerts (budgets on), activations, scheduled and expired promotions. */}
         <section className="dash-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
           <div className="dash-card__header">
             <div>
               <h2 className="dash-card__title" style={{ color: T.textPrimary }}>Recent activity</h2>
-              <p className="dash-card__caption" style={{ color: T.textSecondary }}>Latest budget alerts, activations and schedule changes</p>
+              <p className="dash-card__caption" style={{ color: T.textSecondary }}>
+                {features.budgets ? 'Latest budget alerts, activations and schedule changes' : 'Latest activations and schedule changes'}
+              </p>
             </div>
             <GhostButton small onClick={goToList}>View all promotions</GhostButton>
           </div>

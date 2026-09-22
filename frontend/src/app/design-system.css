@@ -774,3 +774,395 @@ letter-spacing: 0.04em;
 text-transform: uppercase;
 }
 
+
+/* ============================================================
+   Promotion Health card (PROTOTYPE, mock data) — scoped block.
+   Consumers: components/dashboard/PromotionHealthCard.tsx and
+   components/observability/PromotionHealth.tsx. Static presentation
+   only; the sole inline style is the funnel bar width. Every colour
+   literal below is annotated with its tokens.ts / Unity source.
+   Type: 20/15/14/12 only. Spacing: Unity spacer scale only.
+   Counts, rates and alerts only — no monetary totals.
+   ============================================================ */
+
+/* Card shell: spans the full KPI row (.dash-kpis is a 2-up grid). */
+.promo-health-card {
+  grid-column: 1 / -1;
+  padding: 16px;
+  background: #ffffff; /* Base/betika-white — T.white */
+  border: 1px solid rgba(0, 21, 40, 0.1); /* Opacity/10% — T.border */
+  border-radius: 8px; /* Radius/Small — T.radiusSm */
+  font-family: var(--ds-font-family);
+}
+
+.promo-health-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.promo-health-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.promo-health-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 999px; /* Radius/Extra Large — T.radiusPill */
+  background: rgba(0, 21, 40, 0.03); /* Black-based 3% — T.selectionBg */
+  color: #001528; /* Blue/betika-950 — T.navy */
+}
+
+.promo-health-card__title {
+  color: #001528; /* T.textPrimary */
+}
+
+.promo-health-card__caption {
+  color: rgba(0, 21, 40, 0.7); /* Opacity/70% — T.textSecondary */
+}
+
+.promo-health-card__controls {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.promo-health-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Caption Bold — 12px/600 uppercase, same treatment as sidebar group labels. */
+.promo-health-card__label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+.promo-health-card__select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Unity Dropdown trigger: ghostBorder outline, Radius/Small, 14px body. */
+.promo-health-card__select {
+  height: 36px; /* --ds-control-height-sm */
+  padding: 0 32px 0 12px;
+  border: 1px solid rgba(0, 21, 40, 0.15); /* Opacity/15% — T.ghostBorder */
+  border-radius: 8px; /* T.radiusSm */
+  background-color: #ffffff; /* T.white */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23001528' stroke-opacity='0.7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  color: #001528; /* T.textPrimary */
+  font-family: inherit;
+  font-size: 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.promo-health-card__select:focus-visible {
+  outline: 2px solid rgba(0, 21, 40, 0.25); /* Opacity/25% — T.focusRing */
+  outline-offset: 1px;
+}
+
+.promo-health-card__firing {
+  display: inline-flex;
+  flex: none;
+}
+
+/* Range toggle: same segmented control as the dashboard period control. */
+.promo-health-card__range {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border: 1px solid rgba(0, 21, 40, 0.1); /* T.border */
+  border-radius: 999px; /* T.radiusPill */
+  background: #ffffff; /* T.white */
+}
+
+.promo-health-card__range-btn {
+  border: 0;
+  padding: 4px 12px;
+  border-radius: 999px; /* T.radiusPill */
+  background: transparent;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.promo-health-card__range-btn:hover {
+  background: rgba(0, 21, 40, 0.05); /* Black-based 5% — T.activeFill */
+}
+
+.promo-health-card__range-btn--active,
+.promo-health-card__range-btn--active:hover {
+  background: #001528; /* T.navy */
+  color: #ffffff; /* T.white */
+}
+
+/* ---- Body (.promo-health) ---- */
+.promo-health {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  color: #001528; /* T.textPrimary */
+  font-size: 14px;
+}
+
+/* Card mode: fixed body height so the KPI row does not jump between views. */
+.promo-health--compact {
+  height: 180px;
+}
+
+.promo-health--compact > :first-child {
+  flex: 1;
+  min-height: 0;
+}
+
+.promo-health__caption {
+  font-size: 12px;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+/* Headline metric — 20px/600 (Unity Heading). */
+.promo-health__metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  color: #001528; /* T.textPrimary */
+}
+
+.promo-health__metric--breach {
+  color: #ad0000; /* Red/betika-600 — T.destructive */
+}
+
+.promo-health__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.promo-health__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #001528; /* T.textPrimary */
+  text-decoration: none;
+}
+
+.promo-health__link[aria-disabled='true'] {
+  cursor: default;
+  opacity: 0.7;
+}
+
+/* Error notice: Unity Alert (destructive tint), 14px body. */
+.promo-health__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #cc3225; /* Red/betika-500 — T.destructiveActive */
+  border-radius: 8px; /* T.radiusSm */
+  background: #ffffff; /* T.white */
+  color: #ad0000; /* T.destructive */
+  font-size: 14px;
+}
+
+
+/* Funnel: label | track | value rows. */
+.promo-health__funnel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.promo-health__funnel-row {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) 72px;
+  align-items: center;
+  gap: 12px;
+}
+
+.promo-health__funnel-label {
+  font-size: 12px;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+.promo-health__funnel-track {
+  display: block;
+  height: 8px;
+  border-radius: 999px; /* T.radiusPill */
+  background: rgba(0, 21, 40, 0.06); /* Black-based 6% — T.chartTrack */
+  overflow: hidden;
+}
+
+.promo-health__funnel-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px; /* T.radiusPill */
+  background: #001528; /* T.navy */
+  transition: width 300ms ease;
+}
+
+.promo-health__funnel-value {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Failure rate: metric + threshold caption, small line chart beneath. */
+.promo-health__failure {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.promo-health__failure-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.promo-health__chart {
+  flex: 1;
+  min-height: 60px;
+  height: 100%;
+}
+
+/* Alert chips (Unity Chip): state-tinted dot + Caption text. */
+.promo-health__alerts {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.promo-health__alert {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border: 1px solid rgba(0, 21, 40, 0.1); /* T.border */
+  border-radius: 999px; /* T.radiusPill */
+  background: #ffffff; /* T.white */
+  font-size: 12px;
+  font-weight: 500;
+  color: #001528; /* T.textPrimary */
+  white-space: nowrap;
+}
+
+.promo-health__alert-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #47aa39; /* Border/Green (Light UI) — T.progressActive */
+}
+
+.promo-health__alert--pending .promo-health__alert-dot {
+  background: #ffde24; /* Yellow/betika-100 — T.yellow */
+}
+
+.promo-health__alert--firing {
+  border-color: #cc3225; /* Red/betika-500 — T.destructiveActive */
+  color: #ad0000; /* T.destructive */
+}
+
+.promo-health__alert--firing .promo-health__alert-dot {
+  background: #ad0000; /* T.destructive */
+}
+
+/* Infra: three component groups side by side. */
+.promo-health__infra {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.promo-health__infra-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+.promo-health__infra-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.promo-health__infra-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.promo-health__infra-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #001528; /* T.textPrimary */
+}
+
+.promo-health__infra-rate {
+  flex: none;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #007600; /* Green/betika-600 — T.success */
+}
+
+.promo-health__infra-rate--warn {
+  color: #ad0000; /* T.destructive */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .promo-health-card__range-btn,
+  .promo-health__funnel-fill {
+    transition: none;
+  }
+}
+
