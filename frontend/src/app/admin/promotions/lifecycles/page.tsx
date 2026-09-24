@@ -1,5 +1,6 @@
 import T from '@/theme/tokens';
 import { ComingSoon } from '@/components/ui';
+import { features } from '@/config/features';
 /* Shared page-skeleton structural classes (top bar, container) */
 import '../promotions.css';
 
@@ -20,7 +21,9 @@ export default function LifecyclesPage() {
           description="Automated lifecycle flows for welcome, at-risk and reactivation, triggered by real player events with an optional approval step before any award is credited."
           bullets={[
             'Trigger-based flows across the player lifecycle',
-            'Every automated award posts through the same ledger and budget pipeline',
+            features.budgets
+              ? 'Every automated award posts through the same ledger and budget pipeline'
+              : 'Every automated award posts through the same ledger pipeline',
             'Optional human approval gate before crediting',
             'Reuses the same triggers and eligibility rules as promotions',
           ]}

@@ -193,13 +193,6 @@
   font-size: 14px;
 }
 
-/* Checkbox field (Live bet): sits on the control baseline of its input neighbours. */
-.sim-event-fields .sim-field--checkbox {
-  justify-content: flex-end;
-  min-height: 32px;
-  font-weight: 400;
-}
-
 .sim-icon-button {
   display: inline-flex;
   align-items: center;
@@ -302,6 +295,40 @@
 .sim-ledger__chips span {
   padding: 2px 8px;
 }
+
+/* Player notifications stage: rendered messages with placeholders substituted. */
+.sim-messages {
+ display: flex;
+ flex-direction: column;
+ gap: 8px;
+}
+
+.sim-message {
+ display: flex;
+ flex-direction: column;
+ gap: 4px;
+ padding: 12px;
+ font-size: 12px;
+}
+
+.sim-message__head {
+ display: flex;
+ justify-content: space-between;
+ align-items: baseline;
+ gap: 12px;
+ flex-wrap: wrap;
+}
+
+.sim-message__body {
+ margin: 0;
+ line-height: 1.5;
+ overflow-wrap: anywhere;
+}
+
+.sim-message__meta {
+ font-size: 12px;
+}
+
 
 /* Rule inspector: key / value readback of the selected stage. */
 .sim-inspector-section {

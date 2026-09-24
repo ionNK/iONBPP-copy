@@ -1166,3 +1166,1009 @@ text-transform: uppercase;
   }
 }
 
+
+
+/* ============================================================
+   Bulk FreeBet Upload (PROTOTYPE, mock data) — scoped block.
+   Consumers: components/manual-award/BulkUpload*.tsx,
+   components/manual-award/BulkAwardHistory.tsx and the mode toggle
+   on app/admin/promotions/bulk-upload/page.tsx. Static presentation
+   only; the sole inline style is the progress bar width. Every colour
+   literal below is annotated with its tokens.ts / Unity source.
+   Type: 20/15/14/12 only. Spacing: Unity spacer scale only.
+   ============================================================ */
+
+/* ---- Mode toggle (segmented control, top bar right) ---- */
+.bulk-upload-mode {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border: 1px solid rgba(0, 21, 40, 0.1); /* Opacity/10% — T.border */
+  border-radius: 999px; /* Radius/Extra Large — T.radiusPill */
+  background: #ffffff; /* Base/betika-white — T.white */
+}
+
+.bulk-upload-mode__btn {
+  border: 0;
+  padding: 8px 16px;
+  border-radius: 999px; /* T.radiusPill */
+  background: transparent;
+  color: rgba(0, 21, 40, 0.7); /* Opacity/70% — T.textSecondary */
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.bulk-upload-mode__btn:hover {
+  background: rgba(0, 21, 40, 0.05); /* Black-based 5% — T.activeFill */
+}
+
+.bulk-upload-mode__btn--active,
+.bulk-upload-mode__btn--active:hover {
+  background: #001528; /* Blue/betika-950 — T.navy */
+  color: #ffffff; /* T.white */
+}
+
+.bulk-upload-mode__btn:focus-visible {
+  outline: 2px solid rgba(0, 21, 40, 0.25); /* Opacity/25% — T.focusRing */
+  outline-offset: 1px;
+}
+
+/* ---- Stepper card shell ---- */
+.bulk-upload,
+.bulk-upload__history {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: #ffffff; /* T.white */
+  border: 1px solid rgba(0, 21, 40, 0.1); /* T.border */
+  border-radius: 8px; /* Radius/Small — T.radiusSm */
+  color: #001528; /* T.textPrimary */
+  font-family: var(--ds-font-family);
+  font-size: 14px;
+}
+
+.bulk-upload__head,
+.bulk-upload__history-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Section heading — 15px/500 (Unity B1). */
+.bulk-upload__section-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #001528; /* T.textPrimary */
+}
+
+.bulk-upload__caption,
+.bulk-upload__hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+/* ---- Steps (Unity Progress / stepper) ---- */
+.bulk-upload__steps {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+}
+
+.bulk-upload__step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.bulk-upload__step-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(0, 21, 40, 0.15); /* Opacity/15% — T.ghostBorder */
+  border-radius: 999px; /* T.radiusPill */
+  background: #ffffff; /* T.white */
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bulk-upload__step-label {
+  font-size: 12px;
+  white-space: nowrap;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+.bulk-upload__step--current .bulk-upload__step-circle {
+  border-color: #001528; /* T.navy */
+  background: #001528; /* T.navy */
+  color: #ffffff; /* T.white */
+}
+
+.bulk-upload__step--current .bulk-upload__step-label {
+  font-weight: 600;
+  color: #001528; /* T.textPrimary */
+}
+
+.bulk-upload__step--done .bulk-upload__step-circle {
+  border-color: #47aa39; /* Border/Green (Light UI) — T.progressActive */
+  background: #47aa39; /* T.progressActive */
+  color: #ffffff; /* T.white */
+}
+
+.bulk-upload__step--done .bulk-upload__step-label {
+  color: #001528; /* T.textPrimary */
+}
+
+/* Progress track / fill: same primitives as the dashboard funnel bar. */
+.bulk-upload__progress {
+  height: 4px;
+  border-radius: 999px; /* T.radiusPill */
+  background: rgba(0, 21, 40, 0.06); /* Black-based 6% — T.chartTrack */
+  overflow: hidden;
+}
+
+.bulk-upload__progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px; /* T.radiusPill */
+  background: #47aa39; /* T.progressActive */
+  transition: width 300ms ease;
+}
+
+.bulk-upload__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bulk-upload__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 21, 40, 0.1); /* T.border */
+}
+
+
+/* ---- Details form (Unity Input / Dropdown) ---- */
+.bulk-upload__form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+}
+
+.bulk-upload__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.bulk-upload__field--full {
+  grid-column: 1 / -1;
+}
+
+.bulk-upload__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #001528; /* T.textPrimary */
+}
+
+.bulk-upload__required {
+  color: #ad0000; /* Red/betika-600 — T.destructive */
+}
+
+.bulk-upload__input,
+.bulk-upload__select {
+  width: 100%;
+  box-sizing: border-box;
+  height: 36px; /* --ds-control-height-sm */
+  padding: 0 12px;
+  border: 1px solid rgba(0, 21, 40, 0.15); /* T.ghostBorder */
+  border-radius: 8px; /* T.radiusSm */
+  background: #ffffff; /* T.white */
+  color: #001528; /* T.textPrimary */
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.bulk-upload__input::placeholder {
+  color: rgba(0, 21, 40, 0.45); /* Opacity/45% — T.draft */
+}
+
+.bulk-upload__input:focus-visible,
+.bulk-upload__select:focus-visible,
+.bulk-upload__filter:focus-visible,
+.bulk-upload__link:focus-visible,
+.bulk-upload__history-row:focus-visible {
+  outline: 2px solid rgba(0, 21, 40, 0.25); /* T.focusRing */
+  outline-offset: 1px;
+}
+
+.bulk-upload__input--short {
+  width: 96px;
+}
+
+.bulk-upload__textarea {
+  height: auto;
+  min-height: 72px;
+  padding: 8px 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.bulk-upload__select {
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23001528' stroke-opacity='0.7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.bulk-upload__expiry-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bulk-upload__expiry-row > .bulk-upload__select:first-child {
+  flex: 1;
+}
+
+.bulk-upload__expiry-row > .bulk-upload__select:not(:first-child) {
+  width: auto;
+}
+
+/* ---- In-form segmented control (award type / expiry mode) — same primitive as .bulk-upload-mode. ---- */
+.bulk-upload__segmented {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 2px;
+  border: 1px solid rgba(0, 21, 40, 0.1); /* T.border */
+  border-radius: 999px; /* T.radiusPill */
+  background: #ffffff; /* T.white */
+}
+
+.bulk-upload__segment {
+  border: 0;
+  padding: 6px 16px;
+  border-radius: 999px; /* T.radiusPill */
+  background: transparent;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.bulk-upload__segmented--small .bulk-upload__segment {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.bulk-upload__segment:hover {
+  background: rgba(0, 21, 40, 0.05); /* T.activeFill */
+}
+
+.bulk-upload__segment--active,
+.bulk-upload__segment--active:hover {
+  background: #001528; /* T.navy */
+  color: #ffffff; /* T.white */
+}
+
+.bulk-upload__segment:focus-visible {
+  outline: 2px solid rgba(0, 21, 40, 0.25); /* T.focusRing */
+  outline-offset: 1px;
+}
+
+/* ---- Grouped fieldset (terms / SMS) — offWhite panel like notices, Footnote legend. ---- */
+.bulk-upload__group {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid rgba(0, 21, 40, 0.1); /* T.border */
+  border-radius: 8px; /* T.radiusSm */
+  background: #fcfcfc; /* T.offWhite */
+  min-width: 0;
+}
+
+.bulk-upload__group-title {
+  padding: 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #001528; /* T.textPrimary */
+}
+
+.bulk-upload__group-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.bulk-upload__radios {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bulk-upload__radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  color: #001528; /* T.textPrimary */
+  cursor: pointer;
+}
+
+.bulk-upload__radio > input {
+  margin: 2px 0 0;
+  accent-color: #001528; /* T.navy */
+}
+
+/* Invalid select (unmapped mandatory field) — destructive border, same as the error notice. */
+.bulk-upload__select--invalid {
+  border-color: #cc3225; /* T.destructiveActive */
+}
+
+.bulk-upload__mapping {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bulk-upload__mapping .bulk-upload__select {
+  min-width: 220px;
+}
+
+/* ---- Dropzone (Unity Upload) ---- */
+.bulk-upload__dropzone-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bulk-upload__dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 24px;
+  border: 1px dashed rgba(0, 21, 40, 0.15); /* T.ghostBorder */
+  border-radius: 8px; /* T.radiusSm */
+  background: #fcfcfc; /* Grey/betika-50 — T.offWhite */
+  text-align: center;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.bulk-upload__dropzone--active {
+  border-color: #001528; /* T.navy */
+  background: rgba(0, 21, 40, 0.03); /* Black-based 3% — T.selectionBg */
+}
+
+.bulk-upload__dropzone--error {
+  border-color: #cc3225; /* Red/betika-500 — T.destructiveActive */
+}
+
+.bulk-upload__dropzone-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px; /* T.radiusPill */
+  background: rgba(0, 21, 40, 0.05); /* T.activeFill */
+  color: #001528; /* T.navy */
+}
+
+.bulk-upload__dropzone-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #001528; /* T.textPrimary */
+}
+
+.bulk-upload__dropzone-body {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+.bulk-upload__dropzone-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Native file input stays in the DOM (for tests / keyboard) but is visually hidden. */
+.bulk-upload__file-input,
+.bulk-upload__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.bulk-upload__template {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Inline text link / action (Unity Button/Link). */
+.bulk-upload__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #001528; /* T.textPrimary */
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.bulk-upload__link--disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---- Notices (style guide → Interaction rules: offWhite panel + icon + Footnote) ---- */
+.bulk-upload__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 8px; /* T.radiusSm */
+  background: #fcfcfc; /* T.offWhite */
+  color: #001528; /* T.textPrimary */
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.bulk-upload__notice > svg {
+  flex: none;
+  margin-top: 2px;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+.bulk-upload__notice--error {
+  border: 1px solid #cc3225; /* T.destructiveActive */
+  background: #ffffff; /* T.white */
+  color: #ad0000; /* T.destructive */
+}
+
+.bulk-upload__notice--error > svg {
+  color: #ad0000; /* T.destructive */
+}
+
+/* Approval notice: yellow-tinted panel (Yellow/betika-100 at 18% — T.yellowSoft) with navy text. */
+.bulk-upload__notice--approval {
+  border: 1px solid #ffde24; /* Yellow/betika-100 — T.yellow */
+  background: rgba(255, 222, 36, 0.18); /* T.yellowSoft */
+}
+
+.bulk-upload__notice--approval > svg {
+  color: #001528; /* T.navy */
+}
+
+.bulk-upload__notice-sub {
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+
+/* ---- Validation preview: summary stats + filter chips + table ---- */
+.bulk-upload__preview,
+.bulk-upload__review {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bulk-upload__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.bulk-upload__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  border: 1px solid rgba(0, 21, 40, 0.1); /* T.border */
+  border-radius: 8px; /* T.radiusSm */
+  background: #ffffff; /* T.white */
+}
+
+.bulk-upload__stat dt {
+  font-size: 12px;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+/* Stat value — 20px/600 (style guide → Stat values). */
+.bulk-upload__stat dd {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  color: #001528; /* T.textPrimary */
+}
+
+.bulk-upload__stat--valid dd {
+  color: #007600; /* Green/betika-600 — T.success */
+}
+
+.bulk-upload__stat--error dd {
+  color: #ad0000; /* T.destructive */
+}
+
+/* Filter chips (Unity Chips): ghost pill, navy fill when active. */
+.bulk-upload__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bulk-upload__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border: 1px solid rgba(0, 21, 40, 0.15); /* T.ghostBorder */
+  border-radius: 999px; /* T.radiusPill */
+  background: #ffffff; /* T.white */
+  color: #001528; /* T.textPrimary */
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.bulk-upload__filter:hover {
+  background: #fcfcfc; /* T.offWhite */
+}
+
+.bulk-upload__filter--active,
+.bulk-upload__filter--active:hover {
+  border-color: #001528; /* T.navy */
+  background: #001528; /* T.navy */
+  color: #ffffff; /* T.white */
+}
+
+.bulk-upload__filter-count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Table (Unity Table): two-line cells, 14px body, 12px secondary. */
+.bulk-upload__table-wrap {
+  border: 1px solid rgba(0, 21, 40, 0.1); /* T.border */
+  border-radius: 8px; /* T.radiusSm */
+  overflow-x: auto;
+}
+
+.bulk-upload__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.bulk-upload__table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+  background: #fcfcfc; /* T.offWhite */
+  border-bottom: 1px solid rgba(0, 21, 40, 0.1); /* T.border */
+  white-space: nowrap;
+}
+
+.bulk-upload__table td {
+  padding: 12px 16px;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(0, 21, 40, 0.1); /* T.border */
+  color: #001528; /* T.textPrimary */
+}
+
+.bulk-upload__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.bulk-upload__cell-title {
+  display: block;
+  font-weight: 600;
+}
+
+.bulk-upload__cell-sub {
+  display: block;
+  font-size: 12px;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+.bulk-upload__cell-num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.bulk-upload__cell-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  min-width: 240px;
+}
+
+.bulk-upload__cell-chevron {
+  width: 16px;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+.bulk-upload__table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(0, 21, 40, 0.1); /* T.border */
+}
+
+/* Empty state (mirrors .promo-empty). */
+.bulk-upload__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 24px;
+  text-align: center;
+  border: 1px dashed rgba(0, 21, 40, 0.15); /* T.ghostBorder */
+  border-radius: 8px; /* T.radiusSm */
+}
+
+.bulk-upload__empty-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #001528; /* T.textPrimary */
+}
+
+.bulk-upload__empty-body {
+  margin: 0;
+  max-width: 360px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+
+/* ---- Review (key/value cards) ---- */
+.bulk-upload__review-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.bulk-upload__review-card {
+  padding: 16px;
+  border: 1px solid rgba(0, 21, 40, 0.1); /* T.border */
+  border-radius: 8px; /* T.radiusSm */
+  background: #fcfcfc; /* T.offWhite */
+}
+
+.bulk-upload__review-heading {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+.bulk-upload__kv {
+  display: grid;
+  grid-template-columns: minmax(120px, auto) 1fr;
+  gap: 8px 16px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.bulk-upload__kv dt {
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+.bulk-upload__kv dd {
+  margin: 0;
+  color: #001528; /* T.textPrimary */
+  overflow-wrap: anywhere;
+}
+
+.bulk-upload__kv-strong {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Long free-text values (SMS message) keep author line breaks. */
+.bulk-upload__kv-wrap {
+  white-space: pre-wrap;
+}
+
+/* ---- Result panel ---- */
+.bulk-upload__result {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bulk-upload__result--compact {
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.bulk-upload__result-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bulk-upload__result-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px; /* T.radiusPill */
+  background: rgba(0, 21, 40, 0.05); /* T.activeFill */
+  color: #001528; /* T.navy */
+}
+
+.bulk-upload__result-icon--awarded {
+  background: rgba(0, 118, 0, 0.08); /* T.successBg */
+  color: #007600; /* T.success */
+}
+
+.bulk-upload__result-icon--rejected {
+  color: #ad0000; /* T.destructive */
+}
+
+.bulk-upload__result-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.bulk-upload__result-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #001528; /* T.textPrimary */
+}
+
+.bulk-upload__result-sub {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: rgba(0, 21, 40, 0.7); /* T.textSecondary */
+}
+
+.bulk-upload__result-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.bulk-upload__result-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Stacked download links (rejects + SMS recipient list). */
+.bulk-upload__result-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* ---- History rows (whole row clickable, hover offWhite) ---- */
+.bulk-upload__history-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.bulk-upload__history-row:hover,
+.bulk-upload__history-row--open {
+  background: #fcfcfc; /* T.offWhite */
+}
+
+.bulk-upload__history-detail td {
+  padding: 16px 24px;
+  background: #fcfcfc; /* T.offWhite */
+}
+
+@media (max-width: 900px) {
+  .bulk-upload__form,
+  .bulk-upload__review-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bulk-upload-mode__btn,
+  .bulk-upload__progress-fill,
+  .bulk-upload__filter,
+  .bulk-upload__dropzone,
+  .bulk-upload__history-row {
+    transition: none;
+  }
+}
+
+
+/* ============================================================
+   Promotions → Experiments (PROTOTYPE, mock data) — scoped block.
+   Consumers: app/admin/promotions/experiments/page.tsx and
+   components/experiments/*.tsx. Layout shell (topbar, table, drawer,
+   modal) is reused from promotions.css; this block only adds the
+   create-form fields, arm picker and results table. Colour literals
+   are annotated with their tokens.ts source.
+   Type: 20/15/14/12 only. Spacing: Unity spacer scale only.
+   ============================================================ */
+
+/* ---- Create modal: wider than the confirm dialog, scrolls on short viewports ---- */
+.promo-experiments .promo-experiments__modal {
+  max-width: 640px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+
+.promo-experiments__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.promo-experiments__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.promo-experiments__hint {
+  font-size: 12px;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Unity Input: 40px control, 14px text, ghostBorder outline (inline via T). */
+.promo-experiments__input {
+  min-height: 40px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  outline: none;
+}
+
+textarea.promo-experiments__input {
+  resize: vertical;
+}
+
+.promo-experiments__percent {
+  width: 88px;
+}
+
+/* ---- Arm picker: one row per Active promotion, allocation appears when selected ---- */
+.promo-experiments__arms {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 8px;
+  border-radius: 8px; /* T.radiusSm */
+}
+
+.promo-experiments__arm {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* ---- Holdout row + running total ---- */
+.promo-experiments__holdout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.promo-experiments__holdout .promo-experiments__hint {
+  margin-left: auto;
+  font-weight: 500;
+}
+
+.promo-experiments__dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.promo-experiments__errors {
+  margin: 0;
+  padding: 12px 16px 12px 32px;
+  font-size: 12px;
+  border-radius: 8px; /* T.radiusSm */
+}
+
+/* ---- Detail drawer: overview grid + results table ---- */
+.promo-experiments__panel {
+  width: min(720px, 100%);
+}
+
+.promo-experiments__overview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+}
+
+.promo-experiments__overview > div:first-child {
+  grid-column: 1 / -1;
+}
+
+.promo-experiments__results td {
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .promo-experiments__dates,
+  .promo-experiments__overview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+

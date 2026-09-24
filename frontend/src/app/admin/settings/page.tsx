@@ -11,19 +11,22 @@ import { Badge, DestructiveGhostButton, FilterSelect, GhostButton, PrimaryButton
 import { DEFAULT_SETTINGS, createDefaultSettings, loadSettings, saveSettings } from '@/lib/settings';
 import type { ApproverRole, DigestFrequency, Settings } from '@/lib/settings';
 import { loadPromotions } from '@/lib/promotions';
-import { GLOSSARY, MANUAL_SECTIONS, TUTORIAL_VIDEOS, loadTutorialProgress, markTutorialProgress } from '@/data/manual';
+import { GLOSSARY, MANUAL_SECTIONS, TUTORIAL_VIDEOS, WIZARD_STEP_COUNT_WORD, loadTutorialProgress, markTutorialProgress } from '@/data/manual';
 import type { ManualBlock, TutorialProgress, TutorialVideo } from '@/data/manual';
 import VideoModal from '@/components/settings/VideoModal';
 import { requestOnboardingShow, saveOnboardingState } from '../FirstRunTour';
 import { USER_ROLES, USER_SEED } from '@/data/users';
 import type { AdminUser, UserRole, UserStatus } from '@/data/users';
+import { features } from '@/config/features';
 /* Version is read from the workspace manifest at build time (frontend/package.json). */
 import pkg from '../../../../package.json';
 
 /* ---- Tabs (state lives in the URL: /admin/settings?tab=…) ---- */
 type TabId = 'general' | 'budget' | 'approvals' | 'users' | 'tutorials' | 'about';
 
-const TABS: { id: TabId; label: string }[] = [
+/* Budget & alerts (BR-6) is gated on features.budgets; with the flag off the tab is
+ * filtered out and `?tab=budget` falls back to General via isTabId. */
+const ALL_TABS: { id: TabId; label: string }[] = [
   { id: 'general', label: 'General' },
   { id: 'budget', label: 'Budget & alerts' },
   { id: 'approvals', label: 'Approvals' },
@@ -31,6 +34,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'tutorials', label: 'Tutorials' },
   { id: 'about', label: 'About' },
 ];
+const TABS = ALL_TABS.filter((tab) => features.budgets || tab.id !== 'budget');
 
 const isTabId = (value: string | null): value is TabId => TABS.some((tab) => tab.id === value);
 
@@ -128,13 +132,15 @@ const ABOUT_ROWS: [string, string, string | null][] = [
  * simulator item is only marked by the simulator itself. ---- */
 type ChecklistId = 'promotion' | 'threshold' | 'bulkUpload' | 'approvals' | 'simulation';
 
-const CHECKLIST: { id: ChecklistId; label: string; helper: string; href: string; mark?: keyof TutorialProgress }[] = [
-  { id: 'promotion', label: 'Create your first promotion', helper: 'Walk through the seven-step wizard and save a draft.', href: '/admin/promotions/new' },
+const ALL_CHECKLIST: { id: ChecklistId; label: string; helper: string; href: string; mark?: keyof TutorialProgress }[] = [
+  { id: 'promotion', label: 'Create your first promotion', helper: `Walk through the ${WIZARD_STEP_COUNT_WORD}-step wizard and save a draft.`, href: '/admin/promotions/new' },
   { id: 'threshold', label: 'Set a budget alert threshold', helper: 'Change the workspace default in Budget & alerts.', href: '/admin/settings?tab=budget' },
   { id: 'bulkUpload', label: 'Upload a bulk award file', helper: 'Vet a CSV of manual awards before crediting.', href: '/admin/promotions/bulk-upload', mark: 'bulkUpload' },
   { id: 'approvals', label: 'Approve an award', helper: 'Review a pending item as the checker.', href: '/admin/promotions/approvals', mark: 'approvals' },
   { id: 'simulation', label: 'Run a simulation', helper: 'Test a promotion against sample player events.', href: '/admin/simulator' },
 ];
+/* The budget-threshold step is gated on features.budgets (its destination tab is hidden). */
+const CHECKLIST = ALL_CHECKLIST.filter((item) => features.budgets || item.id !== 'threshold');
 
 const SUPPORT_EMAIL = 'support@ionix.zm';
 
@@ -381,9 +387,9 @@ function SettingsContent() {
       body: 'You will be taken to All Promotions and the five-step tour will start again.',
       confirmLabel: 'Replay tour',
       onConfirm: () => {
-        /* Reset the record and raise the session flag; FirstRunTour consumes
-         * it on the landing route and opens the tour immediately (count 1 of 3). */
-        saveOnboardingState({ shownCount: 0, dismissedForever: false });
+        /* Clear the "Don't show again" opt-out and raise the session flag;
+         * FirstRunTour consumes it on the landing route and opens the tour immediately. */
+        saveOnboardingState({ dismissedForever: false });
         requestOnboardingShow();
         setConfirm(null);
         window.location.assign('/admin/promotions');
@@ -441,7 +447,8 @@ function SettingsContent() {
             </Card>
           )}
 
-          {tab === 'budget' && (
+          {/* Budget & alerts (BR-6): unreachable while features.budgets is false because the tab is filtered out of TABS. */}
+          {features.budgets && tab === 'budget' && (
             <Card
               title="Budget & alerts"
               description="BR-6: budget thresholds raise alerts; they never stop a promotion from awarding."
@@ -494,7 +501,7 @@ function SettingsContent() {
                 <Toggle checked={draft.automatedApprovalThreshold} onChange={(v) => update({ automatedApprovalThreshold: v })} ariaLabel="Require approval for automated promotions above a spend threshold" />
               </FieldRow>
               {draft.automatedApprovalThreshold && (
-                <FieldRow label="Threshold amount (K)" helper="Automated promotions budgeted above this amount need approval.">
+                <FieldRow label="Threshold amount (K)" helper={features.budgets ? 'Automated promotions budgeted above this amount need approval.' : 'Automated promotions awarding above this amount need approval.'}>
                   <input
                     type="number"
                     className="settings-input"
@@ -508,7 +515,7 @@ function SettingsContent() {
                   />
                 </FieldRow>
               )}
-              <FieldRow label="Second approver required above K 250,000" helper="Adds a second checker for very large budgets.">
+              <FieldRow label="Second approver required above K 250,000" helper={features.budgets ? 'Adds a second checker for very large budgets.' : 'Adds a second checker for very large awards.'}>
                 <Toggle checked={draft.secondApprover} onChange={(v) => update({ secondApprover: v })} ariaLabel="Second approver required above K 250,000" />
               </FieldRow>
               <FieldRow label="Approver roles" helper="Who can act as checker for pending items.">

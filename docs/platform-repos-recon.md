@@ -165,7 +165,7 @@ Use `FormStepper` + `FormStep` only if its visual state can be reconciled with t
 3. Preserve `STEPS`, current index, validation, and transitions in the route.
 4. Re-test compact widths, long labels, screen-reader announcements, keyboard focus, reload persistence, and modal confirmation focus restoration.
 
-The seven-step wizard can use the library's input, textarea, select, checkbox, switch, Card, Dialog, and separator pieces incrementally. Radio, choice cards, persistent notices, public progress, and route loading remain blocked or local according to section 6.
+The eight-step wizard can use the library's input, textarea, select, checkbox, switch, Card, Dialog, and separator pieces incrementally. Radio, choice cards, persistent notices, public progress, and route loading remain blocked or local according to section 6.
 
 ## 9. Admin-shell feasibility [B, E, G, I]
 

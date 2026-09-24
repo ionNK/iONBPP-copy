@@ -154,6 +154,34 @@ left: 18px;
   cursor: pointer;
 }
 
+/* FilterChip — dismissible active-filter pill (Unity Chip). */
+.ui-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ui-filter-chip__text {
+  line-height: 20px;
+}
+
+.ui-filter-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
 /* EvidenceCard */
 .ui-evidence-card {
 display: flex;

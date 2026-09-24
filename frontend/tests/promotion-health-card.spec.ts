@@ -16,6 +16,8 @@ const ACTIVE_OPTIONS = [
   'All active',
   'Aviator Welcome Offer',
   'Money Back (Sportsbook Cashback)',
+ 'Money Back (Sportsbook Cashback) B',
+
   'First Deposit Boost',
   'Midweek Free Spins',
   'Cashout Insurance',
@@ -40,11 +42,11 @@ test.describe('Promotion health card', () => {
     await expect(page.getByTestId('promo-health-body')).toHaveAttribute('data-view', 'funnel');
     await expect(page.getByTestId('promo-health-range-24h')).toHaveAttribute('aria-pressed', 'true');
 
-    /* Exactly the five active promotions-list entries, in list order. */
+    /* Exactly the six active promotions-list entries, in list order. */
     const options = await service.locator('option').allTextContents();
     expect(options).toEqual(ACTIVE_OPTIONS);
     const values = await service.locator('option').evaluateAll((els) => els.map((el) => (el as HTMLOptionElement).value));
-    expect(values).toEqual(['all_active', 'PR-001', 'PR-002', 'PR-006', 'PR-007', 'PR-011']);
+    expect(values).toEqual(['all_active', 'PR-001', 'PR-002', 'PR-002-B', 'PR-006', 'PR-007', 'PR-011']);
     expect(options.join('|')).not.toContain('Refer & Chop');
     expect(options.join('|')).not.toContain('100% Cash Stake Back');
     /* Scheduled / draft / expired list rows never appear. */

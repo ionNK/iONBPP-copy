@@ -4,14 +4,14 @@ import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { ChevronDown, ChevronUp, FlaskConical, History, Plus, Trash2 } from 'lucide-react';
 import T from '@/theme/tokens';
-import { Badge, Checkbox, DateTimeField, DestructiveGhostButton, PrimaryButton, parseIsoDateTime, toIsoDateTime } from '@/components/ui';
+import { Badge, DateTimeField, DestructiveGhostButton, PrimaryButton, parseIsoDateTime, toIsoDateTime } from '@/components/ui';
 import { EVENT_CATALOG, getCatalogEvent } from '@/data/event-catalog';
 import type { EventId } from '@/data/event-catalog';
 import { markTutorialProgress } from '@/data/manual';
-import { CHANNELS, CHANNEL_LABELS, loadPromotions, PROMO_SEED } from '@/lib/promotions';
+import { CHANNELS, CHANNEL_LABELS, NOTIFICATION_TRIGGER_SHORT, loadPromotions, notificationChannelSummary, PROMO_SEED } from '@/lib/promotions';
 import type { Channel, Promo } from '@/lib/promotions';
 import { loadSettings } from '@/lib/settings';
-import { clearRuns, defaultEvent, fmtK, GAME_CODES, getPersona, isBetEvent, loadRuns, newEventId, PERSONAS, PICKER_FIELDS, PRESETS, recordRun, simulate } from '@/lib/simulator';
+import { clearRuns, defaultEvent, fmtK, GAME_CODES, getPersona, loadRuns, newEventId, PERSONAS, PICKER_FIELDS, PRESETS, recordRun, simulate } from '@/lib/simulator';
 import type { CheckStatus, Scenario, ScenarioEvent, SimulationResult, SimulationRun, StageId } from '@/lib/simulator';
 import './simulator.css';
 
@@ -56,7 +56,14 @@ const promo = channelPromos.find((item) => item.id === scenario.promoId) ?? chan
   const catalog = useMemo(() => EVENT_CATALOG.flatMap((category) => category.events), []);
 
   const updateEvent = (id: string, patch: Partial<ScenarioEvent>) => setScenario((current) => ({ ...current, events: current.events.map((event) => (event.id === id ? { ...event, ...patch } : event)) }));
-  const updateParam = (id: string, name: string, value: string) => setScenario((current) => ({ ...current, events: current.events.map((event) => (event.id === id ? { ...event, params: { ...event.params, [name]: value } } : event)) }));
+  /* Pre-match and Live are mutually exclusive market states: setting one flips the other so a scenario bet is never both or neither. */
+ const updateParam = (id: string, name: string, value: string) => setScenario((current) => ({ ...current, events: current.events.map((event) => {
+ if (event.id !== id) return event;
+ const params = { ...event.params, [name]: value };
+ if (name === 'Pre-match' && 'Live' in params) params.Live = value === 'Yes' ? 'No' : 'Yes';
+ if (name === 'Live' && 'Pre-match' in params) params['Pre-match'] = value === 'Yes' ? 'No' : 'Yes';
+ return { ...event, params };
+ }) }));
   const moveEvent = (index: number, delta: number) => setScenario((current) => { const events = [...current.events]; const target = index + delta; if (target < 0 || target >= events.length) return current; [events[index], events[target]] = [events[target], events[index]]; return { ...current, events }; });
   const loadPreset = (id: string) => { setScenario(clonePreset(id)); setResult(null); setSelected('trigger'); };
 const setChannel = (channel: Channel) => {
@@ -67,7 +74,7 @@ return { ...current, channel, promoId };
 });
 setResult(null);
 };
-  const restore = (item: SimulationRun) => { setScenario({ ...item.scenario, channel: item.scenario.channel ?? 'app', events: item.scenario.events.map((event) => ({ ...event, id: newEventId(), isLive: event.isLive === true, params: { ...event.params } })) }); setResult(null); setTab('new'); };
+  const restore = (item: SimulationRun) => { setScenario({ ...item.scenario, channel: item.scenario.channel ?? 'app', events: item.scenario.events.map((event) => ({ ...event, id: newEventId(), params: { ...event.params } })) }); setResult(null); setTab('new'); };
   const run = () => {
     const output = simulate(promo, getPersona(scenario.personaId), scenario.events, scenario.fixedAt, loadSettings(), scenario.channel);
     setResult(output);
@@ -136,8 +143,7 @@ setResult(null);
                     <div className="sim-event-fields">
                       <label className="sim-field">Minutes from fixed time<input style={inputStyle} type="number" value={event.offsetMinutes} onChange={(e) => { updateEvent(event.id, { offsetMinutes: Number(e.target.value) || 0 }); setResult(null); }} /></label>
                       <label className="sim-field">Provider<select style={inputStyle} value={event.gameCode} onChange={(e) => { updateEvent(event.id, { gameCode: e.target.value }); setResult(null); }}>{GAME_CODES.map((code) => <option key={code}>{code}</option>)}</select></label>
-                {isBetEvent(event.eventId) && <div className="sim-field sim-field--checkbox"><Checkbox checked={event.isLive} label="Live bet" onChange={(checked) => { updateEvent(event.id, { isLive: checked }); setResult(null); }} /></div>}
-                      {PICKER_FIELDS[event.eventId].map((name) => {
+                                      {PICKER_FIELDS[event.eventId].map((name) => {
                         const param = eventDef?.params.find((item) => item.name === name);
                         const options = param?.type === 'boolean' ? ['Yes', 'No'] : param?.options;
                         return <label className="sim-field" key={name}>{name}{options ? <select style={inputStyle} value={event.params[name] ?? ''} onChange={(e) => { updateParam(event.id, name, e.target.value); setResult(null); }}>{options.map((option) => <option key={option}>{option}</option>)}</select> : <input style={inputStyle} value={event.params[name] ?? ''} onChange={(e) => { updateParam(event.id, name, e.target.value); setResult(null); }} />}</label>;
@@ -168,7 +174,23 @@ setResult(null);
                     ))}
                   </div>
                   {stage.notes?.map((note) => <p className="sim-note" key={note} style={{ color: note.startsWith('Alert') ? T.destructive : T.success }}>{note}</p>)}
-                  {stage.ledger && (
+                  {stage.messages && stage.messages.length > 0 && (
+ <div className="sim-messages">
+ {stage.messages.map((message) => (
+ <div key={message.trigger} className="sim-message" style={{ background: T.offWhite, borderRadius: T.radiusSm }}>
+ <div className="sim-message__head">
+ <strong>{message.title}</strong>
+ <span style={{ color: T.textSecondary }}>{NOTIFICATION_TRIGGER_SHORT[message.trigger]} · {notificationChannelSummary(message.channels)}</span>
+ </div>
+ <p className="sim-message__body" style={{ color: T.textPrimary }}>{message.body}</p>
+ {message.smsSegments !== null && (
+ <span className="sim-message__meta" style={{ color: T.textSecondary }}>SMS · {message.body.length} chars · {message.smsSegments} segment{message.smsSegments === 1 ? '' : 's'}</span>
+ )}
+ </div>
+ ))}
+ </div>
+ )}
+ {stage.ledger && (
                     <div className="sim-ledger" style={{ background: T.offWhite, borderRadius: T.radiusSm }}>
                       {stage.ledger.lines.map((line) => <div className="sim-ledger__line" key={line.side}><span>{line.side} · {line.account}</span><b>{fmtK(line.amount)}</b></div>)}
                       <div className="sim-ledger__chips">{stage.ledger.chips.map((chip) => <span key={chip} style={{ border: `1px solid ${T.ghostBorder}`, borderRadius: T.radiusPill }}>{chip}</span>)}</div>

@@ -189,6 +189,15 @@ font-size: 14px;
   font-weight: 500;
 }
 
+/* Type tag + ID under the promotion name. */
+.promo-name__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
 .promo-id {
   font-size: 12px;
 }
@@ -202,10 +211,104 @@ font-size: 14px;
   white-space: nowrap;
 }
 
-.promo-schedule span {
+.promo-schedule > span {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+
+/* Toolbar "Filters" button (Funnel icon + optional count pill). */
+.promo-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.promo-filter-btn__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Active-filter chips row under the toolbar. */
+.promo-active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: -8px;
+}
+
+.promo-active-filters__clear {
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Filter panel (reuses the drawer shell at 400px). Compound selector so it
+   outranks the 520px .promo-drawer__panel rule declared further down. */
+@media (min-width: 640px) {
+  .promo-drawer__panel.promo-drawer__panel--filters {
+    width: 400px;
+  }
+}
+
+.promo-facets {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.promo-facet__title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.promo-facet__options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.promo-facet__empty,
+.promo-facet__hint {
+  font-size: 12px;
+}
+
+.promo-facet__hint {
+  margin-bottom: 8px;
+}
+
+.promo-drawer__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 24px;
+}
+
+.promo-drawer__footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .promo-actions {
@@ -399,6 +502,35 @@ font-size: 14px;
 
 .promo-drawer__section {
 margin-top: 24px;
+}
+
+/* Player notifications: table hint under the channel summary, cards in the drawer. */
+.promo-notify {
+display: flex;
+align-items: center;
+gap: 4px;
+margin-top: 4px;
+font-size: 12px;
+}
+
+.promo-notify-list {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.promo-notify-card {
+display: flex;
+flex-direction: column;
+gap: 4px;
+padding: 12px;
+}
+
+.promo-notify-card__head {
+display: flex;
+align-items: baseline;
+justify-content: space-between;
+gap: 12px;
 }
 
 .promo-drawer__empty {

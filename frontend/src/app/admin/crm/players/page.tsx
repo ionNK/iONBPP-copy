@@ -1,5 +1,6 @@
 import T from '@/theme/tokens';
 import { ComingSoon } from '@/components/ui';
+import { features } from '@/config/features';
 /* Shared page-skeleton structural classes (top bar, container) */
 import '../../promotions/promotions.css';
 
@@ -21,7 +22,9 @@ export default function PlayersPage() {
           bullets={[
             'Full award and promo participation history per player',
             'KYC and safer-gambling indicators surfaced alongside spend',
-            'Drill from any ledger or budget figure to the players behind it',
+            features.budgets
+              ? 'Drill from any ledger or budget figure to the players behind it'
+              : 'Drill from any ledger figure to the players behind it',
             'Built to support the vet-then-credit workflow for manual awards',
           ]}
           until="Player-level award data is available via the ledger export."

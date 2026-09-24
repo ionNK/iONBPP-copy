@@ -45,11 +45,25 @@ export type EventId =
 /** Boolean rule values use the same labels in storage and in controls. */
 export const BOOLEAN_OPTIONS = ['Yes', 'No'];
 
-/** Checkbox-only exclusions, shared by qualification editing and Review readback. */
-export const BET_RESTRICTIONS = [
+export interface BetRestriction {
+  /** Boolean event param the exclusion rule targets (`param = No`). */
+  param: string;
+  label: string;
+  summary: string;
+  warning: string;
+}
+
+/**
+ * Checkbox-only exclusions, shared by qualification editing and Review readback.
+ * A fixed set, shown on every trigger regardless of event: all of them are
+ * ticked by default because the standard offer excludes these bets, and the
+ * author opts out rather than in.
+ */
+export const BET_RESTRICTIONS: BetRestriction[] = [
  { param: 'Free Bet', label: 'Bets placed using free bets', summary: 'free-bet stakes', warning: 'Free-bet stakes are allowed to qualify' },
  { param: 'Voided', label: 'Voided bets', summary: 'voided bets', warning: 'Voided bets are allowed to qualify' },
  { param: 'Cancelled', label: 'Cancelled bets', summary: 'cancelled bets', warning: 'Cancelled bets are allowed to qualify' },
+  { param: 'Cashed Out', label: 'Cashed-out bets', summary: 'cashed-out bets', warning: 'Cashed-out bets are allowed to qualify' },
 ];
 
 /** Shared context params for every event's picker under the PLAYER group. */
@@ -74,7 +88,9 @@ export const EVENT_CATALOG: EventCategory[] = [
  { name: 'Channel', type: 'enum', group: 'bet', options: ['Web', 'Mobile Web', 'App', 'USSD'] },
  { name: 'Stake', type: 'float', group: 'bet' },
  { name: 'Odds', type: 'float', group: 'bet' },
- { name: 'Live', type: 'boolean', group: 'bet' },
+ /* Market state at placement: Pre-match = before the event starts, Live = in-play. A bet is exactly one of the two. */
+        { name: 'Pre-match', type: 'boolean', group: 'bet' },
+        { name: 'Live', type: 'boolean', group: 'bet' },
  ],
  },
  {
@@ -88,6 +104,8 @@ export const EVENT_CATALOG: EventCategory[] = [
  { name: 'Free Bet', type: 'boolean', group: 'bet' },
  { name: 'Result', type: 'enum', group: 'result', options: ['Won', 'Lost', 'Cashed Out'] },
  { name: 'Cash-out multiplier', type: 'float', group: 'result' },
+        /* Settled by cash-out (Result = Cashed Out). Boolean so it can be a checkbox restriction. */
+        { name: 'Cashed Out', type: 'boolean', group: 'result' },
  { name: 'Voided', type: 'boolean', group: 'result' },
  { name: 'Cancelled', type: 'boolean', group: 'result' },
  { name: 'Losing Legs', type: 'integer', group: 'result' },

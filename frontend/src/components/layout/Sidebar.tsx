@@ -16,10 +16,12 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  TestTubes,
   Trophy,
   Upload,
   Users,
 } from 'lucide-react';
+import { features } from '@/config/features';
 
 type NavItem = {
 label: string;
@@ -56,8 +58,13 @@ items: [
 { label: 'Lifecycles', href: '/admin/promotions/lifecycles', icon: <Route size={16} />, comingSoon: true, tour: 'nav-lifecycles' },
       { label: 'Messaging', href: '/admin/promotions/messaging', icon: <MessageSquare size={16} />, comingSoon: true },
       { label: 'Gamification', href: '/admin/promotions/gamification', icon: <Trophy size={16} />, comingSoon: true },
-      { label: 'Bulk Upload', href: '/admin/promotions/bulk-upload', icon: <Upload size={16} />, tour: 'nav-bulk-upload' },
-{ label: 'Approvals', href: '/admin/promotions/approvals', icon: <ClipboardCheck size={16} />, tour: 'nav-approvals' },
+      { label: 'Bulk Upload', href: '/admin/promotions/bulk-upload', icon: <Upload size={16} />, comingSoon: true, tour: 'nav-bulk-upload' },
+{ label: 'Approvals', href: '/admin/promotions/approvals', icon: <ClipboardCheck size={16} />, comingSoon: true, tour: 'nav-approvals' },
+/* Demo flag: hidden entirely when features.experiments is off; shown with the "TBC" pill when on. */
+...(features.experiments
+? [{ label: 'Experiments', href: '/admin/promotions/experiments', icon: <TestTubes size={16} />, comingSoon: true }]
+: []),
+
 ],
 },
 {

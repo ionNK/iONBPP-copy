@@ -1,5 +1,5 @@
 /**
- * Shared page-level form helpers for the New Promotion wizard (steps 1–7).
+ * Shared page-level form helpers for the New Promotion wizard (steps 1–8).
  * Composition only: primitives come from @/components/ui; colors from T.
  */
 import type { CSSProperties, ReactNode } from 'react';

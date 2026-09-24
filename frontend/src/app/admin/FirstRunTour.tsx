@@ -2,28 +2,28 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import T from '@/theme/tokens';
 import { Checkbox, CoachMarks } from '@/components/ui';
 import type { CoachMarkStep } from '@/components/ui';
+import { features } from '@/config/features';
 
 /**
- * Onboarding state. The tour is shown on each of the first MAX_SHOWS
- * successful logins (login/page.tsx raises PENDING_KEY in sessionStorage;
- * this component consumes it on mount, so a refresh never re-shows the tour).
- * Settings → About "Replay onboarding tour" resets the record and raises the
- * same flag. The legacy boolean key is migrated on first read.
+ * Onboarding state. The tour is shown after EVERY successful login
+ * (login/page.tsx raises PENDING_KEY in sessionStorage; this component
+ * consumes it on mount, so a refresh never re-shows the tour) until the user
+ * ticks "Don't show again" on the final step. Settings → About "Replay
+ * onboarding tour" clears that opt-out and raises the same flag. Legacy keys
+ * (boolean completed flag, v1 record with a show counter) are migrated on
+ * first read: only `dismissedForever` is kept.
  */
-export const ONBOARDING_KEY = 'onboarding.v1';
+export const ONBOARDING_KEY = 'onboarding.v2';
 export const PENDING_KEY = 'onboarding.pendingShow';
-export const MAX_SHOWS = 3;
-const LEGACY_KEY = 'onboarding.v1.completed';
+const LEGACY_KEYS = ['onboarding.v1.completed', 'onboarding.v1'];
 
 export interface OnboardingState {
-  shownCount: number;
   dismissedForever: boolean;
 }
 
-const DEFAULT_STATE: OnboardingState = { shownCount: 0, dismissedForever: false };
+const DEFAULT_STATE: OnboardingState = { dismissedForever: false };
 
 /* Targets = data-tour attributes on the Sidebar items and the promotions
  * primary button. Step 5 lives on /admin/promotions only, so CoachMarks falls
@@ -32,7 +32,9 @@ const STEPS: CoachMarkStep[] = [
   {
     target: 'nav-promotions',
     title: 'All Promotions',
-    body: 'Everything starts here: create, budget and track every promotion. Budget alerts warn you at 90% but never block awarding.',
+    body: features.budgets
+      ? 'Everything starts here: create, budget and track every promotion. Budget alerts warn you at 90% but never block awarding.'
+      : 'Everything starts here: create, schedule and track every promotion, then submit it for checker approval.',
   },
   {
     target: 'nav-bulk-upload',
@@ -66,18 +68,31 @@ export function saveOnboardingState(state: OnboardingState): void {
 }
 
 /**
- * Reads the record, migrating the legacy boolean key: a completed/skipped
- * v1 tour counts as all shows used (shownCount: MAX_SHOWS) and the old key
- * is removed. Storage failures fall back to "all shows used" so the tour
+ * Reads the record. Legacy keys are removed on first read; a v1 record's
+ * `dismissedForever` carries over, its show counter is dropped (the tour no
+ * longer has a cap). Storage failures fall back to "opted out" so the tour
  * never loops on a broken browser profile.
  */
 export function loadOnboardingState(): OnboardingState {
-  if (typeof window === 'undefined') return { ...DEFAULT_STATE, shownCount: MAX_SHOWS };
+  if (typeof window === 'undefined') return { dismissedForever: true };
   try {
-    const legacy = window.localStorage.getItem(LEGACY_KEY);
-    if (legacy !== null) {
-      window.localStorage.removeItem(LEGACY_KEY);
-      const migrated: OnboardingState = { shownCount: legacy === 'true' ? MAX_SHOWS : 0, dismissedForever: false };
+    let migrated: OnboardingState | null = null;
+    for (const key of LEGACY_KEYS) {
+      const legacy = window.localStorage.getItem(key);
+      if (legacy === null) continue;
+      window.localStorage.removeItem(key);
+      if (key === 'onboarding.v1') {
+        try {
+          const rec: unknown = JSON.parse(legacy);
+          if (typeof rec === 'object' && rec !== null && (rec as { dismissedForever?: unknown }).dismissedForever === true) {
+            migrated = { dismissedForever: true };
+          }
+        } catch {
+          /* Unreadable legacy record: start fresh. */
+        }
+      }
+    }
+    if (migrated) {
       saveOnboardingState(migrated);
       return migrated;
     }
@@ -86,12 +101,9 @@ export function loadOnboardingState(): OnboardingState {
     const parsed: unknown = JSON.parse(raw);
     if (typeof parsed !== 'object' || parsed === null) return { ...DEFAULT_STATE };
     const rec = parsed as Partial<Record<keyof OnboardingState, unknown>>;
-    return {
-      shownCount: typeof rec.shownCount === 'number' && Number.isFinite(rec.shownCount) ? Math.max(0, Math.floor(rec.shownCount)) : 0,
-      dismissedForever: rec.dismissedForever === true,
-    };
+    return { dismissedForever: rec.dismissedForever === true };
   } catch {
-    return { ...DEFAULT_STATE, shownCount: MAX_SHOWS };
+    return { dismissedForever: true };
   }
 }
 
@@ -119,14 +131,13 @@ function takePendingShow(): boolean {
 
 /**
  * Onboarding tour: mounted once in the admin shell (app/admin/layout.tsx).
- * Opens after a successful login while shownCount < MAX_SHOWS and the user
- * has not ticked "Don't show again"; suppressed on /admin/login, which
- * overlays the shell with its own full-viewport surface.
+ * Opens after every successful login unless the user has ticked "Don't show
+ * again"; suppressed on /admin/login, which overlays the shell with its own
+ * full-viewport surface.
  */
 export default function FirstRunTour() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [shownCount, setShownCount] = useState(0);
   const [dismissForever, setDismissForever] = useState(false);
   const onLogin = pathname === '/admin/login';
 
@@ -137,12 +148,8 @@ export default function FirstRunTour() {
    * what makes a refresh mid-session NOT re-show the tour. */
   useEffect(() => {
     if (onLogin || !takePendingShow()) return;
-    const state = loadOnboardingState();
-    if (state.dismissedForever || state.shownCount >= MAX_SHOWS) return;
-    const next: OnboardingState = { ...state, shownCount: state.shownCount + 1 };
-    saveOnboardingState(next);
+    if (loadOnboardingState().dismissedForever) return;
     /* eslint-disable-next-line react-hooks/set-state-in-effect -- hydration from session/localStorage after navigation */
-    setShownCount(next.shownCount);
     setDismissForever(false);
     setOpen(true);
   }, [onLogin]);
@@ -156,22 +163,17 @@ export default function FirstRunTour() {
     saveOnboardingState({ ...loadOnboardingState(), dismissedForever: checked });
   }, []);
 
+  /* Final step only: the opt-out. The tour otherwise returns after every login. */
   const footer = useCallback(
-    ({ isLast }: { isLast: boolean }) => (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span style={{ fontSize: 12, lineHeight: 1.35, color: T.textSecondary }}>
-          Shown {shownCount} of {MAX_SHOWS}
-        </span>
-        {isLast && (
-          <Checkbox
-            checked={dismissForever}
-            onChange={toggleDismissForever}
-            label="Don't show again"
-          />
-        )}
-      </div>
-    ),
-    [shownCount, dismissForever, toggleDismissForever],
+    ({ isLast }: { isLast: boolean }) =>
+      isLast ? (
+        <Checkbox
+          checked={dismissForever}
+          onChange={toggleDismissForever}
+          label="Don't show again"
+        />
+      ) : null,
+    [dismissForever, toggleDismissForever],
   );
 
   return <CoachMarks steps={STEPS} open={open && !onLogin} onComplete={complete} footer={footer} />;

@@ -28,7 +28,7 @@ export interface CoachMarksProps {
   onComplete: () => void;
   /**
    * Optional slot rendered below the body and above the Skip / Next / Done
-   * actions (e.g. "Shown n of 3", a final-step "Don't show again" control).
+   * actions (e.g. a final-step "Don't show again" control).
    * Nothing is rendered when absent.
    */
   footer?: (ctx: CoachMarkFooterContext) => ReactNode;

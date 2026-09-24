@@ -70,13 +70,32 @@ checked/indeterminate, white fill with ghostBorder outline when unchecked
 optional `label` plus 12px `description`),
 Checkbox group pattern (no primitive; compose Checkbox inline): a parent
 Checkbox that is checked when every child is selected and `indeterminate`
-when only some are, followed by the children in a horizontal wrapping flex
-row (gap 12, indented 24px under the parent), 14px labels, no icons. Wrap
-in `role="group"` with `aria-label`; at-least-one validation and the 12px
-destructive error stay with the caller. Used for promotion Channels
-(All channels; Web, Mobile web, App, USSD); read-only channel summaries are
+when only some are, followed by the children on the same horizontal
+wrapping flex row (gap 16), 14px labels; children may carry a leading 16px
+lucide icon in textSecondary (gap 6 before the label), the parent has none.
+Wrap in `role="group"` with `aria-label`; at-least-one validation and the
+12px destructive error stay with the caller. Used for promotion Channels
+(All channels; Web, Mobile web, App, USSD with the `CHANNEL_ICONS` Globe /
+Smartphone / AppWindow / Hash icons); read-only channel summaries are
 plain text via `channelSummary()`: "All channels" for a full set,
 otherwise the labels joined by ", "),
+FilterChip (Unity Chip, dismissible: ghost pill — white fill, ghostBorder
+outline, radiusPill; 12px/500 "Label: value" with the label in
+textSecondary; trailing 20px × button (lucide X 14px, activeFill hover,
+`aria-label="Remove {label} filter: {value}"`). Rendered one per selected
+facet value in a wrapping gap-8 row directly under the filter toolbar,
+plus a 12px underlined "Clear all" text button when more than one is
+active),
+Filter panel pattern (no primitive; compose in the page): toolbar
+GhostButton-styled "Filters" button with lucide Funnel 16px and a navy
+count pill when filters are applied; opens a right-side drawer (same
+scrim + panel shell as detail drawers, 400px) whose body is a gap-24
+column of facets — 14px/600 facet title over a gap-8 column of Checkboxes,
+Date range via DateRangePicker — and whose footer is GhostButton "Clear
+all" left, GhostButton Cancel + PrimaryButton Apply right. Selections are
+a draft until Apply; Esc / scrim / Cancel discard. Facets AND together,
+values within a facet OR. Used for Promotions (Status, Type, Channel,
+Vertical, Provider, Date range),
 EvidenceCard, ComingSoon (teaser card for unreleased "TBC" nav routes:
 white card radiusMd max-w 640, 20px/600 title + ghost navy "Coming soon"
 Badge, 14px textSecondary description, 14px bullets with 16px lucide Check,
@@ -85,8 +104,8 @@ CoachMarks (step-by-step onboarding: scrim + spotlight ring + 360px white
 card anchored to `[data-tour]` targets; 12px counter, 15px title, 14px body,
 Skip / Back / Next-Done footer; optional `footer?: (ctx: { index, total,
 isLast }) => ReactNode` slot rendered below the body and above the actions —
-FirstRunTour uses it for the 12px textSecondary "Shown n of 3" line and the
-final-step 14px "Don't show again" native checkbox).
+FirstRunTour uses it for the final-step 14px "Don't show again" checkbox; the
+tour otherwise opens after every login).
 DateRangePicker / DateTimeField / TimeField (Unity Date Picker; replaces
 every native `type="date|time|datetime-local"` input). Trigger = ghost
 field (ghostBorder, radiusSm, lucide Calendar 16px, 14px text: range
@@ -141,7 +160,8 @@ Any new internal tool screen must use this shell unless explicitly exempted.
 ## Page skeleton (list/queue screens)
 Top bar (white, border-bottom; title + context Badge left, primary action
 right) → content max-w-[1280px] centered (Unity _Container is 1280) →
-StatChip filter row → filter bar card (search + FilterSelects) → table
+StatChip filter row → filter bar card (search + FilterSelects, or search +
+Filters button with FilterChip row beneath when there are many facets) → table
 card (rows hover offWhite, whole row clickable + explicit small GhostButton)
 → empty state. Detail views: right-side drawer sm:w-[520px], scrim overlay,
 header → 2-col summary grid → tabs → scrollable body.
@@ -149,6 +169,12 @@ header → 2-col summary grid → tabs → scrollable body.
 ## Interaction rules
 - Confirm-before-commit for any state-changing action (maker-checker).
 - Budget indicators alert at >=90% (destructive) but NEVER block.
+- Feature flags live in frontend/src/config/features.ts. Budget surfaces
+  (BR-6) are gated on `features.budgets` — hidden for the current
+  presentation, code retained; flip the flag to restore. The wizard
+  Content step (CMS: tile copy, banners, T&Cs) and its Review summary
+  are gated the same way on `features.content`; saved content data on
+  existing drafts is preserved while hidden.
 - Notices: offWhite panel + icon + Footnote text; success on
  rgba(0,118,0,0.08).
 - Icons: lucide-react only, 12–20px.
@@ -157,3 +183,8 @@ header → 2-col summary grid → tabs → scrollable body.
 Currency K 1,250.00 (ZMW); MSISDNs masked 26097••••214. Status colors:
 Active=success, Scheduled=blue, Expired=darkGrey,
 Draft=rgba(0,21,40,0.45), Critical=destructive.
+Experiments (Promotions → Experiments, demo flag `features.experiments`):
+Running=success, Completed=darkGrey, Draft=draft ghost pill. Results show
+counts and rates only — never award values or currency. A promotion that is
+an arm of a Running experiment carries a read-only navy ghost
+`In experiment EXP-00X` tag in the promotions list.

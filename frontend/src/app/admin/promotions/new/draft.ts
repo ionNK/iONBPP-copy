@@ -17,11 +17,11 @@ import type {
  TemplateId,
  TierRow,
 } from '@/data/promotion-templates';
-import { QUALIFICATION_EVENT_IDS, isNumericType } from '@/data/event-catalog';
+import { BET_RESTRICTIONS, QUALIFICATION_EVENT_IDS, isNumericType } from '@/data/event-catalog';
 import type { EventId } from '@/data/event-catalog';
 import { isRangeOperator, isZeroArityOperator } from '@/data/operator-catalog';
-import { CHANNELS, DEFAULT_BET_TIMING, allChannels, normalizeBetTiming } from '@/lib/promotions';
-import type { BetTiming, Channel } from '@/lib/promotions';
+import { CHANNELS, allChannels, cloneNotifications, defaultDraftNotifications } from '@/lib/promotions';
+import type { Channel, Notifications } from '@/lib/promotions';
 
 export interface TriggerRule {
  id: string;
@@ -41,8 +41,6 @@ export interface Trigger {
 export interface Qualification {
  triggers: Trigger[];
  counting: TriggerRule[];
- /** Which bets can qualify: prematch, live or both (default both). */
- betTiming: BetTiming;
  eligibility: {
  audience: 'all' | 'new_customers';
  windowDays?: number;
@@ -109,6 +107,8 @@ export interface PromotionDraft {
  endTime: string;
  /* Content */
  shortDescription: string;
+ /* Optional player messages sent when a player qualifies or receives an award. */
+ notifications: Notifications;
  bannerSlots: BannerSlot[];
  nextSlotId: number;
  tcsFileName: string;
@@ -149,11 +149,31 @@ function sanitizeRule(value: unknown): TriggerRule | undefined {
  };
 }
 
+/**
+ * Canonical exclusion rules (`param = No`) for every restriction. The set is
+ * fixed and independent of the trigger event: every new trigger starts with all
+ * of them ticked so the standard offer excludes free-bet, voided, cancelled and
+ * cashed-out bets unless the author unticks one. Rule IDs are deterministic per
+ * trigger so re-creation is stable.
+ */
+export function defaultRestrictionRules(triggerId: string): TriggerRule[] {
+  return BET_RESTRICTIONS.map((restriction) => ({
+    id: `${triggerId}-restrict-${restriction.param.toLowerCase().replace(/\s+/g, '-')}`,
+    param: restriction.param,
+    type: 'boolean',
+    operator: '=',
+    value: 'No',
+  }));
+}
+
 export function emptyQualification(): Qualification {
  return {
- triggers: [{ id: 'primary-trigger', eventId: QUALIFICATION_EVENT_IDS.betSettled, rules: [] }],
+ triggers: [{
+      id: 'primary-trigger',
+      eventId: QUALIFICATION_EVENT_IDS.betSettled,
+      rules: defaultRestrictionRules('primary-trigger'),
+    }],
  counting: [],
- betTiming: DEFAULT_BET_TIMING,
  eligibility: { audience: 'all' },
  };
 }
@@ -165,7 +185,6 @@ export function cloneQualification(qualification: Qualification): Qualification 
  rules: trigger.rules.map((rule) => ({ ...rule })),
  })),
  counting: qualification.counting.map((rule) => ({ ...rule })),
- betTiming: qualification.betTiming,
  eligibility: { ...qualification.eligibility },
  };
 }
@@ -209,16 +228,12 @@ export function sanitizeQualification(value: unknown): Qualification {
  return sanitized ? [sanitized] : [];
  });
 
- /* Drafts saved before bet timing existed carry no key and accept both. */
- const betTiming = normalizeBetTiming(candidate.betTiming);
-
  const rawEligibility = candidate.eligibility;
 
  if (!rawEligibility || typeof rawEligibility !== 'object') {
  return {
  triggers,
  counting,
- betTiming,
  eligibility: { audience: 'all' },
  };
  }
@@ -229,7 +244,6 @@ export function sanitizeQualification(value: unknown): Qualification {
  return {
  triggers,
  counting,
- betTiming,
  eligibility: { audience: 'all' },
  };
  }
@@ -237,7 +251,6 @@ export function sanitizeQualification(value: unknown): Qualification {
  return {
  triggers,
  counting,
- betTiming,
  eligibility: {
  audience: 'new_customers',
  ...(typeof eligibility.windowDays === 'number'
@@ -307,6 +320,7 @@ channels: allChannels(),
  endDate: '',
  endTime: '',
  shortDescription: '',
+ notifications: defaultDraftNotifications(),
  bannerSlots: baseSlots(),
  nextSlotId: 3,
  tcsFileName: '',
@@ -326,6 +340,7 @@ export function templateDraft(id: TemplateId): PromotionDraft {
  : emptyQualification(),
  tiers: (prefill.tiers ?? SEED_TIERS).map((t) => ({ ...t })),
     channels: prefill.channels ? [...prefill.channels] : allChannels(),
+ notifications: prefill.notifications ? cloneNotifications(prefill.notifications) : defaultDraftNotifications(),
  template: id,
  step: 1,
  dirty: false,
@@ -344,6 +359,19 @@ export function validateBasics(d: PromotionDraft): Record<string, string> {
 }
 
 /** Step 2 validation reads only the current qualification shape. */
+/** Both enabled message triggers need a delivery channel and complete copy. */
+export function validateNotifications(d: PromotionDraft): Record<string, string> {
+ const errors: Record<string, string> = {};
+ for (const trigger of ['onQualify', 'onAward'] as const) {
+ const rule = d.notifications[trigger];
+ if (!rule.enabled) continue;
+ if (rule.channels.length === 0) errors[`notification:${trigger}:channels`] = 'Select at least one delivery channel.';
+ if (!rule.title.trim()) errors[`notification:${trigger}:title`] = 'Title is required when this notification is enabled.';
+ if (!rule.body.trim()) errors[`notification:${trigger}:body`] = 'Message is required when this notification is enabled.';
+ }
+ return errors;
+}
+
 export function validateQualification(d: PromotionDraft): Record<string, string> {
  const errors: Record<string, string> = {};
 

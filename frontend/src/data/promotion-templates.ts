@@ -1,6 +1,7 @@
 /** Static catalog for the New Promotion wizard. */
 import type { Qualification } from '@/app/admin/promotions/new/draft';
-import type { Channel } from '@/lib/promotions';
+import { AVIATOR_WELCOME_NOTIFICATIONS, MONEY_BACK_NOTIFICATIONS, cloneNotifications } from '@/lib/promotions';
+import type { Channel, Notifications } from '@/lib/promotions';
 import type { EventId } from '@/data/event-catalog';
 
 export type TemplateId = 'welcome_offer' | 'cashback';
@@ -43,6 +44,7 @@ export interface TemplatePrefill {
  /* Budget */ budget?: string; alertThreshold?: string; alertRecipients?: string;
  /* Schedule */ startDate?: string; startTime?: string; endMode?: EndMode; endDate?: string; endTime?: string;
  /* Content */ shortDescription?: string;
+ /* Notifications */ notifications?: Notifications;
 }
 
 export interface PromotionTemplate { id: TemplateId; name: string; caption: string; prefill: TemplatePrefill; }
@@ -68,13 +70,13 @@ export const PROMOTION_TEMPLATES: PromotionTemplate[] = [
  { id: 'tpl-wo-freebet', param: 'Free Bet', type: 'boolean', operator: '=', value: 'No' },
  { id: 'tpl-wo-voided', param: 'Voided', type: 'boolean', operator: '=', value: 'No' },
  { id: 'tpl-wo-cancelled', param: 'Cancelled', type: 'boolean', operator: '=', value: 'No' },
+ /* No 'Cashed Out = No' here: Aviator rounds are cashed out by design, so this offer rewards them (Result includes Cashed Out). */
  ],
  },
  ],
  counting: [
  { id: 'tpl-wo-qualifying-bets-per-day', param: 'Qualifying bets per day', type: 'integer', operator: '>=', value: '10' },
  ],
- betTiming: 'both',
  eligibility: { audience: 'new_customers', windowDays: 5, nonConsecutive: true },
  },
  rewardType: 'freebet',
@@ -83,6 +85,7 @@ export const PROMOTION_TEMPLATES: PromotionTemplate[] = [
  restrictedProduct: 'Aviator', wholeStakeOnly: true, winningsExcludeStake: true,
  withholdOtherOffers: true, alertThreshold: '90', endMode: 'ongoing',
  shortDescription: 'Betika brings you exclusive and thrilling Aviator challenges like never before!',
+ notifications: cloneNotifications(AVIATOR_WELCOME_NOTIFICATIONS),
  },
  },
  {
@@ -104,17 +107,17 @@ export const PROMOTION_TEMPLATES: PromotionTemplate[] = [
  { id: 'tpl-cb-freebet', param: 'Free Bet', type: 'boolean', operator: '=', value: 'No' },
  { id: 'tpl-cb-voided', param: 'Voided', type: 'boolean', operator: '=', value: 'No' },
  { id: 'tpl-cb-cancelled', param: 'Cancelled', type: 'boolean', operator: '=', value: 'No' },
+ { id: 'tpl-cb-cashed-out', param: 'Cashed Out', type: 'boolean', operator: '=', value: 'No' },
  ],
  },
  ],
  counting: [],
- /* Mirrors seed PR-002: Money Back is a prematch-only cashback. */
- betTiming: 'prematch',
  eligibility: { audience: 'all' },
  },
  rewardType: 'cash', payoutMode: 'tiers', tiers: SEED_TIERS.map((t) => ({ ...t })),
  payoutCap: '1000', creditTiming: 'next-day', creditTime: '14:00', alertThreshold: '90',
  endMode: 'ongoing', shortDescription: '',
+ notifications: cloneNotifications(MONEY_BACK_NOTIFICATIONS),
  },
  },
 ];

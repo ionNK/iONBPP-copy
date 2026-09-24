@@ -9,16 +9,17 @@ Check, ChevronLeft, CircleCheck, FileText, ImagePlus, Info, Plus, Trash2, Triang
 import '../promotions.css';
 import './new.css';
 import T from '@/theme/tokens';
-import { Badge, DateTimeField, GhostButton, PrimaryButton, TimeField, Toggle, parseIsoDateTime, toIsoDate, toIsoTime } from '@/components/ui';
-import { addPromotion, nextPromoId, setListNotice } from '@/lib/promotions';
-import type { Promo } from '@/lib/promotions';
-import { BET_TIMING_LABELS, channelSummary, normalizeChannels } from '@/lib/promotions';
+import { Badge, Checkbox, DateTimeField, GhostButton, PrimaryButton, TimeField, Toggle, parseIsoDateTime, toIsoDate, toIsoTime } from '@/components/ui';
+import { addPromotion, cloneNotifications, nextPromoId, setListNotice } from '@/lib/promotions';
+import type { NotificationTrigger, Notifications, Promo } from '@/lib/promotions';
+import { NOTIFICATION_CHANNELS, NOTIFICATION_CHANNEL_LABELS, NOTIFICATION_PLACEHOLDERS, NOTIFICATION_TRIGGER_LABELS, SMS_SEGMENT_LENGTH, channelSummary, notificationChannelSummary, normalizeChannels, normalizeNotifications, placeholderToken, smsSegments } from '@/lib/promotions';
 import { BET_RESTRICTIONS, catalogEventLabel } from '@/data/event-catalog';
 import { isRangeOperator, isZeroArityOperator, QUALIFICATION_OPERATOR_VALUES } from '@/data/operator-catalog';
 import { getPromotionType } from '@/data/promotion-templates';
 import type { TemplateId, TierRow } from '@/data/promotion-templates';
-import { DRAFT_KEY, baseDraft, sanitizeDraftChannels, sanitizeQualification, templateDraft, validateBasics, validateQualification } from './draft';
+import { DRAFT_KEY, baseDraft, sanitizeDraftChannels, sanitizeQualification, templateDraft, validateBasics, validateNotifications, validateQualification } from './draft';
 import type { BannerSlot, PromotionDraft, TriggerRule } from './draft';
+import { features } from '@/config/features';
 import { Field, inputStyle } from './fields';
 import { Step1Basics } from './Step1Basics';
 import { Step2Qualification } from './Step2Qualification';
@@ -26,7 +27,33 @@ import { Step2Qualification } from './Step2Qualification';
 /* Draft model lives in ./draft: a single PromotionDraft persisted to
  * localStorage (DRAFT_KEY), prefilled from the template catalog. */
 
-const STEPS = ['Basics', 'Qualification', 'Award', 'Budget', 'Schedule', 'Content', 'Review'];
+/* Wizard steps. Budget (BR-6) is gated on features.budgets and Content on features.content:
+ * with a flag off the step is filtered out and STEP.<id> resolves to 0, so its JSX /
+ * validation / review row are unreachable but retained. Every step reference goes through
+ * STEP.<id>, never a literal, so the stepper renumbers with no gap and Back/Continue
+ * (step ± 1 over the filtered list) skip hidden steps automatically. */
+type StepId = 'basics' | 'qualification' | 'award' | 'budget' | 'schedule' | 'content' | 'notifications' | 'review';
+const ALL_STEPS: { id: StepId; label: string }[] = [
+{ id: 'basics', label: 'Basics' },
+{ id: 'qualification', label: 'Qualification' },
+{ id: 'award', label: 'Award' },
+{ id: 'budget', label: 'Budget' },
+{ id: 'schedule', label: 'Schedule' },
+{ id: 'content', label: 'Content' },
+{ id: 'notifications', label: 'Notifications' },
+{ id: 'review', label: 'Review' },
+];
+const HIDDEN_STEPS: StepId[] = [
+  ...(features.budgets ? [] : ['budget' as const]),
+  ...(features.content ? [] : ['content' as const]),
+];
+const STEP_DEFS = ALL_STEPS.filter((s) => !HIDDEN_STEPS.includes(s.id));
+const STEPS = STEP_DEFS.map((s) => s.label);
+/** 1-based step number per id; 0 when the step is hidden by a feature flag. */
+const STEP: Record<StepId, number> = ALL_STEPS.reduce((acc, s) => {
+acc[s.id] = STEP_DEFS.findIndex((d) => d.id === s.id) + 1;
+return acc;
+}, {} as Record<StepId, number>);
 const VERTICALS = ['Sportsbook', 'Aviator', 'Casino', 'Crash', 'Virtuals'];
 const EXTRA_PLACEMENTS = ['Homepage', 'Casino', 'Crash'];
 const DEVICES = ['Desktop', 'Mobile'];
@@ -42,7 +69,7 @@ function qualificationRuleSummary(rule: TriggerRule): string {
   return `${label} ${rule.value || '·'}`;
 }
 
-/** Read each OR branch independently; another trigger cannot cover its exclusions. */
+/** Read each OR branch independently; another trigger cannot cover its exclusions. The restriction set is fixed, whatever the event. */
 function qualificationRestrictionRows(rules: TriggerRule[], index: number): [string, string][] {
   const active = BET_RESTRICTIONS.filter((restriction) => rules.some((rule) =>
     rule.param === restriction.param && rule.operator === QUALIFICATION_OPERATOR_VALUES.equals && rule.value === 'No',
@@ -61,9 +88,9 @@ function qualificationRestrictionRows(rules: TriggerRule[], index: number): [str
 /* Per-step required-field validation → inline errors keyed by field. */
 function validateStep(d: PromotionDraft, step: number): Record<string, string> {
 const e: Record<string, string> = {};
-if (step === 1) return validateBasics(d);
-if (step === 2) return validateQualification(d);
-if (step === 3) {
+if (step === STEP.basics) return validateBasics(d);
+if (step === STEP.qualification) return validateQualification(d);
+if (step === STEP.award) {
 if (d.rewardType === 'freebet') {
 if (!d.freebetCount || Number(d.freebetCount) <= 0) e.freebetCount = 'Freebet count is required.';
 if (!d.freebetValue || Number(d.freebetValue) <= 0) e.freebetValue = 'Freebet value is required.';
@@ -71,7 +98,7 @@ if (!d.freebetValue || Number(d.freebetValue) <= 0) e.freebetValue = 'Freebet va
 e.fixedAmount = 'Fixed amount is required.';
 }
 }
-if (step === 5) {
+if (step === STEP.schedule) {
 if (!d.startDate) e.startDate = 'Start date is required.';
 if (!d.startTime) e.startTime = 'Start time is required.';
 if (d.endMode === 'date') {
@@ -79,9 +106,10 @@ if (!d.endDate) e.endDate = 'End date is required.';
 if (!d.endTime) e.endTime = 'End time is required.';
 }
 }
-if (step === 6) {
+if (step === STEP.content) {
 if (!d.shortDescription.trim()) e.shortDescription = 'Short description is required.';
 }
+if (step === STEP.notifications) return validateNotifications(d);
 return e;
 }
 
@@ -103,11 +131,16 @@ type: typeLabel(d),
 /* Zambia is implicit in this prototype (no Market field in the wizard). */
 market: 'Zambia',
 schedule: scheduleLabel(d),
-budget: d.budget ? Number(d.budget) : null,
+/* BR-6 budget is only captured when the Budget step is enabled. */
+budget: features.budgets && d.budget ? Number(d.budget) : null,
 spend: null,
 status,
 channels: normalizeChannels(d.channels),
-betTiming: d.qualification.betTiming,
+notifications: cloneNotifications(d.notifications),
+/* Step 1 "Product vertical" select; empty = cross-product. */
+vertical: d.vertical || null,
+/* PLACEHOLDER: the wizard captures no provider yet (Settings owns provider codes). */
+providerCode: null,
 };
 }
 
@@ -147,6 +180,10 @@ const [errors, setErrors] = useState<Record<string, string>>({});
 const [confirmSubmit, setConfirmSubmit] = useState(false);
 const [confirmDiscard, setConfirmDiscard] = useState(false);
 const restored = useRef(false);
+/* The pristine mount state. It is never persisted: under Strict Mode the persist effect
+ * runs in the same commit as the restore effect (before the restored draft has rendered),
+ * so writing it would clobber the saved draft — hidden Content fields included. */
+const initialDraft = useRef(draft);
 
 /* Restore a persisted draft on load. */
 useEffect(() => {
@@ -169,10 +206,14 @@ const tpl = rest.template;
 setDraft({
 ...baseDraft(),
 ...rest,
+/* A draft saved with more steps (e.g. Budget or Content enabled) must not land past the last step.
+ * Content fields (shortDescription, bannerSlots, tcs*) stay on the draft via ...rest while hidden. */
+step: Math.min(Math.max(Number(rest.step) || 1, 1), STEPS.length),
 template: tpl === 'welcome_offer' || tpl === 'cashback' ? tpl : null,
 /* Pre-rules-model drafts (flat fields / no primary trigger) fall back to an empty qualification. */
 qualification: sanitizeQualification(rest.qualification),
 channels: sanitizeDraftChannels(rest.channels),
+notifications: normalizeNotifications(rest.notifications),
 });
 }
 } catch {
@@ -180,9 +221,10 @@ channels: sanitizeDraftChannels(rest.channels),
 }
 }, []);
 
-/* Persist on every change (skipped until the restore effect has run). */
+/* Persist on every change (skipped until the restore effect has run and for the
+ * untouched mount state, which would otherwise overwrite the stored draft). */
 useEffect(() => {
-if (!restored.current) return;
+if (!restored.current || draft === initialDraft.current) return;
 try {
 window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
 } catch {
@@ -197,6 +239,12 @@ update({ [key]: value, dirty: true } as Partial<PromotionDraft>);
 setErrors((prev) => {
 const next = { ...prev };
 delete next[key as string];
+/* Notification edits invalidate every per-trigger notification error. */
+if (key === 'notifications') {
+for (const errorKey of Object.keys(next)) {
+if (errorKey.startsWith('notification:')) delete next[errorKey];
+}
+}
 /* Qualification edits invalidate trigger, counting and eligibility errors. */
 if (key === 'qualification') {
 for (const errorKey of Object.keys(next)) {
@@ -276,6 +324,11 @@ setDraft((d) => ({ ...d, bannerSlots: d.bannerSlots.filter((s) => s.id !== slotI
 
 const updateSlot = (slotId: number, patch: Partial<BannerSlot>) =>
 setDraft((d) => ({ ...d, bannerSlots: d.bannerSlots.map((s) => (s.id === slotId ? { ...s, ...patch } : s)) }));
+
+/* Notification edits go through setField so the draft is marked dirty and
+ * stale notification errors clear. */
+const setNotificationRule = (trigger: NotificationTrigger, patch: Partial<Notifications[NotificationTrigger]>) =>
+setField('notifications', { ...draft.notifications, [trigger]: { ...draft.notifications[trigger], ...patch } });
 
 const addTier = () => setDraft((d) => ({ ...d, tiers: [...d.tiers, { odds: '', multiplier: '' }] }));
 const removeTier = (i: number) => setDraft((d) => ({ ...d, tiers: d.tiers.filter((_, idx) => idx !== i) }));
@@ -369,8 +422,8 @@ style={{ color: current ? T.textPrimary : T.textSecondary, fontWeight: current ?
 </ol>
 
 <div className="np-card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}>
-{/* ---------- STEP 1: BASICS ---------- */}
-{draft.step === 1 && (
+{/* ---------- STEP: BASICS ---------- */}
+{draft.step === STEP.basics && (
 <Step1Basics
 draft={draft}
 errors={errors}
@@ -380,12 +433,12 @@ onDetachTemplate={detachTemplate}
 />
 )}
 
-{/* ---------- STEP 2: QUALIFICATION ---------- */}
-{draft.step === 2 && <Step2Qualification draft={draft} errors={errors} onEdit={setField} />}
+{/* ---------- STEP: QUALIFICATION ---------- */}
+{draft.step === STEP.qualification && <Step2Qualification draft={draft} errors={errors} onEdit={setField} />}
 
 
-{/* ---------- STEP 3: AWARD ---------- */}
-{draft.step === 3 && (
+{/* ---------- STEP: AWARD ---------- */}
+{draft.step === STEP.award && (
 <>
 <h2 className="np-card__heading" style={{ color: T.textPrimary }}>Award</h2>
 <div className="np-form-grid">
@@ -626,8 +679,8 @@ onChange={(e) => setField('restrictedProduct', e.target.value)}
 </>
 )}
 
-{/* ---------- STEP 4: BUDGET ---------- */}
-{draft.step === 4 && (
+{/* ---------- STEP: BUDGET (BR-6) — hidden behind features.budgets (STEP.budget === 0 when off) ---------- */}
+{features.budgets && draft.step === STEP.budget && (
 <>
 <h2 className="np-card__heading" style={{ color: T.textPrimary }}>Budget</h2>
 <div className="np-form-grid">
@@ -666,8 +719,8 @@ Budgets alert the business when spend reaches the threshold. They never block aw
 )}
 
 
-{/* ---------- STEP 5: SCHEDULE ---------- */}
-{draft.step === 5 && (
+{/* ---------- STEP: SCHEDULE ---------- */}
+{draft.step === STEP.schedule && (
 <>
 <h2 className="np-card__heading" style={{ color: T.textPrimary }}>Schedule</h2>
 <div className="np-form-grid">
@@ -728,8 +781,9 @@ Ongoing
 )}
 
 
-{/* ---------- STEP 6: CONTENT (CMS) ---------- */}
-{draft.step === 6 && (
+{/* ---------- STEP: CONTENT (CMS) ---------- */}
+{/* Hidden behind features.content: STEP.content is 0 while the flag is off, so this never renders. */}
+{draft.step === STEP.content && (
 <>
 <h2 className="np-card__heading" style={{ color: T.textPrimary }}>Content</h2>
 
@@ -905,14 +959,110 @@ style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.r
 )}
 
 
-{/* ---------- STEP 7: REVIEW ---------- */}
-{draft.step === 7 && (
+{/* ---------- STEP: NOTIFICATIONS ---------- */}
+{draft.step === STEP.notifications && (
+<>
+<h2 className="np-card__heading" style={{ color: T.textPrimary }}>Notifications</h2>
+<p className="np-hint" style={{ color: T.textSecondary }}>
+Optional player messages. Each is sent once when its event happens. The award message is on by default; turn on the qualify message if you need it.
+Placeholders in double braces are filled in at send time.
+</p>
+{/* Award first, qualify second. Each rule's fields render only while its toggle (rule.enabled) is on. */}
+              {(['onAward', 'onQualify'] as const).map((trigger, index) => {
+const rule = draft.notifications[trigger];
+const channelsError = errors[`notification:${trigger}:channels`];
+const titleError = errors[`notification:${trigger}:title`];
+const bodyError = errors[`notification:${trigger}:body`];
+const bodyId = `np-notification-${trigger}-body`;
+return (
+<div key={trigger} className="np-section" style={index > 0 ? { borderTop: `1px solid ${T.border}` } : undefined}>
+<div className="np-toggle-row" style={{ color: T.textPrimary }}>
+<div>
+<h3 className="np-section__title" style={{ color: T.textPrimary, margin: 0 }}>{NOTIFICATION_TRIGGER_LABELS[trigger]}</h3>
+<p className="np-hint" style={{ color: T.textSecondary }}>
+{trigger === 'onQualify'
+? 'Sent as soon as the qualifying event is confirmed.'
+: 'Sent when the reward is credited to the player.'}
+</p>
+</div>
+<Toggle
+checked={rule.enabled}
+ariaLabel={`Send a message ${trigger === 'onQualify' ? 'when a player qualifies' : 'when a player is awarded'}`}
+onChange={(checked) => setNotificationRule(trigger, { enabled: checked })}
+/>
+</div>
+{rule.enabled && (
+<div className="np-form-grid" style={{ marginTop: 12 }}>
+<Field label="Delivery channels" required full error={channelsError}>
+<div role="group" aria-label={`${NOTIFICATION_TRIGGER_LABELS[trigger]} delivery channels`} style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+{NOTIFICATION_CHANNELS.map((channel) => (
+<Checkbox
+key={channel}
+checked={rule.channels.includes(channel)}
+label={NOTIFICATION_CHANNEL_LABELS[channel]}
+onChange={(checked) => setNotificationRule(trigger, {
+channels: checked
+? NOTIFICATION_CHANNELS.filter((c) => c === channel || rule.channels.includes(c))
+: rule.channels.filter((c) => c !== channel),
+})}
+/>
+))}
+</div>
+</Field>
+<Field label="Title" required full error={titleError}>
+<input
+type="text"
+className="np-input"
+style={inputStyle(titleError)}
+value={rule.title}
+maxLength={80}
+placeholder="e.g. Your reward is on its way"
+aria-label={`${NOTIFICATION_TRIGGER_LABELS[trigger]} title`}
+onChange={(e) => setNotificationRule(trigger, { title: e.target.value })}
+/>
+</Field>
+<Field label="Message" required full error={bodyError}>
+<textarea
+id={bodyId}
+className="np-input np-textarea"
+style={inputStyle(bodyError)}
+value={rule.body}
+placeholder="Hi {{firstName}}, ..."
+aria-label={`${NOTIFICATION_TRIGGER_LABELS[trigger]} message`}
+onChange={(e) => setNotificationRule(trigger, { body: e.target.value })}
+/>
+<div className="np-radio-group" style={{ marginTop: 8 }} aria-label="Insert placeholder">
+{NOTIFICATION_PLACEHOLDERS.map((placeholder) => (
+<GhostButton
+key={placeholder}
+small
+onClick={() => setNotificationRule(trigger, { body: `${rule.body}${rule.body && !rule.body.endsWith(' ') ? ' ' : ''}${placeholderToken(placeholder)}` })}
+>
+<Plus size={12} /> {placeholderToken(placeholder)}
+</GhostButton>
+))}
+</div>
+<p className="np-hint" style={{ color: T.textSecondary, marginTop: 8 }}>
+{rule.body.length} characters
+{rule.channels.includes('sms') ? ` · SMS: ${smsSegments(rule.body.length)} segment(s) at ${SMS_SEGMENT_LENGTH} characters each` : ''}
+</p>
+</Field>
+</div>
+)}
+</div>
+);
+})}
+</>
+)}
+
+{/* ---------- STEP: REVIEW ---------- */}
+{draft.step === STEP.review && (
 <>
 <h2 className="np-card__heading" style={{ color: T.textPrimary }}>Review</h2>
 <div className="np-review-grid">
 <ReviewSection
 title="Basics"
-step={1}
+step={STEP.basics}
 onEdit={goToStep}
 rows={[
 ['Name', draft.name.trim() || '·'],
@@ -922,7 +1072,7 @@ rows={[
 />
 <ReviewSection
 title="Qualification"
-step={2}
+step={STEP.qualification}
 onEdit={goToStep}
 rows={[
 ['Qualifying bet', `${qualificationRules.length} rule(s) across ${draft.qualification.triggers.length} trigger(s)`],
@@ -943,7 +1093,6 @@ draft.qualification.counting.length > 0
 : 'Each qualifying event (subject to award limits)',
 ],
 ['Channels', selectedChannelSummary],
-['Bet timing', BET_TIMING_LABELS[draft.qualification.betTiming]],
 [
 'Eligibility',
 draft.qualification.eligibility.audience === 'all'
@@ -956,7 +1105,7 @@ draft.qualification.eligibility.audience === 'all'
 
 <ReviewSection
 title="Award"
-step={3}
+step={STEP.award}
 onEdit={goToStep}
 rows={[
 ['Reward type', draft.rewardType === 'freebet' ? 'Freebet' : 'Cash'],
@@ -989,9 +1138,11 @@ draft.winningsExcludeStake ? 'Winnings exclude stake' : '',
 ['Withhold other offers', draft.withholdOtherOffers ? 'On' : 'Off'],
 ]}
 />
+{/* Budget review row (BR-6): hidden behind features.budgets. */}
+{features.budgets && (
 <ReviewSection
 title="Budget"
-step={4}
+step={STEP.budget}
 onEdit={goToStep}
 rows={[
 ['Budget amount', draft.budget ? `K ${draft.budget}` : '·'],
@@ -999,18 +1150,21 @@ rows={[
 ['Alert recipients', draft.alertRecipients || '·'],
 ]}
 />
+)}
 <ReviewSection
 title="Schedule"
-step={5}
+step={STEP.schedule}
 onEdit={goToStep}
 rows={[
 ['Start', draft.startDate ? `${draft.startDate} ${draft.startTime || ''}`.trim() : '·'],
 ['End', draft.endMode === 'ongoing' ? 'Ongoing' : `${draft.endDate || '·'} ${draft.endTime || ''}`.trim()],
 ]}
 />
+{/* Content review row: hidden behind features.content alongside the step. */}
+{features.content && (
 <ReviewSection
 title="Content"
-step={6}
+step={STEP.content}
 onEdit={goToStep}
 badge={
 contentIncomplete ? (
@@ -1026,6 +1180,21 @@ rows={[
 ['T&Cs', draft.tcsFileName || 'Not uploaded'],
 ]}
 />
+)}
+<ReviewSection
+title="Notifications"
+step={STEP.notifications}
+onEdit={goToStep}
+rows={(['onAward', 'onQualify'] as const).map((trigger): [string, string] => {
+const rule = draft.notifications[trigger];
+return [
+NOTIFICATION_TRIGGER_LABELS[trigger],
+rule.enabled
+? `${notificationChannelSummary(rule.channels)} · "${rule.title.trim() || '·'}" · ${rule.body.trim() || '·'}`
+: 'Off',
+];
+})}
+/>
 </div>
 </>
 )}
@@ -1034,7 +1203,7 @@ rows={[
 
 {/* Footer: Back / Continue per step; Review adds Save draft + Submit */}
 <div className="np-wizard-footer">
-<GhostButton onClick={() => (draft.step === 1 ? router.push('/admin/promotions') : goToStep(draft.step - 1))}>
+<GhostButton onClick={() => (draft.step === STEP.basics ? router.push('/admin/promotions') : goToStep(draft.step - 1))}>
 <ChevronLeft size={16} /> Back
 </GhostButton>
 <div className="np-wizard-footer__group">

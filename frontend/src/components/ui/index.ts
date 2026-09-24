@@ -16,6 +16,8 @@ export { DestructiveGhostButton } from './DestructiveGhostButton';
 export type { DestructiveGhostButtonProps } from './DestructiveGhostButton';
 export { FilterSelect } from './FilterSelect';
 export type { FilterSelectProps } from './FilterSelect';
+export { FilterChip } from './FilterChip';
+export type { FilterChipProps } from './FilterChip';
 export { EvidenceCard } from './EvidenceCard';
 export type { EvidenceCardProps } from './EvidenceCard';
 export { Toggle } from './Toggle';

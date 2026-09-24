@@ -36,7 +36,7 @@ export default function LoginPage() {
     setTheme('dark');
 
     // Successful login: FirstRunTour consumes this session flag once on the
-    // landing route (shows the tour for the first three logins only).
+    // landing route (shows the tour after every login unless opted out).
     requestOnboardingShow();
 
     window.setTimeout(() => router.push('/admin/promotions'), 800);

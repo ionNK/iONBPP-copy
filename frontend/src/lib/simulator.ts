@@ -14,12 +14,13 @@
  */
 import { PROMOTION_TEMPLATES, getPromotionType } from '@/data/promotion-templates';
 import type { PromotionTemplate, TemplatePrefill, TierRow } from '@/data/promotion-templates';
-import { getCatalogEvent } from '@/data/event-catalog';
+import { BET_RESTRICTIONS, getCatalogEvent } from '@/data/event-catalog';
 import type { EventId } from '@/data/event-catalog';
 import type { TriggerRule } from '@/app/admin/promotions/new/draft';
-import { BET_TIMING_LABELS, CHANNEL_LABELS, betTimingAllows, channelSummary } from '@/lib/promotions';
-import type { Channel, Promo } from '@/lib/promotions';
+import { CHANNEL_LABELS, NOTIFICATION_TRIGGERS, NOTIFICATION_TRIGGER_LABELS, NOTIFICATION_TRIGGER_SHORT, channelSummary, notificationChannelSummary, renderNotificationText, smsSegments } from '@/lib/promotions';
+import type { Channel, NotificationChannel, NotificationTrigger, PlaceholderValues, Promo } from '@/lib/promotions';
 import type { Settings } from '@/lib/settings';
+import { features } from '@/config/features';
 
 /* ------------------------------------------------------------------ */
 /* Personas                                                            */
@@ -62,13 +63,7 @@ export interface ScenarioEvent {
   params: Record<string, string>;
   /** Vertical / provider context for ledger preview (not a catalog param). */
   gameCode: string;
-  /** Bet placed after the event started (live) rather than prematch. Only meaningful for bet events. */
-  isLive: boolean;
 }
-
-/** Events that carry a bet and therefore a bet timing. */
-export const BET_EVENT_IDS: readonly EventId[] = ['bet_placed', 'bet_settled'];
-export const isBetEvent = (eventId: EventId): boolean => BET_EVENT_IDS.includes(eventId);
 
 export interface Scenario {
   promoId: string;
@@ -82,8 +77,7 @@ events: ScenarioEvent[];
 
 /** Key fields the inline picker exposes per event (from the catalog). */
 export const PICKER_FIELDS: Record<EventId, string[]> = {
-  /* 'Live' is driven by ScenarioEvent.isLive (the picker's "Live bet" field), not listed here. */
- bet_placed: ['Bet Type', 'Stake', 'Odds', 'Channel'],
+  bet_placed: ['Bet Type', 'Stake', 'Odds', 'Channel', 'Pre-match', 'Live'],
   bet_settled: ['Bet Type', 'Stake', 'Result', 'Losing Legs', 'Remaining Odds', 'Cash-out multiplier', 'Free Bet', 'Voided', 'Cancelled', 'Payout'],
   deposit: ['Amount', 'Method', 'First Deposit'],
   withdrawal: ['Amount', 'Status'],
@@ -101,12 +95,13 @@ export function newEventId(): string {
 }
 
 export function defaultEvent(eventId: EventId): ScenarioEvent {
-  const base: ScenarioEvent = { id: newEventId(), eventId, offsetMinutes: 0, params: {}, gameCode: 'SBK', isLive: false };
+  const base: ScenarioEvent = { id: newEventId(), eventId, offsetMinutes: 0, params: {}, gameCode: 'SBK' };
   const catalog = getCatalogEvent(eventId);
   for (const name of PICKER_FIELDS[eventId]) {
     const param = catalog?.params.find((p) => p.name === name);
     if (!param) continue;
-    if (param.type === 'boolean') base.params[name] = 'No';
+    /* Booleans default to 'No', except 'Pre-match': an ordinary sportsbook bet is placed before kick-off (so 'Live' stays 'No'). */
+    if (param.type === 'boolean') base.params[name] = name === 'Pre-match' ? 'Yes' : 'No';
     else if (param.type === 'enum' && param.options) base.params[name] = param.options[0];
     else base.params[name] = '';
   }
@@ -125,21 +120,19 @@ export interface Preset {
   events: Omit<ScenarioEvent, 'id'>[];
 }
 
-const settledMultibet = (offset: number, params: Record<string, string>, isLive = false): Omit<ScenarioEvent, 'id'> => ({
-  eventId: 'bet_settled', offsetMinutes: offset, gameCode: 'SBK', isLive,
+const settledMultibet = (offset: number, params: Record<string, string>): Omit<ScenarioEvent, 'id'> => ({
+  eventId: 'bet_settled', offsetMinutes: offset, gameCode: 'SBK',
   params: { 'Bet Type': 'Multibet', Stake: '50', Result: 'Lost', 'Losing Legs': '1', 'Remaining Odds': '48', 'Cash-out multiplier': '', 'Free Bet': 'No', Voided: 'No', Cancelled: 'No', Payout: '0', ...params },
 });
 
 const aviatorBet = (offset: number): Omit<ScenarioEvent, 'id'> => ({
-  eventId: 'bet_settled', offsetMinutes: offset, gameCode: 'SPR', isLive: false,
+  eventId: 'bet_settled', offsetMinutes: offset, gameCode: 'SPR',
   params: { 'Bet Type': 'Single', Stake: '5', Result: 'Cashed Out', 'Losing Legs': '0', 'Remaining Odds': '', 'Cash-out multiplier': '2.4', 'Free Bet': 'No', Voided: 'No', Cancelled: 'No', Payout: '12' },
 });
 
 export const PRESETS: Preset[] = [
   { id: 'multibet-one-leg', label: 'Qualifying multibet loses by one leg', promoId: 'PR-002', personaId: 'active-depositor', events: [settledMultibet(-30, {})] },
-  /* PR-002 is prematch-only: an otherwise-qualifying live multibet fails at Trigger on bet timing. */
-  { id: 'money-back-live-bet', label: 'Money Back with a live bet (should not qualify)', promoId: 'PR-002', personaId: 'active-depositor', events: [settledMultibet(-30, {}, true)] },
-  { id: 'aviator-qualifying-day', label: 'Aviator qualifying day (10 bets)', promoId: 'PR-001', personaId: 'new-today', events: Array.from({ length: 10 }, (_, i) => aviatorBet(-(10 - i) * 12)) },
+    { id: 'aviator-qualifying-day', label: 'Aviator qualifying day (10 bets)', promoId: 'PR-001', personaId: 'new-today', events: Array.from({ length: 10 }, (_, i) => aviatorBet(-(10 - i) * 12)) },
   { id: 'aviator-partial-day', label: 'Aviator partial day (9 bets, should not qualify)', promoId: 'PR-001', personaId: 'new-today', events: Array.from({ length: 9 }, (_, i) => aviatorBet(-(9 - i) * 12)) },
   { id: 'cashed-out', label: 'Cashed-out bet (should not qualify)', promoId: 'PR-002', personaId: 'active-depositor', events: [settledMultibet(-30, { Result: 'Cashed Out', 'Cash-out multiplier': '1.6', 'Losing Legs': '0', Payout: '80' })] },
   { id: 'self-excluded', label: 'Self-excluded player (should not qualify)', promoId: 'PR-002', personaId: 'self-excluded', events: [settledMultibet(-30, {})] },
@@ -155,13 +148,17 @@ export function templateFor(promo: Promo): PromotionTemplate | undefined {
 }
 
 export type CheckStatus = 'PASS' | 'FAIL' | 'SKIPPED';
-export type StageId = 'schedule' | 'eligibility' | 'trigger' | 'reward' | 'budget' | 'approval' | 'ledger';
+export type StageId = 'schedule' | 'eligibility' | 'trigger' | 'reward' | 'budget' | 'approval' | 'ledger' | 'notifications';
 export interface RuleCheck { label: string; status: CheckStatus; actual: string; required: string; reason?: string; }
 export interface LedgerLine { side: 'Credit' | 'Debit'; account: string; amount: number; }
-export interface StageResult { id: StageId; title: string; status: CheckStatus; summary: string; checks: RuleCheck[]; config: [string, string][]; inputs: [string, string][]; notes?: string[]; ledger?: { lines: LedgerLine[]; chips: string[] }; }
+/** A player message as it would be delivered: placeholders already substituted. */
+export interface DeliveredMessage { trigger: NotificationTrigger; channels: NotificationChannel[]; title: string; body: string; smsSegments: number | null; }
+export interface StageResult { id: StageId; title: string; status: CheckStatus; summary: string; checks: RuleCheck[]; config: [string, string][]; inputs: [string, string][]; notes?: string[]; ledger?: { lines: LedgerLine[]; chips: string[] }; messages?: DeliveredMessage[]; }
 export interface SimulationResult { outcome: 'PASS' | 'FAIL'; failedAt: StageId | null; stages: StageResult[]; reward: { amount: number; currency: 'ZMW'; kind: 'freebet' | 'cash' | 'none'; label: string }; }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+/** Personas carry no name; previews substitute {{firstName}} with a fixed sample so runs stay deterministic. */
+const SAMPLE_FIRST_NAME = 'Chanda';
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 export const fmtK = (n: number) => `K ${n.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 export function parseFixedAt(value: string): number {
@@ -189,6 +186,24 @@ function scheduleWindow(schedule: string, year: number): { start: number | null;
   return { start: parseScheduleToken(startToken.trim(), year), end: end === null ? null : end + DAY_MS - 1, ongoing };
 }
 const toNumber = (v: string | undefined): number | null => { const n = Number(v); return v === undefined || v.trim() === '' || !Number.isFinite(n) ? null : n; };
+/**
+ * Envelope fields the engine derives rather than the operator entering them. Restrictions are a
+ * fixed set on every trigger, so any restriction flag the event does not carry defaults to 'No':
+ * a bet not marked free / voided / cancelled / cashed out is none of those. `Cashed Out` is the
+ * boolean view of `Result = Cashed Out` when a Result is present. Explicit values (presets) win.
+ */
+export function withDerivedParams(event: ScenarioEvent): Record<string, string> {
+  const params = { ...event.params };
+  for (const restriction of BET_RESTRICTIONS) {
+    if (params[restriction.param] !== undefined && params[restriction.param] !== '') continue;
+    if (restriction.param === 'Cashed Out' && params.Result !== undefined) {
+      params['Cashed Out'] = params.Result.trim().toLowerCase() === 'cashed out' ? 'Yes' : 'No';
+    } else {
+      params[restriction.param] = 'No';
+    }
+  }
+  return params;
+}
 function evaluateRule(rule: TriggerRule, params: Record<string, string>): { pass: boolean; actual: string } {
   const raw = params[rule.param]; const actual = raw === undefined || raw === '' ? '·' : raw;
   const numeric = rule.type === 'integer' || rule.type === 'float'; const a = numeric ? toNumber(raw) : null; const b = numeric ? toNumber(rule.value) : null; const b2 = numeric ? toNumber(rule.value2) : null;
@@ -233,15 +248,14 @@ required: channelSummary(promo.channels),
   if (!triggers.length) triggerChecks.push(skipped('Trigger rules'));
   else if (!ordered.length) triggerChecks.push(check('Event sequence', false, 'no events', 'at least one qualifying event'));
   else {
-    /* Bet timing is a promotion-level rule: a bet event only qualifies when its prematch/live timing is allowed. 'both' is still an evaluated (passing) check, never skipped. */
-    const perEvent = ordered.map((event) => { const branches = triggers.filter((t) => t.eventId === event.eventId); const results = branches.map((t) => t.rules.map((rule) => ({ rule, ...evaluateRule(rule, event.params) }))); const timingOk = !isBetEvent(event.eventId) || betTimingAllows(promo.betTiming, event.isLive); return { event, branches, results, timingOk, qualifies: timingOk && results.some((rules) => rules.every((r) => r.pass)) }; });
+    /* Pre-match / Live are ordinary Bet Placed rules (boolean params), evaluated with every other trigger rule. */
+    const perEvent = ordered.map((event) => { const params = withDerivedParams(event); const branches = triggers.filter((t) => t.eventId === event.eventId); const results = branches.map((t) => t.rules.map((rule) => ({ rule, ...evaluateRule(rule, params) }))); return { event, branches, results, qualifies: results.some((rules) => rules.every((r) => r.pass)) }; });
     qualifyingEvents = perEvent.filter((p) => p.qualifies).map((p) => p.event); const candidate = perEvent.find((p) => p.qualifies) ?? perEvent[perEvent.length - 1];
     triggerChecks.push(check('Event type', perEvent.some((p) => p.branches.length > 0), candidate.event.eventId, triggers.map((t) => t.eventId).join(' or ')));
-    if (isBetEvent(candidate.event.eventId)) triggerChecks.push({ ...check('Bet timing', candidate.timingOk, candidate.event.isLive ? 'Live' : 'Prematch', BET_TIMING_LABELS[promo.betTiming]), ...(candidate.timingOk ? {} : { reason: `Only ${BET_TIMING_LABELS[promo.betTiming].toLowerCase()} bets qualify for this promotion.` }) });
-    for (const r of candidate.results[0] ?? []) triggerChecks.push(check(r.rule.param, r.pass, r.actual, ruleRequired(r.rule)));
+       for (const r of candidate.results[0] ?? []) triggerChecks.push(check(r.rule.param, r.pass, r.actual, ruleRequired(r.rule)));
     for (const rule of qualification?.counting ?? []) { const pool = /per day/i.test(rule.param) ? qualifyingEvents.filter((e) => Math.floor((now + e.offsetMinutes * 60_000) / DAY_MS) === Math.floor(lastEventAt / DAY_MS)) : qualifyingEvents; const value = /stake/i.test(rule.param) ? pool.reduce((sum, e) => sum + (toNumber(e.params.Stake) ?? 0), 0) : pool.length; const result = evaluateRule(rule, { [rule.param]: String(value) }); triggerChecks.push(check(rule.param, result.pass, /stake/i.test(rule.param) ? fmtK(value) : `counter ${value} of ${rule.value}`, ruleRequired(rule))); }
   }
-  stages.push({ id: 'trigger', title: 'Trigger', status: stageStatus(triggerChecks), checks: triggerChecks, summary: triggers.length ? `${qualifyingEvents.length} of ${ordered.length} events qualify` : 'No trigger rules configured', config: [['event', triggers.map((t) => t.eventId).join(', ') || '·'], ['betTiming', BET_TIMING_LABELS[promo.betTiming]], ...(qualification?.counting ?? []).map((r): [string, string] => ['counting', `${r.param} ${ruleRequired(r)}`])], inputs: ordered.map((e, i): [string, string] => [`event ${i + 1}`, `${e.eventId} · ${[...(isBetEvent(e.eventId) ? [`timing=${e.isLive ? 'Live' : 'Prematch'}`] : []), ...Object.entries(e.params).filter(([, v]) => v !== '').map(([k, v]) => `${k}=${v}`)].join(', ')}`]) });
+  stages.push({ id: 'trigger', title: 'Trigger', status: stageStatus(triggerChecks), checks: triggerChecks, summary: triggers.length ? `${qualifyingEvents.length} of ${ordered.length} events qualify` : 'No trigger rules configured', config: [['event', triggers.map((t) => t.eventId).join(', ') || '·'], ...(qualification?.counting ?? []).map((r): [string, string] => ['counting', `${r.param} ${ruleRequired(r)}`])], inputs: ordered.map((e, i): [string, string] => [`event ${i + 1}`, `${e.eventId} · ${Object.entries(e.params).filter(([, v]) => v !== '').map(([k, v]) => `${k}=${v}`).join(', ')}`]) });
   let rewardAmount = 0; let rewardKind: SimulationResult['reward']['kind'] = 'none'; let rewardLabel = 'No reward configured'; const rewardChecks: RuleCheck[] = [];
   if (!prefill.rewardType) rewardChecks.push(skipped('Reward type'));
   else if (prefill.rewardType === 'freebet') { rewardKind = 'freebet'; const count = toNumber(prefill.freebetCount ?? '') ?? 0; const value = toNumber(prefill.freebetValue ?? '') ?? 0; rewardAmount = count * value; rewardLabel = `${count} × ${fmtK(value)} freebet`; rewardChecks.push(check('Freebet count', count > 0, String(count), '> 0')); rewardChecks.push(check('Freebet value', value > 0, fmtK(value), '> 0')); rewardChecks.push(check('Computed amount', rewardAmount > 0, fmtK(rewardAmount), 'count × value')); }
@@ -250,18 +264,42 @@ required: channelSummary(promo.channels),
   if (prefill.rewardType === 'cash' && prefill.payoutMode === 'tiers') { const event = qualifyingEvents[qualifyingEvents.length - 1]; const odds = toNumber(event?.params['Remaining Odds']); const stake = toNumber(event?.params.Stake) ?? 0; let tier: TierRow | undefined; for (const candidate of prefill.tiers ?? []) { if (odds !== null && odds >= (toNumber(candidate.odds) ?? Infinity) && (!tier || Number(candidate.odds) >= Number(tier.odds))) tier = candidate; } const multiplier = toNumber(tier?.multiplier) ?? 0; const uncapped = stake * multiplier; const cap = toNumber(prefill.payoutCap ?? ''); rewardAmount = cap === null ? uncapped : Math.min(uncapped, cap); rewardLabel = `stake × tier ${multiplier}${cap !== null && uncapped > cap ? ' (capped)' : ''}`; rewardChecks.length = 0; rewardChecks.push(check('Tier matched', Boolean(tier), odds === null ? '·' : `remaining odds ${odds}`, `≥ ${(prefill.tiers ?? []).map((t) => t.odds).join(' | ')}`)); rewardChecks.push(check('Computed amount', uncapped > 0, fmtK(uncapped), `${fmtK(stake)} × ${multiplier}`)); rewardChecks.push(cap === null ? skipped('Payout cap') : check('Payout cap', true, fmtK(rewardAmount), `≤ ${fmtK(cap)}${uncapped > cap ? ' · cap applied' : ''}`)); }
   rewardChecks.push(check('Currency', true, 'ZMW', 'ZMW (market currency)'));
   stages.push({ id: 'reward', title: 'Reward', status: stageStatus(rewardChecks), checks: rewardChecks, summary: rewardKind === 'none' ? rewardLabel : `${fmtK(rewardAmount)} · ${rewardLabel}`, config: [['rewardType', prefill.rewardType ?? '·'], ['payoutMode', prefill.payoutMode ?? '·'], ['freebetCount', prefill.freebetCount ?? '·'], ['freebetValue', prefill.freebetValue ?? '·'], ['tiers', prefill.tiers?.map((t) => `${t.odds}→×${t.multiplier}`).join(', ') ?? '·'], ['payoutCap', prefill.payoutCap ?? '·']], inputs: [['computedAmount', fmtK(rewardAmount)]] });
-  const budgetChecks: RuleCheck[] = []; const budgetNotes: string[] = []; const threshold = (toNumber(prefill.alertThreshold ?? '') ?? settings.alertThreshold) / 100;
-  if (promo.budget === null || promo.spend === null) { budgetChecks.push(skipped('Budget', 'No budget on this promotion')); budgetNotes.push('Award NOT blocked'); }
-  else { const projected = promo.spend + rewardAmount; const ratio = projected / promo.budget; const alertFires = ratio >= threshold; budgetChecks.push(check('Spend + reward vs budget', true, `${fmtK(projected)} of ${fmtK(promo.budget)} (${Math.round(ratio * 100)}%)`, 'monitored only (BR-6)')); budgetChecks.push({ label: 'Alert threshold', status: 'PASS', actual: alertFires ? `alert fires at ${Math.round(threshold * 100)}%` : `${Math.round(ratio * 100)}% below ${Math.round(threshold * 100)}%`, required: `alert at ≥ ${Math.round(threshold * 100)}%` }); if (alertFires) budgetNotes.push(`Alert would fire at ${Math.round(threshold * 100)}%`); budgetNotes.push('Award NOT blocked'); }
-  stages.push({ id: 'budget', title: 'Budget check', status: stageStatus(budgetChecks), checks: budgetChecks, notes: budgetNotes, summary: promo.budget === null ? 'No budget configured · award not blocked' : `${fmtK((promo.spend ?? 0) + rewardAmount)} / ${fmtK(promo.budget)} after award`, config: [['budget', promo.budget === null ? '·' : fmtK(promo.budget)], ['alertThreshold', `${Math.round(threshold * 100)}%`], ['earlyWarning', String(settings.earlyWarning)]], inputs: [['currentSpend', promo.spend === null ? '·' : fmtK(promo.spend)], ['reward', fmtK(rewardAmount)]] });
-  const approvalChecks: RuleCheck[] = []; const routes = settings.automatedApprovalThreshold && (promo.budget ?? 0) > settings.thresholdAmount;
-  if (settings.automatedApprovalThreshold) { approvalChecks.push({ label: 'Automated promotion threshold', status: 'PASS', actual: routes ? `budget ${fmtK(promo.budget ?? 0)} > ${fmtK(settings.thresholdAmount)} · routes to Approvals` : `budget ${fmtK(promo.budget ?? 0)} ≤ ${fmtK(settings.thresholdAmount)} · no checker needed`, required: `budget > ${fmtK(settings.thresholdAmount)} routes to Approvals` }); if (routes) approvalChecks.push(check('Approver role', true, settings.approverRole, settings.secondApprover ? 'two approvers' : 'one approver')); }
+  /* Budget check stage (BR-6) — hidden behind features.budgets; the code is retained for re-enablement. */
+  if (features.budgets) {
+    const budgetChecks: RuleCheck[] = []; const budgetNotes: string[] = []; const threshold = (toNumber(prefill.alertThreshold ?? '') ?? settings.alertThreshold) / 100;
+    if (promo.budget === null || promo.spend === null) { budgetChecks.push(skipped('Budget', 'No budget on this promotion')); budgetNotes.push('Award NOT blocked'); }
+    else { const projected = promo.spend + rewardAmount; const ratio = projected / promo.budget; const alertFires = ratio >= threshold; budgetChecks.push(check('Spend + reward vs budget', true, `${fmtK(projected)} of ${fmtK(promo.budget)} (${Math.round(ratio * 100)}%)`, 'monitored only (BR-6)')); budgetChecks.push({ label: 'Alert threshold', status: 'PASS', actual: alertFires ? `alert fires at ${Math.round(threshold * 100)}%` : `${Math.round(ratio * 100)}% below ${Math.round(threshold * 100)}%`, required: `alert at ≥ ${Math.round(threshold * 100)}%` }); if (alertFires) budgetNotes.push(`Alert would fire at ${Math.round(threshold * 100)}%`); budgetNotes.push('Award NOT blocked'); }
+    stages.push({ id: 'budget', title: 'Budget check', status: stageStatus(budgetChecks), checks: budgetChecks, notes: budgetNotes, summary: promo.budget === null ? 'No budget configured · award not blocked' : `${fmtK((promo.spend ?? 0) + rewardAmount)} / ${fmtK(promo.budget)} after award`, config: [['budget', promo.budget === null ? '·' : fmtK(promo.budget)], ['alertThreshold', `${Math.round(threshold * 100)}%`], ['earlyWarning', String(settings.earlyWarning)]], inputs: [['currentSpend', promo.spend === null ? '·' : fmtK(promo.spend)], ['reward', fmtK(rewardAmount)]] });
+  }
+  /* Approval routing basis: the promotion budget when budgets are enabled, otherwise the computed award value. */
+  const approvalBasisLabel = features.budgets ? 'budget' : 'award value';
+  const approvalBasisAmount = features.budgets ? (promo.budget ?? 0) : rewardAmount;
+  const approvalChecks: RuleCheck[] = []; const routes = settings.automatedApprovalThreshold && approvalBasisAmount > settings.thresholdAmount;
+  if (settings.automatedApprovalThreshold) { approvalChecks.push({ label: 'Automated promotion threshold', status: 'PASS', actual: routes ? `${approvalBasisLabel} ${fmtK(approvalBasisAmount)} > ${fmtK(settings.thresholdAmount)} · routes to Approvals` : `${approvalBasisLabel} ${fmtK(approvalBasisAmount)} ≤ ${fmtK(settings.thresholdAmount)} · no checker needed`, required: `${approvalBasisLabel} > ${fmtK(settings.thresholdAmount)} routes to Approvals` }); if (routes) approvalChecks.push(check('Approver role', true, settings.approverRole, settings.secondApprover ? 'two approvers' : 'one approver')); }
   else approvalChecks.push(skipped('Automated promotion threshold', 'Disabled in Settings → Approvals'));
   approvalChecks.push(check('Manual awards', true, 'not a manual award', 'manual awards always require approval'));
-  stages.push({ id: 'approval', title: 'Approval', status: stageStatus(approvalChecks), checks: approvalChecks, summary: routes ? `Routes to Approvals · ${settings.approverRole}${settings.secondApprover ? ' · second approver' : ''}` : 'No checker required for this award', config: [['automatedApprovalThreshold', String(settings.automatedApprovalThreshold)], ['thresholdAmount', fmtK(settings.thresholdAmount)], ['secondApprover', String(settings.secondApprover)], ['approverRole', settings.approverRole]], inputs: [['promotionBudget', promo.budget === null ? '·' : fmtK(promo.budget)], ['awardKind', 'automated']] });
+  stages.push({ id: 'approval', title: 'Approval', status: stageStatus(approvalChecks), checks: approvalChecks, summary: routes ? `Routes to Approvals · ${settings.approverRole}${settings.secondApprover ? ' · second approver' : ''}` : 'No checker required for this award', config: [['automatedApprovalThreshold', String(settings.automatedApprovalThreshold)], ['thresholdAmount', fmtK(settings.thresholdAmount)], ['secondApprover', String(settings.secondApprover)], ['approverRole', settings.approverRole]], inputs: [features.budgets ? ['promotionBudget', promo.budget === null ? '·' : fmtK(promo.budget)] : ['awardValue', fmtK(rewardAmount)], ['awardKind', 'automated']] });
   const ledgerChecks: RuleCheck[] = []; const last = qualifyingEvents[qualifyingEvents.length - 1] ?? ordered[ordered.length - 1]; const vertical = prefill.vertical ?? '·'; const provider = settings.providers.find((p) => p.code === last?.gameCode);
   ledgerChecks.push(check('Double entry balanced', true, `${fmtK(rewardAmount)} = ${fmtK(rewardAmount)}`, 'credit = debit')); ledgerChecks.push(vertical === '·' ? skipped('Vertical') : check('Vertical', true, vertical, 'required (BR-4)')); ledgerChecks.push(check('Provider code', Boolean(provider), last?.gameCode ?? '·', `one of ${settings.providers.map((p) => p.code).join(', ')}`)); ledgerChecks.push(check('Promo reference', true, promo.id, 'required (BR-4)'));
   stages.push({ id: 'ledger', title: 'Ledger posting', status: stageStatus(ledgerChecks), checks: ledgerChecks, summary: 'No funds move; recorded at award time', ledger: { lines: [{ side: 'Credit', account: 'Player wallet', amount: rewardAmount }, { side: 'Debit', account: 'Promotional expense account', amount: rewardAmount }], chips: [`Vertical · ${vertical}`, `Provider · ${last?.gameCode ?? '·'}${provider ? ` (${provider.name})` : ''}`, `Promo · ${promo.id}`] }, config: [['creditAccount', 'Player wallet'], ['debitAccount', 'Promotional expense account'], ['metadata', 'vertical, provider code, promo reference (BR-4)']], inputs: [['amount', fmtK(rewardAmount)], ['vertical', vertical], ['providerCode', last?.gameCode ?? '·'], ['promoReference', promo.id]] });
+ /* Player notifications: a delivery preview, never a gate. The outcome is fixed by the stages above; this stage only PASSes (message sent) or is SKIPPED, so it cannot change `outcome` or `failedAt`. */
+ const qualified = !stages.some((stage) => (stage.id === 'schedule' || stage.id === 'eligibility' || stage.id === 'trigger') && stage.status === 'FAIL');
+ const awarded = qualified && rewardKind !== 'none' && rewardAmount > 0 && !stages.some((stage) => stage.id === 'reward' && stage.status === 'FAIL');
+ const expiryHours = toNumber(prefill.freebetExpiryHours ?? '');
+ const values: PlaceholderValues = { firstName: SAMPLE_FIRST_NAME, promoName: promo.name, amount: fmtK(rewardAmount), currency: 'ZMW', expiry: rewardKind === 'freebet' && expiryHours !== null ? fmtDateTime(lastEventAt + expiryHours * 60 * 60_000) : '·' };
+ const notificationChecks: RuleCheck[] = []; const messages: DeliveredMessage[] = [];
+ for (const trigger of NOTIFICATION_TRIGGERS) {
+ const rule = promo.notifications[trigger]; const label = `${NOTIFICATION_TRIGGER_SHORT[trigger]} message`;
+ if (!rule.enabled) { notificationChecks.push(skipped(label, 'Not enabled on this promotion')); continue; }
+ const fires = trigger === 'onQualify' ? qualified : awarded;
+ if (!fires) { notificationChecks.push(skipped(label, trigger === 'onQualify' ? 'Player did not qualify' : 'No award to notify')); continue; }
+ const body = renderNotificationText(rule.body, values);
+ messages.push({ trigger, channels: [...rule.channels], title: renderNotificationText(rule.title, values), body, smsSegments: rule.channels.includes('sms') ? smsSegments(body.length) : null });
+ notificationChecks.push(check(label, true, `sent via ${notificationChannelSummary(rule.channels)}`, NOTIFICATION_TRIGGER_LABELS[trigger].toLowerCase()));
+ }
+ const configured = NOTIFICATION_TRIGGERS.filter((trigger) => promo.notifications[trigger].enabled);
+ stages.push({ id: 'notifications', title: 'Player notifications', status: stageStatus(notificationChecks), checks: notificationChecks, messages, notes: ['Delivery only · never blocks an award'], summary: configured.length === 0 ? 'No player messages configured' : messages.length === 0 ? 'No message sent for this scenario' : `${messages.length} of ${configured.length} configured message(s) sent`, config: NOTIFICATION_TRIGGERS.map((trigger): [string, string] => { const rule = promo.notifications[trigger]; return [trigger, rule.enabled ? `${notificationChannelSummary(rule.channels)} · ${rule.title}` : 'off']; }), inputs: [['firstName', values.firstName], ['promoName', values.promoName], ['amount', values.amount], ['currency', values.currency], ['expiry', values.expiry], ['qualified', String(qualified)], ['awarded', String(awarded)]] });
+
   const firstFail = stages.find((stage) => stage.status === 'FAIL');
   return { outcome: firstFail ? 'FAIL' : 'PASS', failedAt: firstFail?.id ?? null, stages, reward: { amount: rewardAmount, currency: 'ZMW', kind: rewardKind, label: rewardLabel } };
 }
@@ -269,7 +307,7 @@ required: channelSummary(promo.channels),
 export interface SimulationRun { id: string; createdAt: number; promoId: string; promoName: string; personaId: string; outcome: 'PASS' | 'FAIL'; failedAt: StageId | null; scenario: Scenario; }
 export const RUNS_KEY = 'simulator.v1.runs'; export const MAX_RUNS = 25;
 export function runId(createdAt: number): string { return `sim_${createdAt.toString(36)}`; }
-export function loadRuns(): SimulationRun[] { if (typeof window === 'undefined') return []; try { const parsed: unknown = JSON.parse(window.localStorage.getItem(RUNS_KEY) ?? '[]'); return Array.isArray(parsed) ? parsed.map((run) => ({ ...run, scenario: { ...run.scenario, channel: run.scenario?.channel ?? 'app', events: (run.scenario?.events ?? []).map((event: Partial<ScenarioEvent>) => ({ ...event, isLive: event.isLive === true })) } })) as SimulationRun[] : []; } catch { return []; } }
+export function loadRuns(): SimulationRun[] { if (typeof window === 'undefined') return []; try { const parsed: unknown = JSON.parse(window.localStorage.getItem(RUNS_KEY) ?? '[]'); return Array.isArray(parsed) ? parsed.map((run) => ({ ...run, scenario: { ...run.scenario, channel: run.scenario?.channel ?? 'app', events: run.scenario?.events ?? [] } })) as SimulationRun[] : []; } catch { return []; } }
 export function saveRuns(runs: SimulationRun[]): void { if (typeof window === 'undefined') return; try { window.localStorage.setItem(RUNS_KEY, JSON.stringify(runs.slice(0, MAX_RUNS))); } catch { /* Prototype mock: storage failures are non-fatal. */ } }
 export function addRun(run: SimulationRun): SimulationRun[] { const next = [run, ...loadRuns()].slice(0, MAX_RUNS); saveRuns(next); return next; }
 /** Stamp and persist a run. The wall-clock read lives here (history bookkeeping), never inside simulate(). */
