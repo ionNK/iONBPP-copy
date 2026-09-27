@@ -5,8 +5,8 @@
  * Rule shape comes from the promotion model the wizard produces
  * (src/app/admin/promotions/new/draft.ts, seeded from
  * src/data/promotion-templates.ts): triggers[].rules[] over event-catalog
- * params, counting[] over aggregation-catalog params, eligibility
- * (audience / windowDays), reward (freebet or cash: fixed or odds tiers +
+ * params, counting[] over aggregation-catalog params, promotion channels,
+ * reward (freebet or cash: fixed or odds tiers +
  * payoutCap), budget and schedule. Approval and alert thresholds are read
  * from lib/settings.ts. Everything here is deterministic: no Date.now(), no
  * randomness. Where the data model has no rule for a check the check is
@@ -16,7 +16,8 @@ import { PROMOTION_TEMPLATES, getPromotionType } from '@/data/promotion-template
 import type { PromotionTemplate, TemplatePrefill, TierRow } from '@/data/promotion-templates';
 import { BET_RESTRICTIONS, getCatalogEvent } from '@/data/event-catalog';
 import type { EventId } from '@/data/event-catalog';
-import type { TriggerRule } from '@/app/admin/promotions/new/draft';
+import { TRIGGER_JOIN_LABELS, triggerGroups } from '@/app/admin/promotions/new/draft';
+import type { Trigger, TriggerRule } from '@/app/admin/promotions/new/draft';
 import { CHANNEL_LABELS, NOTIFICATION_TRIGGERS, NOTIFICATION_TRIGGER_LABELS, NOTIFICATION_TRIGGER_SHORT, channelSummary, notificationChannelSummary, renderNotificationText, smsSegments } from '@/lib/promotions';
 import type { Channel, NotificationChannel, NotificationTrigger, PlaceholderValues, Promo } from '@/lib/promotions';
 import type { Settings } from '@/lib/settings';
@@ -32,8 +33,6 @@ export type RgStatus = 'None' | 'Cooling off' | 'Self-excluded';
 export interface Persona {
   id: string;
   label: string;
-  /** ISO date (YYYY-MM-DD), or 'today' for "registered today" relative to fixedAt. */
-  registrationDate: string;
   kycStatus: KycStatus;
   rgStatus: RgStatus;
   market: string;
@@ -41,10 +40,10 @@ export interface Persona {
 }
 
 export const PERSONAS: Persona[] = [
-  { id: 'new-today', label: 'New · registered today', registrationDate: 'today', kycStatus: 'Verified', rgStatus: 'None', market: 'Zambia', lifetimeDeposits: 50 },
-  { id: 'active-depositor', label: 'Active depositor', registrationDate: '2025-11-03', kycStatus: 'Verified', rgStatus: 'None', market: 'Zambia', lifetimeDeposits: 4820 },
-  { id: 'kyc-pending', label: 'KYC pending', registrationDate: '2026-09-10', kycStatus: 'Pending', rgStatus: 'None', market: 'Zambia', lifetimeDeposits: 120 },
-  { id: 'self-excluded', label: 'Self-excluded', registrationDate: '2025-02-14', kycStatus: 'Verified', rgStatus: 'Self-excluded', market: 'Zambia', lifetimeDeposits: 9340 },
+  { id: 'new-today', label: 'New · registered today', kycStatus: 'Verified', rgStatus: 'None', market: 'Zambia', lifetimeDeposits: 50 },
+  { id: 'active-depositor', label: 'Active depositor', kycStatus: 'Verified', rgStatus: 'None', market: 'Zambia', lifetimeDeposits: 4820 },
+  { id: 'kyc-pending', label: 'KYC pending', kycStatus: 'Pending', rgStatus: 'None', market: 'Zambia', lifetimeDeposits: 120 },
+  { id: 'self-excluded', label: 'Self-excluded', kycStatus: 'Verified', rgStatus: 'Self-excluded', market: 'Zambia', lifetimeDeposits: 9340 },
 ];
 
 export function getPersona(id: string): Persona {
@@ -77,8 +76,8 @@ events: ScenarioEvent[];
 
 /** Key fields the inline picker exposes per event (from the catalog). */
 export const PICKER_FIELDS: Record<EventId, string[]> = {
-  bet_placed: ['Bet Type', 'Stake', 'Odds', 'Channel', 'Pre-match', 'Live'],
-  bet_settled: ['Bet Type', 'Stake', 'Result', 'Losing Legs', 'Remaining Odds', 'Cash-out multiplier', 'Free Bet', 'Voided', 'Cancelled', 'Payout'],
+  bet_placed: ['Bet Type', 'Stake', 'Stake Funding', 'Selections', 'Odds', 'Pre-match', 'Live'],
+  bet_settled: ['Bet Type', 'Stake', 'Stake Funding', 'Selections', 'Result', 'Losing Legs', 'Remaining Odds', 'Cash-out multiplier', 'Voided', 'Cancelled', 'Payout'],
   deposit: ['Amount', 'Method', 'First Deposit'],
   withdrawal: ['Amount', 'Status'],
   registration: ['Method', 'Referral Code'],
@@ -122,12 +121,12 @@ export interface Preset {
 
 const settledMultibet = (offset: number, params: Record<string, string>): Omit<ScenarioEvent, 'id'> => ({
   eventId: 'bet_settled', offsetMinutes: offset, gameCode: 'SBK',
-  params: { 'Bet Type': 'Multibet', Stake: '50', Result: 'Lost', 'Losing Legs': '1', 'Remaining Odds': '48', 'Cash-out multiplier': '', 'Free Bet': 'No', Voided: 'No', Cancelled: 'No', Payout: '0', ...params },
+  params: { 'Bet Type': 'Multibet', Stake: '50', 'Stake Funding': 'Cash', Result: 'Lost', 'Losing Legs': '1', 'Remaining Odds': '48', 'Cash-out multiplier': '', Voided: 'No', Cancelled: 'No', Payout: '0', ...params },
 });
 
 const aviatorBet = (offset: number): Omit<ScenarioEvent, 'id'> => ({
   eventId: 'bet_settled', offsetMinutes: offset, gameCode: 'SPR',
-  params: { 'Bet Type': 'Single', Stake: '5', Result: 'Cashed Out', 'Losing Legs': '0', 'Remaining Odds': '', 'Cash-out multiplier': '2.4', 'Free Bet': 'No', Voided: 'No', Cancelled: 'No', Payout: '12' },
+  params: { 'Bet Type': 'Single', Stake: '5', 'Stake Funding': 'Cash', Result: 'Cashed Out', 'Losing Legs': '0', 'Remaining Odds': '', 'Cash-out multiplier': '2.4', Voided: 'No', Cancelled: 'No', Payout: '12' },
 });
 
 export const PRESETS: Preset[] = [
@@ -189,7 +188,7 @@ const toNumber = (v: string | undefined): number | null => { const n = Number(v)
 /**
  * Envelope fields the engine derives rather than the operator entering them. Restrictions are a
  * fixed set on every trigger, so any restriction flag the event does not carry defaults to 'No':
- * a bet not marked free / voided / cancelled / cashed out is none of those. `Cashed Out` is the
+ * a bet not marked voided / cancelled / cashed out is none of those. `Cashed Out` is the
  * boolean view of `Result = Cashed Out` when a Result is present. Explicit values (presets) win.
  */
 export function withDerivedParams(event: ScenarioEvent): Record<string, string> {
@@ -231,7 +230,7 @@ export function simulate(promo: Promo, persona: Persona, events: ScenarioEvent[]
   else { scheduleChecks.push(check('Event after start', lastEventAt >= window.start, fmtDateTime(lastEventAt), `≥ ${fmtDateTime(window.start)}`)); scheduleChecks.push(window.ongoing ? check('Event before end', true, fmtDateTime(lastEventAt), 'ongoing (no end)') : window.end !== null ? check('Event before end', lastEventAt <= window.end, fmtDateTime(lastEventAt), `≤ ${fmtDateTime(window.end)}`) : skipped('Event before end')); }
   scheduleChecks.push(check('Promotion status', promo.status === 'active' || promo.status === 'scheduled', promo.status, 'active or scheduled'));
   stages.push({ id: 'schedule', title: 'Schedule', status: stageStatus(scheduleChecks), checks: scheduleChecks, summary: window.start === null ? 'No schedule on this promotion' : `${promo.schedule} · ${settings.timezone}`, config: [['schedule', promo.schedule], ['timezone', settings.timezone], ['status', promo.status]], inputs: [['fixedAt', fmtDateTime(now)], ['lastEventAt', fmtDateTime(lastEventAt)], ['events', String(ordered.length)]] });
-  const elig = qualification?.eligibility; const eligibilityChecks: RuleCheck[] = [];
+  const eligibilityChecks: RuleCheck[] = [];
 const channelEligible = promo.channels.includes(channel);
 eligibilityChecks.push({
 label: 'Channel',
@@ -241,21 +240,25 @@ required: channelSummary(promo.channels),
 ...(channelEligible ? {} : { reason: `Promotion is not available on ${CHANNEL_LABELS[channel]}.` }),
 });
   eligibilityChecks.push(check('Market', persona.market === promo.market, persona.market, `= ${promo.market}`)); eligibilityChecks.push({ ...skipped('KYC status'), actual: persona.kycStatus }); eligibilityChecks.push(check('RG exclusion', persona.rgStatus !== 'Self-excluded', persona.rgStatus, 'not Self-excluded (platform rule)'));
-  if (elig?.audience === 'new_customers' && elig.windowDays) { const regAt = persona.registrationDate === 'today' ? Date.UTC(year, new Date(now).getUTCMonth(), new Date(now).getUTCDate()) : parseFixedAt(`${persona.registrationDate}T00:00`); const days = Number.isFinite(regAt) ? Math.floor((lastEventAt - regAt) / DAY_MS) : NaN; eligibilityChecks.push(check('Registration window', Number.isFinite(days) && days >= 0 && days <= elig.windowDays, Number.isFinite(days) ? `${days} days since registration` : '·', `≤ ${elig.windowDays} days`)); }
-  else if (elig?.audience === 'all') eligibilityChecks.push(check('Audience', true, 'any player', 'all players')); else eligibilityChecks.push(skipped('Registration window'));
-  stages.push({ id: 'eligibility', title: 'Eligibility', status: stageStatus(eligibilityChecks), checks: eligibilityChecks, summary: elig?.audience === 'new_customers' ? `New customers within ${elig.windowDays} days` : elig ? 'All players' : 'No eligibility rules configured', config: [['audience', elig?.audience ?? '·'], ['windowDays', String(elig?.windowDays ?? '·')], ['market', promo.market], ['kycRule', '·'], ['rgRule', 'platform: self-excluded blocked']], inputs: [['persona', persona.label], ['registrationDate', persona.registrationDate], ['kycStatus', persona.kycStatus], ['rgStatus', persona.rgStatus], ['market', persona.market]] });
+  /* Eligibility is restricted to channels, market and platform rules. */
+    stages.push({ id: 'eligibility', title: 'Eligibility', status: stageStatus(eligibilityChecks), checks: eligibilityChecks, summary: channelSummary(promo.channels), config: [['channels', channelSummary(promo.channels)], ['market', promo.market], ['kycRule', '·'], ['rgRule', 'platform: self-excluded blocked']], inputs: [['persona', persona.label], ['kycStatus', persona.kycStatus], ['rgStatus', persona.rgStatus], ['market', persona.market]] });
   const triggerChecks: RuleCheck[] = []; const triggers = qualification?.triggers ?? []; let qualifyingEvents: ScenarioEvent[] = [];
   if (!triggers.length) triggerChecks.push(skipped('Trigger rules'));
   else if (!ordered.length) triggerChecks.push(check('Event sequence', false, 'no events', 'at least one qualifying event'));
   else {
     /* Pre-match / Live are ordinary Bet Placed rules (boolean params), evaluated with every other trigger rule. */
-    const perEvent = ordered.map((event) => { const params = withDerivedParams(event); const branches = triggers.filter((t) => t.eventId === event.eventId); const results = branches.map((t) => t.rules.map((rule) => ({ rule, ...evaluateRule(rule, params) }))); return { event, branches, results, qualifies: results.some((rules) => rules.every((r) => r.pass)) }; });
-    qualifyingEvents = perEvent.filter((p) => p.qualifies).map((p) => p.event); const candidate = perEvent.find((p) => p.qualifies) ?? perEvent[perEvent.length - 1];
-    triggerChecks.push(check('Event type', perEvent.some((p) => p.branches.length > 0), candidate.event.eventId, triggers.map((t) => t.eventId).join(' or ')));
+    const perEvent = ordered.map((event) => { const params = withDerivedParams(event); const branches = triggers.filter((t) => t.eventId === event.eventId); const results = branches.map((t) => t.rules.map((rule) => ({ rule, ...evaluateRule(rule, params) }))); const satisfied = new Set(branches.filter((_, i) => results[i].every((r) => r.pass)).map((t) => t.id)); return { event, branches, results, satisfied }; });
+    /* AND binds tighter than OR: a group qualifies when every trigger in it is satisfied by some event in the scenario. */
+    const groups = triggerGroups(triggers); const satisfiedIds = new Set(perEvent.flatMap((p) => [...p.satisfied])); const groupResults = groups.map((group) => ({ group, pass: group.every((t) => satisfiedIds.has(t.id)) })); const winning = groupResults.find((g) => g.pass)?.group ?? null; const memberIds = new Set((winning ?? []).map((t) => t.id));
+    qualifyingEvents = winning ? perEvent.filter((p) => [...p.satisfied].some((id) => memberIds.has(id))).map((p) => p.event) : [];
+    const candidate = perEvent.find((p) => p.satisfied.size > 0) ?? perEvent[perEvent.length - 1];
+    const chain = (group: Trigger[]) => group.map((t) => t.eventId).join(' AND ');
+    triggerChecks.push(check('Event type', perEvent.some((p) => p.branches.length > 0), candidate.event.eventId, groups.map(chain).join(' OR ')));
        for (const r of candidate.results[0] ?? []) triggerChecks.push(check(r.rule.param, r.pass, r.actual, ruleRequired(r.rule)));
+    if (groups.some((group) => group.length > 1)) groupResults.forEach(({ group, pass }, i) => triggerChecks.push(check(`Trigger group ${i + 1}`, pass, `${group.filter((t) => satisfiedIds.has(t.id)).length} of ${group.length} events seen`, `all of: ${chain(group)}`)));
     for (const rule of qualification?.counting ?? []) { const pool = /per day/i.test(rule.param) ? qualifyingEvents.filter((e) => Math.floor((now + e.offsetMinutes * 60_000) / DAY_MS) === Math.floor(lastEventAt / DAY_MS)) : qualifyingEvents; const value = /stake/i.test(rule.param) ? pool.reduce((sum, e) => sum + (toNumber(e.params.Stake) ?? 0), 0) : pool.length; const result = evaluateRule(rule, { [rule.param]: String(value) }); triggerChecks.push(check(rule.param, result.pass, /stake/i.test(rule.param) ? fmtK(value) : `counter ${value} of ${rule.value}`, ruleRequired(rule))); }
   }
-  stages.push({ id: 'trigger', title: 'Trigger', status: stageStatus(triggerChecks), checks: triggerChecks, summary: triggers.length ? `${qualifyingEvents.length} of ${ordered.length} events qualify` : 'No trigger rules configured', config: [['event', triggers.map((t) => t.eventId).join(', ') || '·'], ...(qualification?.counting ?? []).map((r): [string, string] => ['counting', `${r.param} ${ruleRequired(r)}`])], inputs: ordered.map((e, i): [string, string] => [`event ${i + 1}`, `${e.eventId} · ${Object.entries(e.params).filter(([, v]) => v !== '').map(([k, v]) => `${k}=${v}`).join(', ')}`]) });
+  stages.push({ id: 'trigger', title: 'Trigger', status: stageStatus(triggerChecks), checks: triggerChecks, summary: triggers.length ? `${qualifyingEvents.length} of ${ordered.length} events qualify` : 'No trigger rules configured', config: [['event', triggers.map((t, i) => `${i > 0 ? `${TRIGGER_JOIN_LABELS[t.join ?? 'or']} ` : ''}${t.eventId}`).join(' ') || '·'], ...(qualification?.counting ?? []).map((r): [string, string] => ['counting', `${r.param} ${ruleRequired(r)}`])], inputs: ordered.map((e, i): [string, string] => [`event ${i + 1}`, `${e.eventId} · ${Object.entries(e.params).filter(([, v]) => v !== '').map(([k, v]) => `${k}=${v}`).join(', ')}`]) });
   let rewardAmount = 0; let rewardKind: SimulationResult['reward']['kind'] = 'none'; let rewardLabel = 'No reward configured'; const rewardChecks: RuleCheck[] = [];
   if (!prefill.rewardType) rewardChecks.push(skipped('Reward type'));
   else if (prefill.rewardType === 'freebet') { rewardKind = 'freebet'; const count = toNumber(prefill.freebetCount ?? '') ?? 0; const value = toNumber(prefill.freebetValue ?? '') ?? 0; rewardAmount = count * value; rewardLabel = `${count} × ${fmtK(value)} freebet`; rewardChecks.push(check('Freebet count', count > 0, String(count), '> 0')); rewardChecks.push(check('Freebet value', value > 0, fmtK(value), '> 0')); rewardChecks.push(check('Computed amount', rewardAmount > 0, fmtK(rewardAmount), 'count × value')); }

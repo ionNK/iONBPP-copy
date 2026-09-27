@@ -2172,3 +2172,95 @@ textarea.promo-experiments__input {
   }
 }
 
+/* ============================================================
+   Promotions → Draft save / resume (PROTOTYPE, localStorage) — scoped block.
+   Consumers: app/admin/promotions/new/page.tsx (save indicator, resume
+   note, footer actions) and app/admin/promotions/page.tsx ("Last saved …"
+   cell, "Continue editing" row action). Layout shell (topbar, wizard
+   footer, modal) is reused from promotions.css / new.css; this block only
+   adds the draft-specific pieces. All colours are set inline from
+   tokens.ts; nothing here declares a colour.
+   Type: 20/15/14/12 only. Spacing: Unity spacer scale only.
+   ============================================================ */
+
+/* ---- Topbar: save indicator sits left of Discard draft ---- */
+.promo-draft__topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.promo-draft__state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.promo-draft__dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+}
+
+/* ---- Resume note (offWhite notice panel + icon + Footnote, dismissible) ---- */
+.promo-draft__resume {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.promo-draft__resume > svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.promo-draft__resume > span {
+  flex: 1;
+}
+
+.promo-draft__resume-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: -4px -4px -4px 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* ---- List: "Last saved …" in the Schedule cell of a Draft row ---- */
+.promo-draft__last-saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+/* ---- List: "Continue editing" row action (icon button widened to fit its label) ---- */
+.promo-icon-btn.promo-draft__continue {
+  width: auto;
+  gap: 4px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .promo-draft__topbar-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}
+

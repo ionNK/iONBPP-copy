@@ -59,7 +59,9 @@ for the "Pending approval" status; `textColor` overrides the foreground,
 used for the yellow "content incomplete" warning badge with navy text),
 StatChip, PrimaryButton (yellow bg + navy text,
 pressed=yellowActive), SecondaryButton (navyDeep bg + white text),
-GhostButton (ghostBorder), DestructiveGhostButton, FilterSelect,
+GhostButton (ghostBorder; `disabled` renders the reduced-emphasis state
+used for unreleased "TBC" actions, e.g. the wizard's "Save as template"),
+DestructiveGhostButton, FilterSelect,
 Toggle (Unity Switch: navy track when on, ghostBorder track when off;
 `disabled` renders a locked state, e.g. mandatory business rules),
 Checkbox (Unity Checkbox: visually hidden native input + 18px custom box

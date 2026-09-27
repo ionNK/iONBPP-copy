@@ -3,12 +3,12 @@
 /**
  * Step 2: Qualification (rules-only model).
  * Trigger rules are the single source of truth for conditions and restrictions.
- * Counting and eligibility remain separate groups within draft.qualification.
+ * Counting remains a separate group within draft.qualification.
  */
 import { useState } from 'react';
 import { Info, Plus, Trash2, TriangleAlert, X } from 'lucide-react';
 import T from '@/theme/tokens';
-import { Checkbox, DestructiveGhostButton, GhostButton } from '@/components/ui';
+import { Checkbox, DestructiveGhostButton, GhostButton, Toggle } from '@/components/ui';
 import { CHANNELS, CHANNEL_ICONS, CHANNEL_LABELS, allChannels } from '@/lib/promotions';
 import type { Channel } from '@/lib/promotions';
 import {
@@ -30,8 +30,13 @@ import {
  isZeroArityOperator,
  operatorsForType,
 } from '@/data/operator-catalog';
-import { defaultRestrictionRules } from './draft';
-import type { PromotionDraft, Qualification, Trigger, TriggerRule } from './draft';
+import {
+ TRIGGER_JOINS,
+ TRIGGER_JOIN_LABELS,
+ defaultRestrictionRules,
+ normalizeTriggerJoins,
+} from './draft';
+import type { PromotionDraft, Qualification, Trigger, TriggerJoin, TriggerRule } from './draft';
 import { inputStyle } from './fields';
 
 interface Step2QualificationProps {
@@ -41,7 +46,6 @@ interface Step2QualificationProps {
  onEdit: <K extends keyof PromotionDraft>(key: K, value: PromotionDraft[K]) => void;
 }
 
-const REGISTRATION_EVENT: EventId = 'registration';
 const SETTLEMENT_PARAMS = ['Losing Legs', 'Remaining Odds'];
 
 function newId(prefix: string): string {
@@ -88,6 +92,11 @@ function isRestrictionParam(name: string): boolean {
  return BET_RESTRICTIONS.some((restriction) => restriction.param === name);
 }
 
+/** Conditions the author sees on the card; restriction rules live in the shared section below. */
+function visibleRulesOf(trigger: Trigger): TriggerRule[] {
+ return trigger.rules.filter((rule) => !isRestrictionParam(rule.param));
+}
+
 /** Checked means the canonical exclusion rule exists, not separate UI state. */
 function hasRestriction(trigger: Trigger, param: string): boolean {
  return trigger.rules.some((rule) =>
@@ -95,6 +104,33 @@ function hasRestriction(trigger: Trigger, param: string): boolean {
  && rule.operator === QUALIFICATION_OPERATOR_VALUES.equals
  && rule.value === 'No',
  );
+}
+
+/**
+ * Restrictions are one promotion-wide set (shown once, like How often)
+ * but stored as an exclusion rule on every trigger so each trigger stays self-contained.
+ * A restriction reads as ticked when any trigger carries it.
+ */
+function anyTriggerHasRestriction(triggers: Trigger[], param: string): boolean {
+ return triggers.some((trigger) => hasRestriction(trigger, param));
+}
+
+function restrictionRule(triggerId: string, param: string): TriggerRule {
+ return {
+ id: `${triggerId}-restrict-${param.toLowerCase().replace(/\s+/g, '-')}`,
+ param,
+ type: 'boolean',
+ operator: QUALIFICATION_OPERATOR_VALUES.equals,
+ value: 'No',
+ };
+}
+
+/** Exclusion rules for a new or switched trigger: mirror the current shared set, or the default set when there is nothing to mirror. */
+function seedRestrictionRules(triggers: Trigger[], triggerId: string): TriggerRule[] {
+ if (triggers.length === 0) return defaultRestrictionRules(triggerId);
+ return BET_RESTRICTIONS
+ .filter((restriction) => anyTriggerHasRestriction(triggers, restriction.param))
+ .map((restriction) => restrictionRule(triggerId, restriction.param));
 }
 
 /** Betting params use BET / RESULT; other events retain their event heading. */
@@ -113,6 +149,8 @@ function pickerGroupsFor(eventId: string): { label: string; params: EventParam[]
 
 export function Step2Qualification({ draft, errors, onEdit }: Step2QualificationProps) {
  const [eventModalOpen, setEventModalOpen] = useState(false);
+ /* Join chosen in the "Add trigger event" modal for the trigger about to be added. */
+ const [pendingJoin, setPendingJoin] = useState<TriggerJoin>('or');
  const [paramPickerFor, setParamPickerFor] = useState<string | null>(null);
  const [confirmDeleteTrigger, setConfirmDeleteTrigger] = useState<Trigger | null>(null);
  const [pendingSwitch, setPendingSwitch] = useState<{
@@ -121,12 +159,8 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  } | null>(null);
 
  const qualification = draft.qualification;
- const eligibility = qualification.eligibility;
  const errorFor = (key: string): string | undefined => errors[key];
 
- const anyRegistrationTrigger = qualification.triggers.some(
- (trigger) => trigger.eventId === REGISTRATION_EVENT,
- );
  const anySettlementRule = qualification.triggers.some((trigger) =>
  trigger.rules.some((rule) => SETTLEMENT_PARAMS.includes(rule.param)),
  );
@@ -145,24 +179,37 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
 
  /* Group 1: Qualifying bet */
  const addTrigger = (eventId: EventId) => {
- /* New bet triggers start with every standard exclusion ticked. */
+ /* New triggers inherit the promotion-wide restriction set (all ticked when starting fresh). */
  const id = newId('trigger');
  commit({
  ...qualification,
- triggers: [
+ triggers: normalizeTriggerJoins([
  ...qualification.triggers,
- { id, eventId, rules: defaultRestrictionRules(id) },
- ],
+ { id, eventId, rules: seedRestrictionRules(qualification.triggers, id), join: pendingJoin },
+ ]),
  });
  setEventModalOpen(false);
+ };
+
+ const setTriggerJoin = (triggerId: string, join: TriggerJoin) => {
+ commit(mapTrigger(triggerId, (trigger) => ({ ...trigger, join })));
+ };
+
+ const removeTrigger = (triggerId: string) => {
+ commit({
+ ...qualification,
+ triggers: normalizeTriggerJoins(
+ qualification.triggers.filter((item) => item.id !== triggerId),
+ ),
+ });
  };
 
  const applyEventSwitch = (triggerId: string, eventId: EventId) => {
  commit(mapTrigger(triggerId, (trigger) => ({
  ...trigger,
  eventId,
- /* Conditions are dropped on switch; the standard exclusions come back ticked. */
- rules: defaultRestrictionRules(trigger.id),
+ /* Conditions are dropped on switch; the shared restriction set is kept. */
+ rules: seedRestrictionRules(qualification.triggers, trigger.id),
  })));
  setPendingSwitch(null);
  setParamPickerFor(null);
@@ -170,7 +217,7 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
 
  const requestEventSwitch = (trigger: Trigger, eventId: EventId) => {
  if (eventId === trigger.eventId) return;
- if (trigger.rules.length > 0) {
+ if (visibleRulesOf(trigger).length > 0) {
  setPendingSwitch({ triggerId: trigger.id, eventId });
  return;
  }
@@ -178,26 +225,18 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  };
 
  const requestDeleteTrigger = (trigger: Trigger) => {
- if (trigger.rules.length > 0) {
+ if (visibleRulesOf(trigger).length > 0) {
  setConfirmDeleteTrigger(trigger);
  return;
  }
- commit({
- ...qualification,
- triggers: qualification.triggers.filter((item) => item.id !== trigger.id),
- });
+ removeTrigger(trigger.id);
  if (paramPickerFor === trigger.id) setParamPickerFor(null);
  if (pendingSwitch?.triggerId === trigger.id) setPendingSwitch(null);
  };
 
  const deleteTrigger = () => {
  if (confirmDeleteTrigger) {
- commit({
- ...qualification,
- triggers: qualification.triggers.filter(
- (trigger) => trigger.id !== confirmDeleteTrigger.id,
- ),
- });
+ removeTrigger(confirmDeleteTrigger.id);
  if (paramPickerFor === confirmDeleteTrigger.id) setParamPickerFor(null);
  if (pendingSwitch?.triggerId === confirmDeleteTrigger.id) setPendingSwitch(null);
  }
@@ -226,25 +265,18 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  })));
  };
 
- const setRestriction = (triggerId: string, param: string, checked: boolean) => {
- commit(mapTrigger(triggerId, (trigger) => {
+ /* One checkbox drives the matching exclusion rule on every trigger. */
+ const setRestriction = (param: string, checked: boolean) => {
+ commit({
+ ...qualification,
+ triggers: qualification.triggers.map((trigger) => {
  const rules = trigger.rules.filter((rule) => rule.param !== param);
  return {
  ...trigger,
- rules: checked
- ? [
- ...rules,
- {
- id: newId('rule'),
- param,
- type: 'boolean',
- operator: QUALIFICATION_OPERATOR_VALUES.equals,
- value: 'No',
- },
- ]
- : rules,
+ rules: checked ? [...rules, restrictionRule(trigger.id, param)] : rules,
  };
- }));
+ }),
+ });
  };
 
  /* Group 2: How often */
@@ -285,32 +317,6 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
 
  const setAllChannels = (checked: boolean) => {
  onEdit('channels', checked ? allChannels() : []);
- };
-
- /* Group 3: Who's eligible */
- const setAudience = (audience: Qualification['eligibility']['audience']) => {
- commit({
- ...qualification,
- eligibility: audience === 'all' ? { audience } : { ...eligibility, audience },
- });
- };
-
- const setWindowDays = (raw: string) => {
- const n = Number(raw);
- commit({
- ...qualification,
- eligibility: {
- ...eligibility,
- windowDays: raw.trim() === '' || Number.isNaN(n) ? undefined : n,
- },
- });
- };
-
- const setNonConsecutive = (value: boolean) => {
- commit({
- ...qualification,
- eligibility: { ...eligibility, nonConsecutive: value },
- });
  };
 
  const renderValue = (
@@ -517,6 +523,42 @@ export function Step2Qualification({ draft, errors, onEdit }: Step2Qualification
  );
  };
 
+ /* AND / OR segmented switch: navy fill marks the selected join. */
+ const renderJoinSwitch = (
+ value: TriggerJoin,
+ onChange: (join: TriggerJoin) => void,
+ ariaLabel: string,
+ ) => (
+ <div
+ className="np-join-switch"
+ role="radiogroup"
+ aria-label={ariaLabel}
+ style={{ border: `1px solid ${T.border}`, borderRadius: T.radiusSm, background: T.white }}
+ >
+ {TRIGGER_JOINS.map((join) => {
+ const selected = join === value;
+ return (
+ <button
+ key={join}
+ type="button"
+ role="radio"
+ aria-checked={selected}
+ className="np-join-switch__option"
+ style={{
+ background: selected ? T.navy : 'transparent',
+ color: selected ? T.white : T.textSecondary,
+ borderRadius: T.radiusSm,
+ }}
+ onClick={() => onChange(join)}
+ >
+ {TRIGGER_JOIN_LABELS[join]}
+ </button>
+ );
+ })}
+ </div>
+ );
+
+
  const renderParamPicker = (
  groups: { label: string; params: EventParam[] }[],
  onPick: (param: EventParam) => void,
@@ -646,7 +688,7 @@ style={{ borderTop: `1px solid ${T.border}` }}
  const event = getCatalogEvent(trigger.eventId);
  const groups = pickerGroupsFor(trigger.eventId);
  const params = [...(event?.params ?? []), ...PLAYER_PARAMS];
- const visibleRules = trigger.rules.filter((rule) => !isRestrictionParam(rule.param));
+ const visibleRules = visibleRulesOf(trigger);
  const switching = pendingSwitch?.triggerId === trigger.id ? pendingSwitch : null;
  const error = errorFor(`trigger:${trigger.id}`);
 
@@ -655,7 +697,11 @@ style={{ borderTop: `1px solid ${T.border}` }}
  {index > 0 && (
  <div className="np-or-divider" style={{ color: T.textSecondary }}>
  <span className="np-or-divider__line" style={{ background: T.border }} />
- OR
+ {renderJoinSwitch(
+ trigger.join ?? 'or',
+ (join) => setTriggerJoin(trigger.id, join),
+ `Trigger ${index + 1} join`,
+ )}
  <span className="np-or-divider__line" style={{ background: T.border }} />
  </div>
  )}
@@ -743,7 +789,7 @@ style={{ borderTop: `1px solid ${T.border}` }}
  Switch to &quot;{catalogEventLabel(switching.eventId)}&quot;?
  </p>
  <p className="np-hint" style={{ color: T.textSecondary }}>
- All {trigger.rules.length} conditions on this card will be removed.
+ All {visibleRules.length} conditions on this card will be removed.
  Other triggers are unchanged.
  </p>
  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
@@ -786,45 +832,19 @@ style={{ borderTop: `1px solid ${T.border}` }}
  groups,
  (param) => addTriggerRule(trigger.id, param),
  )}
-
- <section
- aria-labelledby={`np-restrictions-${trigger.id}`}
- style={{
- borderTop: `1px solid ${T.border}`,
- marginTop: 16,
- paddingTop: 12,
- }}
- >
- <h4
- id={`np-restrictions-${trigger.id}`}
- style={{ color: T.textPrimary, fontSize: 14, fontWeight: 500, margin: 0 }}
- >
- Restrictions: bets that never qualify
- </h4>
- <div
- style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}
- >
- {BET_RESTRICTIONS.map((restriction) => (
- <Checkbox
- key={restriction.param}
- checked={hasRestriction(trigger, restriction.param)}
- label={restriction.label}
- onChange={(checked) => setRestriction(
- trigger.id,
- restriction.param,
- checked,
- )}
- />
- ))}
- </div>
- </section>
  </div>
  </div>
  );
  })}
 
  <div style={{ marginTop: 12 }}>
- <GhostButton small onClick={() => setEventModalOpen(true)}>
+ <GhostButton
+ small
+ onClick={() => {
+ setPendingJoin('or');
+ setEventModalOpen(true);
+ }}
+ >
  <Plus size={14} /> Add trigger event
  </GhostButton>
  </div>
@@ -842,6 +862,38 @@ style={{ borderTop: `1px solid ${T.border}` }}
  </div>
  )}
 
+ </section>
+
+ {/* One shared set for the promotion; stored as an exclusion rule on every trigger. */}
+ <section
+ className="np-section"
+ aria-labelledby="np-restrictions-title"
+ style={{ borderTop: `1px solid ${T.border}` }}
+ >
+ <h3
+ id="np-restrictions-title"
+ className="np-section__title"
+ style={{ color: T.textPrimary }}
+ >
+ Restrictions: bets that never qualify
+ </h3>
+ <p className="np-hint" style={{ color: T.textSecondary }}>
+ Applies to every trigger above. Untick one to let those bets qualify.
+ </p>
+ <div
+ role="group"
+ aria-label="Restrictions: bets that never qualify"
+ style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}
+ >
+ {BET_RESTRICTIONS.map((restriction) => (
+ <Checkbox
+ key={restriction.param}
+ checked={anyTriggerHasRestriction(qualification.triggers, restriction.param)}
+ label={restriction.label}
+ onChange={(checked) => setRestriction(restriction.param, checked)}
+ />
+ ))}
+ </div>
  </section>
 
  <section
@@ -894,95 +946,31 @@ style={{ borderTop: `1px solid ${T.border}` }}
  </p>
  </section>
 
+ {/* Recorded on the promotion and in T&Cs only; not enforced by the engine yet. */}
  <section
  className="np-section"
- aria-labelledby="np-eligibility-title"
+ aria-labelledby="np-combinable-title"
  style={{ borderTop: `1px solid ${T.border}` }}
  >
+ <div className="np-toggle-row" style={{ color: T.textPrimary }}>
+ <div>
  <h3
- id="np-eligibility-title"
+ id="np-combinable-title"
  className="np-section__title"
- style={{ color: T.textPrimary }}
+ style={{ color: T.textPrimary, margin: 0 }}
  >
- Who&apos;s eligible
+ Combinable with other offers
  </h3>
- <div
- className="np-radio-group"
- role="radiogroup"
- aria-label="Eligibility"
- style={{ marginTop: 12 }}
- >
- <label className="np-radio-row" style={{ color: T.textPrimary }}>
- <input
- type="radio"
- name="eligibility"
- checked={eligibility.audience === 'all'}
- onChange={() => setAudience('all')}
- />
- All players
- </label>
- <label className="np-radio-row" style={{ color: T.textPrimary }}>
- <input
- type="radio"
- name="eligibility"
- checked={eligibility.audience === 'new_customers'}
- onChange={() => setAudience('new_customers')}
- />
- New customers
- </label>
- </div>
-
- {eligibility.audience === 'new_customers' && (
- <div style={{ marginTop: 12 }}>
- <label className="np-radio-row" style={{ color: T.textPrimary, flexWrap: 'wrap' }}>
- Within
- <input
- type="number"
- min="1"
- step="1"
- className="np-input"
- style={{ ...inputStyle(errors.eligibilityDays), width: 80 }}
- value={eligibility.windowDays ?? ''}
- aria-label="Days since registration"
- aria-invalid={Boolean(errors.eligibilityDays)}
- aria-describedby={errors.eligibilityDays ? 'np-eligibility-error' : undefined}
- onChange={(e) => setWindowDays(e.target.value)}
- />
- days of registration
- </label>
- {errors.eligibilityDays && (
- <p
- id="np-eligibility-error"
- className="np-error"
- role="alert"
- style={{ color: T.destructive }}
- >
- {errors.eligibilityDays}
+ <p className="np-hint" style={{ color: T.textSecondary }}>
+ Shown on the promotion and in T&amp;Cs. Not enforced by the engine yet.
  </p>
- )}
- <div style={{ marginTop: 12 }}>
- <Checkbox
- checked={Boolean(eligibility.nonConsecutive)}
- label="Missing a day doesn't disqualify the player"
- description="The player can qualify on any of the days in the window; they don't have to be back-to-back."
- onChange={(checked) => setNonConsecutive(checked)}
+ </div>
+ <Toggle
+ checked={draft.combinableWithOtherOffers}
+ onChange={(v) => onEdit('combinableWithOtherOffers', v)}
+ ariaLabel="Combinable with other offers"
  />
  </div>
- </div>
- )}
-
- {anyRegistrationTrigger && (
- <div
- className="np-notice"
- style={{ background: T.offWhite, borderRadius: T.radiusSm, marginTop: 12 }}
- >
- <Info size={16} style={{ color: T.textSecondary }} />
- <span style={{ color: T.textPrimary }}>
- A registration trigger already targets customers at registration;
- a new-customer window is redundant for that trigger.
- </span>
- </div>
- )}
  </section>
 
  {eventModalOpen && (
@@ -1007,6 +995,19 @@ style={{ borderTop: `1px solid ${T.border}` }}
  >
  Add trigger event
  </h2>
+ {qualification.triggers.length > 0 && (
+ <div className="np-join-picker" style={{ color: T.textPrimary }}>
+ <span className="np-hint" style={{ color: T.textSecondary }}>
+ Combine with the previous trigger using
+ </span>
+ {renderJoinSwitch(pendingJoin, setPendingJoin, 'Join with previous trigger')}
+ <span className="np-hint" style={{ color: T.textSecondary }}>
+ {pendingJoin === 'and'
+ ? 'AND: the player must complete both events to qualify.'
+ : 'OR: either event on its own qualifies the player.'}
+ </span>
+ </div>
+ )}
  <div className="np-event-modal__body">
  {EVENT_CATALOG.map((category) => (
  <div key={category.label}>
@@ -1079,8 +1080,8 @@ style={{ borderTop: `1px solid ${T.border}` }}
  </h2>
  <p className="promo-modal__body" style={{ color: T.textSecondary }}>
  The &quot;{catalogEventLabel(confirmDeleteTrigger.eventId)}&quot; trigger
- and its {confirmDeleteTrigger.rules.length}{' '}
- {confirmDeleteTrigger.rules.length === 1 ? 'condition' : 'conditions'} will
+ and its {visibleRulesOf(confirmDeleteTrigger).length}{' '}
+ {visibleRulesOf(confirmDeleteTrigger).length === 1 ? 'condition' : 'conditions'} will
  be removed from this promotion.
  </p>
  <div className="promo-modal__actions">

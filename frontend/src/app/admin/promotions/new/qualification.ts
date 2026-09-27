@@ -30,11 +30,6 @@ export interface Trigger {
 export interface Qualification {
   triggers: Trigger[];
   aggregation?: { countPerDay?: number; attributionNote: string };
-  eligibility: {
-    audience: 'all' | 'new_customers';
-    windowDays?: number;
-    nonConsecutive?: boolean;
-  };
 }
 
 export const qualificationEventIds = {
@@ -144,7 +139,6 @@ export function newQualificationId(prefix: 'trigger' | 'rule'): string {
 export function emptyQualification(): Qualification {
   return {
     triggers: [{ id: primaryTriggerId, eventId: qualificationEventIds.betSettled, rules: [] }],
-    eligibility: { audience: 'all' },
   };
 }
 
@@ -156,7 +150,6 @@ export function cloneQualification(qualification: Qualification): Qualification 
       rules: trigger.rules.map((rule) => ({ ...rule })),
     })),
     aggregation: qualification.aggregation ? { ...qualification.aggregation } : undefined,
-    eligibility: { ...qualification.eligibility },
   };
 }
 
@@ -266,10 +259,6 @@ export function removeUserRule(qualification: Qualification, triggerId: string, 
 
 export function setAggregation(qualification: Qualification, countPerDay: number | undefined): Qualification {
  return countPerDay === undefined ? { ...qualification, aggregation: undefined } : { ...qualification, aggregation: { countPerDay, attributionNote } };
-}
-
-export function setEligibility(qualification: Qualification, eligibility: Qualification['eligibility']): Qualification {
- return { ...qualification, eligibility };
 }
 
 export const qualificationOperators = QUALIFICATION_OPERATOR_VALUES;

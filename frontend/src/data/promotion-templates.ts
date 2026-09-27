@@ -8,7 +8,8 @@ export type TemplateId = 'welcome_offer' | 'cashback';
 export type PromotionTypeId = 'welcome_offer' | 'cashback' | 'freebet_award' | 'odds_boost' | 'leaderboard' | 'missions' | 'deposit_match' | 'referral_reward';
 export type ProductVertical = 'Sportsbook' | 'Aviator' | 'Casino' | 'Crash' | 'Virtuals';
 export type RewardType = 'freebet' | 'cash';
-export type PayoutMode = 'fixed' | 'tiers';
+/** `percentage` returns a share of the qualifying cash stake (Cashback stake-back). */
+export type PayoutMode = 'fixed' | 'tiers' | 'percentage';
 export type CreditTiming = 'instant' | 'next-day' | 'manual';
 export type EndMode = 'date' | 'ongoing';
 
@@ -67,7 +68,7 @@ export const PROMOTION_TEMPLATES: PromotionTemplate[] = [
  { id: 'tpl-wo-stake', param: 'Stake', type: 'float', operator: '>=', value: '2.00' },
  { id: 'tpl-wo-result', param: 'Result', type: 'enum', operator: 'in', value: 'Cashed Out,Lost' },
  { id: 'tpl-wo-multiplier', param: 'Cash-out multiplier', type: 'float', operator: '>=', value: '2.00' },
- { id: 'tpl-wo-freebet', param: 'Free Bet', type: 'boolean', operator: '=', value: 'No' },
+ { id: 'tpl-wo-stake-funding', param: 'Stake Funding', type: 'enum', operator: '=', value: 'Cash' },
  { id: 'tpl-wo-voided', param: 'Voided', type: 'boolean', operator: '=', value: 'No' },
  { id: 'tpl-wo-cancelled', param: 'Cancelled', type: 'boolean', operator: '=', value: 'No' },
  /* No 'Cashed Out = No' here: Aviator rounds are cashed out by design, so this offer rewards them (Result includes Cashed Out). */
@@ -77,7 +78,6 @@ export const PROMOTION_TEMPLATES: PromotionTemplate[] = [
  counting: [
  { id: 'tpl-wo-qualifying-bets-per-day', param: 'Qualifying bets per day', type: 'integer', operator: '>=', value: '10' },
  ],
- eligibility: { audience: 'new_customers', windowDays: 5, nonConsecutive: true },
  },
  rewardType: 'freebet',
  freebetCount: '5', freebetValue: '2.00', freebetExpiryHours: '24', maxAwardsPerDay: '5',
@@ -104,7 +104,7 @@ export const PROMOTION_TEMPLATES: PromotionTemplate[] = [
  { id: 'tpl-cb-result', param: 'Result', type: 'enum', operator: '=', value: 'Lost' },
  { id: 'tpl-cb-one-leg', param: 'Losing Legs', type: 'integer', operator: '=', value: '1' },
  { id: 'tpl-cb-odds', param: 'Remaining Odds', type: 'float', operator: '>=', value: '25' },
- { id: 'tpl-cb-freebet', param: 'Free Bet', type: 'boolean', operator: '=', value: 'No' },
+ { id: 'tpl-cb-stake-funding', param: 'Stake Funding', type: 'enum', operator: '=', value: 'Cash' },
  { id: 'tpl-cb-voided', param: 'Voided', type: 'boolean', operator: '=', value: 'No' },
  { id: 'tpl-cb-cancelled', param: 'Cancelled', type: 'boolean', operator: '=', value: 'No' },
  { id: 'tpl-cb-cashed-out', param: 'Cashed Out', type: 'boolean', operator: '=', value: 'No' },
@@ -112,7 +112,6 @@ export const PROMOTION_TEMPLATES: PromotionTemplate[] = [
  },
  ],
  counting: [],
- eligibility: { audience: 'all' },
  },
  rewardType: 'cash', payoutMode: 'tiers', tiers: SEED_TIERS.map((t) => ({ ...t })),
  payoutCap: '1000', creditTiming: 'next-day', creditTime: '14:00', alertThreshold: '90',

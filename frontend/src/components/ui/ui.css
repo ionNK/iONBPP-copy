@@ -76,7 +76,8 @@
   font-weight: 500;
 }
 
-.promo-btn-primary:disabled {
+.promo-btn-primary:disabled,
+.promo-btn-ghost:disabled {
  opacity: 0.5;
  cursor: not-allowed;
 }

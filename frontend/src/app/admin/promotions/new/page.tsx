@@ -1,59 +1,50 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
-Check, ChevronLeft, CircleCheck, FileText, ImagePlus, Info, Plus, Trash2, TriangleAlert, Upload, X,
+Check, ChevronLeft, CircleCheck, FileText, ImagePlus, Info, LayoutTemplate, LogOut, Plus, Save, Trash2, TriangleAlert, Upload, X,
 } from 'lucide-react';
 import '../promotions.css';
 import './new.css';
 import T from '@/theme/tokens';
 import { Badge, Checkbox, DateTimeField, GhostButton, PrimaryButton, TimeField, Toggle, parseIsoDateTime, toIsoDate, toIsoTime } from '@/components/ui';
-import { addPromotion, cloneNotifications, nextPromoId, setListNotice } from '@/lib/promotions';
+import { cloneNotifications, loadPromotions, nextPromoId, setListNotice, upsertPromotion } from '@/lib/promotions';
 import type { NotificationTrigger, Notifications, Promo } from '@/lib/promotions';
-import { NOTIFICATION_CHANNELS, NOTIFICATION_CHANNEL_LABELS, NOTIFICATION_PLACEHOLDERS, NOTIFICATION_TRIGGER_LABELS, SMS_SEGMENT_LENGTH, channelSummary, notificationChannelSummary, normalizeChannels, normalizeNotifications, placeholderToken, smsSegments } from '@/lib/promotions';
+import { DRAFT_STEP_COUNT, deleteDraft, formatSavedAgo, loadDraft, sanitizeDraft, saveDraft as storeDraft } from '@/lib/promotions/draftStore';
+import { NOTIFICATION_CHANNELS, NOTIFICATION_CHANNEL_LABELS, NOTIFICATION_PLACEHOLDERS, NOTIFICATION_TRIGGER_LABELS, SMS_SEGMENT_LENGTH, channelSummary, isNotificationChannelAvailable, notificationChannelSummary, normalizeChannels, normalizeNotifications, placeholderToken, smsSegments } from '@/lib/promotions';
 import { BET_RESTRICTIONS, catalogEventLabel } from '@/data/event-catalog';
 import { isRangeOperator, isZeroArityOperator, QUALIFICATION_OPERATOR_VALUES } from '@/data/operator-catalog';
 import { getPromotionType } from '@/data/promotion-templates';
 import type { TemplateId, TierRow } from '@/data/promotion-templates';
-import { DRAFT_KEY, baseDraft, sanitizeDraftChannels, sanitizeQualification, templateDraft, validateBasics, validateNotifications, validateQualification } from './draft';
-import type { BannerSlot, PromotionDraft, TriggerRule } from './draft';
+import { DRAFT_KEY, TRIGGER_JOIN_LABELS, baseDraft, formatAwardCap, sanitizeDraftChannels, sanitizeQualification, stakePercentageSummary, templateDraft, triggerChainSummary, validateBasics, validateNotifications, validateQualification, validateStakeBack } from './draft';
+import type { BannerSlot, PromotionDraft, Trigger, TriggerRule } from './draft';
+import { STEP, STEPS, clampStep } from './steps';
 import { features } from '@/config/features';
 import { Field, inputStyle } from './fields';
 import { Step1Basics } from './Step1Basics';
 import { Step2Qualification } from './Step2Qualification';
 
-/* Draft model lives in ./draft: a single PromotionDraft persisted to
- * localStorage (DRAFT_KEY), prefilled from the template catalog. */
+/* Draft model lives in ./draft: a single PromotionDraft autosaved to
+ * localStorage (DRAFT_KEY) as the session's working copy, prefilled from the
+ * template catalog. Explicit Save draft / Save and exit additionally write it
+ * to the reference-keyed store (@/lib/promotions/draftStore, `promo-drafts:v1`)
+ * and upsert a Draft row on the list; `?ref=PR-xxx` resumes from that store. */
 
-/* Wizard steps. Budget (BR-6) is gated on features.budgets and Content on features.content:
- * with a flag off the step is filtered out and STEP.<id> resolves to 0, so its JSX /
- * validation / review row are unreachable but retained. Every step reference goes through
- * STEP.<id>, never a literal, so the stepper renumbers with no gap and Back/Continue
- * (step ± 1 over the filtered list) skip hidden steps automatically. */
-type StepId = 'basics' | 'qualification' | 'award' | 'budget' | 'schedule' | 'content' | 'notifications' | 'review';
-const ALL_STEPS: { id: StepId; label: string }[] = [
-{ id: 'basics', label: 'Basics' },
-{ id: 'qualification', label: 'Qualification' },
-{ id: 'award', label: 'Award' },
-{ id: 'budget', label: 'Budget' },
-{ id: 'schedule', label: 'Schedule' },
-{ id: 'content', label: 'Content' },
-{ id: 'notifications', label: 'Notifications' },
-{ id: 'review', label: 'Review' },
-];
-const HIDDEN_STEPS: StepId[] = [
-  ...(features.budgets ? [] : ['budget' as const]),
-  ...(features.content ? [] : ['content' as const]),
-];
-const STEP_DEFS = ALL_STEPS.filter((s) => !HIDDEN_STEPS.includes(s.id));
-const STEPS = STEP_DEFS.map((s) => s.label);
-/** 1-based step number per id; 0 when the step is hidden by a feature flag. */
-const STEP: Record<StepId, number> = ALL_STEPS.reduce((acc, s) => {
-acc[s.id] = STEP_DEFS.findIndex((d) => d.id === s.id) + 1;
-return acc;
-}, {} as Record<StepId, number>);
+/* Wizard steps come from ./steps (shared with the draft store): Budget (BR-6) and
+ * Content are feature-gated, STEP.<id> is 0 when hidden, and the stepper renumbers. */
+const NAME_INPUT_ID = 'np-field-name';
+/** Draft keys that never count as an unsaved edit (navigation + persistence metadata). */
+const VOLATILE_KEYS: (keyof PromotionDraft)[] = ['step', 'dirty', 'reference', 'lastStep', 'lastStepId', 'savedAt', 'status'];
+
+/** Serialises the editable part of a draft; equal fingerprints mean "nothing to save". */
+function fingerprint(d: PromotionDraft): string {
+const editable: Partial<PromotionDraft> = { ...d };
+for (const key of VOLATILE_KEYS) delete editable[key];
+return JSON.stringify(editable);
+}
+
 const VERTICALS = ['Sportsbook', 'Aviator', 'Casino', 'Crash', 'Virtuals'];
 const EXTRA_PLACEMENTS = ['Homepage', 'Casino', 'Crash'];
 const DEVICES = ['Desktop', 'Mobile'];
@@ -69,17 +60,18 @@ function qualificationRuleSummary(rule: TriggerRule): string {
   return `${label} ${rule.value || '·'}`;
 }
 
-/** Read each OR branch independently; another trigger cannot cover its exclusions. The restriction set is fixed, whatever the event. */
-function qualificationRestrictionRows(rules: TriggerRule[], index: number): [string, string][] {
+/** Restrictions are one promotion-wide set (edited once in Step 2) stored as an exclusion rule on every trigger, so they read back once. */
+function qualificationRestrictionRows(triggers: Trigger[]): [string, string][] {
+  const rules = triggers.flatMap((trigger) => trigger.rules);
   const active = BET_RESTRICTIONS.filter((restriction) => rules.some((rule) =>
     rule.param === restriction.param && rule.operator === QUALIFICATION_OPERATOR_VALUES.equals && rule.value === 'No',
   ));
   const rows: [string, string][] = active.length > 0
-    ? [[`Trigger ${index + 1} restrictions`, `Excluded: ${active.map((restriction) => restriction.summary).join(', ')}`]]
+    ? [['Restrictions', `Excluded: ${active.map((restriction) => restriction.summary).join(', ')}`]]
     : [];
   for (const restriction of BET_RESTRICTIONS) {
     if (!active.includes(restriction)) {
-      rows.push([`Trigger ${index + 1} · ${restriction.param} warning`, `⚠ ${restriction.warning}`]);
+      rows.push([`${restriction.param} warning`, `⚠ ${restriction.warning}`]);
     }
   }
   return rows;
@@ -97,6 +89,8 @@ if (!d.freebetValue || Number(d.freebetValue) <= 0) e.freebetValue = 'Freebet va
 } else if (d.payoutMode === 'fixed' && (!d.fixedAmount || Number(d.fixedAmount) <= 0)) {
 e.fixedAmount = 'Fixed amount is required.';
 }
+/* Stake-back fields (percentage of stake / max value per award). */
+Object.assign(e, validateStakeBack(d));
 }
 if (step === STEP.schedule) {
 if (!d.startDate) e.startDate = 'Start date is required.';
@@ -123,24 +117,33 @@ if (!d.startDate) return 'Draft';
 return d.endMode === 'date' && d.endDate ? `${d.startDate} – ${d.endDate}` : `${d.startDate} – ongoing`;
 }
 
-function buildPromo(d: PromotionDraft, status: 'draft' | 'pending'): Promo {
+/**
+ * `reference` is the row id: the draft's stable reference once one exists,
+ * otherwise a fresh `nextPromoId()`. When a row with that id already exists
+ * (re-saving a draft, or a seeded Draft such as PR-004) its list-only fields
+ * (providerCode, spend) carry over so the upsert replaces, never duplicates.
+ */
+function buildPromo(d: PromotionDraft, status: 'draft' | 'pending', reference: string): Promo {
+const existing = loadPromotions().find((p) => p.id === reference);
+/* The seeded type label ("Odds Boost") survives while the wizard type is still unset. */
+const type = d.type ? typeLabel(d) : existing?.type ?? typeLabel(d);
 return {
-id: nextPromoId(),
+id: reference,
 name: d.name.trim() || 'Untitled promotion',
-type: typeLabel(d),
+type,
 /* Zambia is implicit in this prototype (no Market field in the wizard). */
-market: 'Zambia',
+market: existing?.market ?? 'Zambia',
 schedule: scheduleLabel(d),
 /* BR-6 budget is only captured when the Budget step is enabled. */
-budget: features.budgets && d.budget ? Number(d.budget) : null,
-spend: null,
+budget: features.budgets && d.budget ? Number(d.budget) : existing?.budget ?? null,
+spend: existing?.spend ?? null,
 status,
 channels: normalizeChannels(d.channels),
 notifications: cloneNotifications(d.notifications),
 /* Step 1 "Product vertical" select; empty = cross-product. */
-vertical: d.vertical || null,
+vertical: d.vertical || existing?.vertical || null,
 /* PLACEHOLDER: the wizard captures no provider yet (Settings owns provider codes). */
-providerCode: null,
+providerCode: existing?.providerCode ?? null,
 };
 }
 
@@ -173,21 +176,76 @@ onChange={(e) => onChange(e.target.value)}
 );
 
 
+/* useSearchParams (the `?ref=` resume route) needs a Suspense boundary for static rendering. */
 export default function NewPromotionPage() {
+return (
+<Suspense fallback={null}>
+<NewPromotionWizard />
+</Suspense>
+);
+}
+
+/** Where the author was trying to go when the unsaved-changes guard stopped them. */
+type LeaveIntent = { kind: 'route'; href: string } | { kind: 'back' };
+
+function NewPromotionWizard() {
 const router = useRouter();
+const searchParams = useSearchParams();
+const resumeRef = searchParams.get('ref');
 const [draft, setDraft] = useState<PromotionDraft>(() => baseDraft());
 const [errors, setErrors] = useState<Record<string, string>>({});
 const [confirmSubmit, setConfirmSubmit] = useState(false);
 const [confirmDiscard, setConfirmDiscard] = useState(false);
+/* Save / resume state. `savedFingerprint` is the clean baseline the live draft is
+ * compared against: the pristine draft on a fresh start, the loaded copy on resume,
+ * and the on-screen content after each explicit save. */
+const [savedFingerprint, setSavedFingerprint] = useState<string | null>(null);
+const [resumeNote, setResumeNote] = useState<string | null>(null);
+const [leaveIntent, setLeaveIntent] = useState<LeaveIntent | null>(null);
+const [focusName, setFocusName] = useState(false);
+/* Re-render clock for "Saved N min ago" (ticks only while a save timestamp exists). */
+const [now, setNow] = useState(() => Date.now());
 const restored = useRef(false);
+const leaving = useRef(false);
+const sentinelPushed = useRef(false);
 /* The pristine mount state. It is never persisted: under Strict Mode the persist effect
  * runs in the same commit as the restore effect (before the restored draft has rendered),
  * so writing it would clobber the saved draft — hidden Content fields included. */
 const initialDraft = useRef(draft);
 
-/* Restore a persisted draft on load. */
+const currentFingerprint = useMemo(() => fingerprint(draft), [draft]);
+const pristineFingerprint = useMemo(() => fingerprint(baseDraft()), []);
+/* Unsaved = differs from the last save, or (never saved) from an untouched draft. */
+const unsaved = savedFingerprint === null
+? currentFingerprint !== pristineFingerprint
+: currentFingerprint !== savedFingerprint;
+/* Mirrored into a ref for the window/document listeners registered once on mount. */
+const unsavedRef = useRef(unsaved);
+useEffect(() => {
+unsavedRef.current = unsaved;
+}, [unsaved]);
+
+/* Restore on load: `?ref=` resumes the reference-keyed saved draft; otherwise the
+ * session's autosaved working copy (DRAFT_KEY) is rehydrated as before. */
 useEffect(() => {
 restored.current = true;
+if (resumeRef) {
+const stored = loadDraft(resumeRef);
+if (stored) {
+/* eslint-disable-next-line react-hooks/set-state-in-effect -- mount-only hydration from localStorage */
+setDraft(stored);
+/* Resumed content is the clean baseline, whether or not it has been saved from the wizard before. */
+setSavedFingerprint(fingerprint(stored));
+setResumeNote(
+stored.savedAt
+? `Resumed ${stored.reference ?? resumeRef} from step ${stored.lastStep} of ${DRAFT_STEP_COUNT} · last saved ${formatSavedAgo(stored.savedAt)}.`
+: `Editing ${resumeRef}. This draft has not been saved from the wizard yet; Save draft keeps it under the same reference.`,
+);
+} else {
+setResumeNote(`Draft ${resumeRef} was not found. Starting a new promotion.`);
+}
+return;
+}
 try {
 const raw = window.localStorage.getItem(DRAFT_KEY);
 if (raw) {
@@ -202,24 +260,34 @@ const { preset, id, market, provider, ...rest } = parsed;
 void preset; void id; void market; void provider;
 /* Legacy drafts may carry the removed 'custom' template; sanitize. */
 const tpl = rest.template;
-/* eslint-disable-next-line react-hooks/set-state-in-effect -- mount-only hydration from localStorage */
-setDraft({
+const scratch: PromotionDraft = {
 ...baseDraft(),
 ...rest,
 /* A draft saved with more steps (e.g. Budget or Content enabled) must not land past the last step.
  * Content fields (shortDescription, bannerSlots, tcs*) stay on the draft via ...rest while hidden. */
-step: Math.min(Math.max(Number(rest.step) || 1, 1), STEPS.length),
+step: clampStep(rest.step),
 template: tpl === 'welcome_offer' || tpl === 'cashback' ? tpl : null,
 /* Pre-rules-model drafts (flat fields / no primary trigger) fall back to an empty qualification. */
 qualification: sanitizeQualification(rest.qualification),
 channels: sanitizeDraftChannels(rest.channels),
 notifications: normalizeNotifications(rest.notifications),
-});
+reference: typeof rest.reference === 'string' && rest.reference ? rest.reference : null,
+};
+setDraft(scratch);
+/* A working copy that was explicitly saved earlier compares against its stored entry.
+ * Both sides are sanitised first so key order / legacy shapes never read as an edit. */
+const stored = scratch.reference ? loadDraft(scratch.reference) : null;
+if (stored?.savedAt) {
+const unchanged = fingerprint(sanitizeDraft(scratch, scratch.reference)) === fingerprint(stored);
+setSavedFingerprint(unchanged ? fingerprint(scratch) : fingerprint(stored));
+} else {
+setSavedFingerprint(null);
+}
 }
 } catch {
 /* Corrupt draft: start clean. */
 }
-}, []);
+}, [resumeRef]);
 
 /* Persist on every change (skipped until the restore effect has run and for the
  * untouched mount state, which would otherwise overwrite the stored draft). */
@@ -231,6 +299,70 @@ window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
 /* Quota errors are non-fatal for the prototype. */
 }
 }, [draft]);
+
+/* "Saved N min ago" refreshes once a minute while a save timestamp is showing. */
+useEffect(() => {
+if (!draft.savedAt) return;
+const id = window.setInterval(() => setNow(Date.now()), 60_000);
+return () => window.clearInterval(id);
+}, [draft.savedAt]);
+
+/* Name-only save validation focuses the Name field (Step 1) after the step renders. */
+useEffect(() => {
+if (!focusName) return;
+document.getElementById(NAME_INPUT_ID)?.focus();
+/* eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot focus request reset */
+setFocusName(false);
+}, [focusName, draft.step]);
+
+/* Exit guard. Browser reload/close: native beforeunload prompt. Browser back: a history
+ * sentinel is pushed on mount so the first back press lands on the wizard again and can be
+ * intercepted; the guard modal then offers Save and exit / Leave without saving. */
+useEffect(() => {
+const onBeforeUnload = (e: BeforeUnloadEvent) => {
+if (!unsavedRef.current || leaving.current) return;
+e.preventDefault();
+};
+window.addEventListener('beforeunload', onBeforeUnload);
+return () => window.removeEventListener('beforeunload', onBeforeUnload);
+}, []);
+
+useEffect(() => {
+/* The Next.js router state is carried over so popping onto the sentinel is a no-op for it. */
+const pushSentinel = () => window.history.pushState({ ...window.history.state, npGuard: true }, '', window.location.href);
+if (!sentinelPushed.current) {
+sentinelPushed.current = true;
+pushSentinel();
+}
+const onPopState = () => {
+if (leaving.current) return;
+if (unsavedRef.current) {
+/* Re-arm the sentinel and ask; a confirmed leave goes back twice (sentinel + wizard). */
+pushSentinel();
+setLeaveIntent({ kind: 'back' });
+} else {
+window.history.back();
+}
+};
+window.addEventListener('popstate', onPopState);
+return () => window.removeEventListener('popstate', onPopState);
+}, []);
+
+/* In-app navigation guard: sidebar / any same-origin link click while unsaved. */
+useEffect(() => {
+const onClick = (e: MouseEvent) => {
+if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+const anchor = (e.target as HTMLElement | null)?.closest('a[href]');
+if (!anchor) return;
+const href = anchor.getAttribute('href') ?? '';
+if (!href.startsWith('/') || anchor.getAttribute('target') === '_blank') return;
+if (!unsavedRef.current || leaving.current) return;
+e.preventDefault();
+setLeaveIntent({ kind: 'route', href });
+};
+document.addEventListener('click', onClick, true);
+return () => document.removeEventListener('click', onClick, true);
+}, []);
 
 const update = (patch: Partial<PromotionDraft>) => setDraft((d) => ({ ...d, ...patch }));
 
@@ -245,13 +377,12 @@ for (const errorKey of Object.keys(next)) {
 if (errorKey.startsWith('notification:')) delete next[errorKey];
 }
 }
-/* Qualification edits invalidate trigger, counting and eligibility errors. */
+/* Qualification edits invalidate trigger and counting errors. */
 if (key === 'qualification') {
 for (const errorKey of Object.keys(next)) {
 if (
             errorKey === 'triggers' || errorKey.startsWith('trigger:')
             || errorKey.startsWith('rule:') || errorKey.startsWith('counting:')
-            || errorKey === 'eligibilityDays'
           ) delete next[errorKey];
 }
 }
@@ -335,37 +466,102 @@ const removeTier = (i: number) => setDraft((d) => ({ ...d, tiers: d.tiers.filter
 const updateTier = (i: number, patch: Partial<TierRow>) =>
 setDraft((d) => ({ ...d, tiers: d.tiers.map((t, idx) => (idx === i ? { ...t, ...patch } : t)) }));
 
-/* Save draft → adds a Draft row to the list and routes back. */
-const saveDraft = () => {
-addPromotion(buildPromo(draft, 'draft'));
+/* Leaves the wizard for good: the guards stand down and the scratch copy is cleared. */
+const exitTo = (href: string) => {
+leaving.current = true;
 clearDraft();
-setListNotice(`${draft.name.trim() || 'Promotion'} saved as draft.`);
-router.push('/admin/promotions');
+router.push(href);
 };
 
-/* Submit → confirm-before-commit → Pending approval row + toast. */
-const doSubmit = () => {
-addPromotion(buildPromo(draft, 'pending'));
+/**
+ * Save draft (any step). Only the name is required to save — every other step
+ * validation is deferred to Continue / Submit. Writes the reference-keyed store
+ * and upserts the list row as Draft (never Pending approval). Returns the saved
+ * draft, or null when the name is missing (Step 1 is shown with the Name focused).
+ */
+const persistDraft = (): PromotionDraft | null => {
+if (!draft.name.trim()) {
+setErrors({ name: 'Add a name to save this draft.' });
+if (draft.step !== STEP.basics) update({ step: STEP.basics });
+setFocusName(true);
+return null;
+}
+const reference = draft.reference ?? nextPromoId();
+const saved = storeDraft(draft, reference);
+upsertPromotion(buildPromo(saved, 'draft', reference));
+/* Keep the author's live edits object identity but adopt the persistence metadata. */
+setDraft((d) => ({ ...d, reference, lastStep: saved.lastStep, lastStepId: saved.lastStepId, savedAt: saved.savedAt, dirty: false }));
+/* Baseline = what is on screen now (the stored copy is a sanitised equivalent). */
+setSavedFingerprint(currentFingerprint);
+setNow(Date.now());
+return saved;
+};
+
+const saveDraft = () => {
+persistDraft();
+};
+
+/* Save and exit → same save, then back to the list with a notice. */
+const saveAndExit = (href = '/admin/promotions') => {
+const saved = persistDraft();
+if (!saved) return;
+setLeaveIntent(null);
+setListNotice(`${saved.name.trim()} saved as draft (${saved.reference}).`);
+exitTo(href);
+};
+
+/* Guard modal → Leave without saving: honour the original intent. */
+const leaveWithoutSaving = () => {
+if (!leaveIntent) return;
+const intent = leaveIntent;
+setLeaveIntent(null);
+leaving.current = true;
 clearDraft();
+if (intent.kind === 'route') {
+router.push(intent.href);
+} else {
+/* Two entries: the re-armed sentinel and the wizard itself. */
+window.history.go(-2);
+}
+};
+
+/* Back to the list from Step 1: guarded like any other exit. */
+const requestExit = (href = '/admin/promotions') => {
+if (unsaved) {
+setLeaveIntent({ kind: 'route', href });
+return;
+}
+exitTo(href);
+};
+
+/* Submit → confirm-before-commit → Pending approval row + toast. The stored draft is
+ * removed: from here on the row belongs to the approval queue, not the wizard. */
+const doSubmit = () => {
+const reference = draft.reference ?? nextPromoId();
+upsertPromotion(buildPromo(draft, 'pending', reference));
+deleteDraft(reference);
 setConfirmSubmit(false);
 setListNotice('Promotion submitted for approval');
-router.push('/admin/promotions');
+exitTo('/admin/promotions');
 };
 
 const doDiscard = () => {
-clearDraft();
 setConfirmDiscard(false);
-router.push('/admin/promotions');
+exitTo('/admin/promotions');
 };
+
+/* Save indicator copy: never saved / unsaved edits / saved N min ago. */
+const saveState: { state: 'unsaved' | 'saved' | 'clean'; label: string } = unsaved
+? { state: 'unsaved', label: 'Unsaved changes' }
+: draft.savedAt
+? { state: 'saved', label: `Saved ${formatSavedAgo(draft.savedAt, new Date(now))}` }
+: { state: 'clean', label: 'Not saved yet' };
 
 const bannersFilled = draft.bannerSlots.filter((s) => s.fileName).length;
 const contentIncomplete = bannersFilled < draft.bannerSlots.length || !draft.tcsFileName;
-const qualificationRules = draft.qualification.triggers.flatMap((trigger) => trigger.rules);
-  const hasChannelRule = qualificationRules.some((rule) => rule.param === 'Channel');
-/* Channel-level eligibility; per-trigger Channel conditions can narrow it further. */
-const selectedChannelSummary = hasChannelRule
-  ? `${channelSummary(draft.channels)} · narrowed further by Channel conditions on the triggers above`
-  : channelSummary(draft.channels);
+  const qualificationRules = draft.qualification.triggers.flatMap((trigger) => trigger.rules);
+/* Promotion-level channel eligibility (the Channels checkboxes on Qualification). */
+const selectedChannelSummary = channelSummary(draft.channels);
 
 const showTcsWarning = draft.template === 'cashback' || draft.qualification.triggers.length > 1;
 
@@ -374,19 +570,65 @@ return (
 {/* Top bar: Internal Tool Shell title + subtitle, discard action right */}
 <div className="promo-topbar" style={{ background: T.white, borderBottom: `1px solid ${T.border}` }}>
 <div>
-<h1 className="promo-title" style={{ color: T.textPrimary }}>Create a promotion</h1>
+<h1 className="promo-title" style={{ color: T.textPrimary }}>
+{draft.reference ? `Edit draft ${draft.reference}` : 'Create a promotion'}
+</h1>
 <p className="promo-subtitle" style={{ color: T.textSecondary }}>
 Step {draft.step} of {STEPS.length} · {STEPS[draft.step - 1]}
 </p>
 </div>
+<div className="promo-draft__topbar-actions">
+{/* Save indicator: unsaved edits (amber) / saved N min ago (green) / not saved yet (muted) */}
+<span
+className="promo-draft__state"
+data-testid="draft-save-state"
+data-state={saveState.state}
+role="status"
+aria-live="polite"
+style={{ color: saveState.state === 'saved' ? T.success : T.textSecondary }}
+>
+{/* Dot: attention yellow (same as the "Content incomplete" badge) / progress green / Draft grey */}
+<span
+className="promo-draft__dot"
+aria-hidden="true"
+style={{
+background: saveState.state === 'unsaved' ? T.yellow : saveState.state === 'saved' ? T.progressActive : T.draft,
+borderRadius: T.radiusPill,
+}}
+/>
+{saveState.label}
+</span>
 <GhostButton onClick={() => setConfirmDiscard(true)}>
 <Trash2 size={16} /> Discard draft
 </GhostButton>
+</div>
 </div>
 
 <div className="promo-container">
 {/* ============ WIZARD ============ */}
 <div className="np-wizard">
+{/* Resume note: shown when the wizard opened from ?ref= (found, seeded, or missing). */}
+{resumeNote && (
+<div
+className="promo-draft__resume"
+data-testid="draft-resume-note"
+role="status"
+style={{ background: T.offWhite, border: `1px solid ${T.border}`, borderRadius: T.radiusSm }}
+>
+<Info size={16} aria-hidden="true" style={{ color: T.textSecondary }} />
+<span style={{ color: T.textPrimary }}>{resumeNote}</span>
+<button
+type="button"
+className="promo-draft__resume-close"
+aria-label="Dismiss"
+onClick={() => setResumeNote(null)}
+style={{ color: T.textSecondary }}
+>
+<X size={14} />
+</button>
+</div>
+)}
+
 {/* Stepper: completed = green + white check, current = navy, upcoming = ghost */}
 <ol className="np-stepper" aria-label="Promotion setup progress">
 {STEPS.map((label, i) => {
@@ -498,6 +740,7 @@ onChange={(e) => setField('freebetExpiryHours', e.target.value)}
 {([
 ['fixed', 'Fixed amount'],
 ['tiers', 'Tier matrix'],
+['percentage', 'Percentage of stake'],
 ] as const).map(([value, label]) => (
 <label key={value} className="np-radio-row" style={{ color: T.textPrimary }}>
 <input
@@ -510,7 +753,31 @@ onChange={() => setField('payoutMode', value)}
 </label>
 ))}
 </div>
-{draft.payoutMode === 'fixed' ? (
+{draft.payoutMode === 'percentage' ? (
+<div style={{ maxWidth: 280 }}>
+<Field
+label="Percentage of stake"
+error={errors.stakePercentage}
+hint="Share of the qualifying cash stake returned as the award (1–100)."
+>
+<div className="np-input-wrap">
+<input
+type="number"
+min="1"
+max="100"
+step="1"
+className="np-input"
+style={inputStyle(errors.stakePercentage)}
+value={draft.stakePercentage}
+placeholder="100"
+aria-label="Percentage of stake returned"
+onChange={(e) => setField('stakePercentage', e.target.value)}
+/>
+<span className="np-input-suffix" style={{ color: T.textSecondary }}>%</span>
+</div>
+</Field>
+</div>
+) : draft.payoutMode === 'fixed' ? (
 <div style={{ maxWidth: 280 }}>
 {moneyInput(draft.fixedAmount, (v) => setField('fixedAmount', v), { error: errors.fixedAmount, placeholder: '0.00', ariaLabel: 'Fixed payout amount' })}
 {errors.fixedAmount && <p className="np-error" role="alert" style={{ color: T.destructive }}>{errors.fixedAmount}</p>}
@@ -596,6 +863,13 @@ value={draft.maxAwardsPerDay}
 aria-label="Max awards per day"
 onChange={(e) => setField('maxAwardsPerDay', e.target.value)}
 />
+</Field>
+<Field
+label="Maximum value per award"
+error={errors.maxValuePerAward}
+hint="Cap on a single award. Leave blank for no cap."
+>
+{moneyInput(draft.maxValuePerAward, (v) => setField('maxValuePerAward', v), { placeholder: '0.00', ariaLabel: 'Maximum value per award in ZMW' })}
 </Field>
 <Field label="Lifetime award count">
 <input
@@ -995,18 +1269,22 @@ onChange={(checked) => setNotificationRule(trigger, { enabled: checked })}
 <div className="np-form-grid" style={{ marginTop: 12 }}>
 <Field label="Delivery channels" required full error={channelsError}>
 <div role="group" aria-label={`${NOTIFICATION_TRIGGER_LABELS[trigger]} delivery channels`} style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-{NOTIFICATION_CHANNELS.map((channel) => (
+{NOTIFICATION_CHANNELS.map((channel) => {
+const available = isNotificationChannelAvailable(channel);
+return (
 <Checkbox
 key={channel}
 checked={rule.channels.includes(channel)}
-label={NOTIFICATION_CHANNEL_LABELS[channel]}
+disabled={!available}
+label={available ? NOTIFICATION_CHANNEL_LABELS[channel] : `${NOTIFICATION_CHANNEL_LABELS[channel]} (TBC)`}
 onChange={(checked) => setNotificationRule(trigger, {
 channels: checked
 ? NOTIFICATION_CHANNELS.filter((c) => c === channel || rule.channels.includes(c))
 : rule.channels.filter((c) => c !== channel),
 })}
 />
-))}
+);
+})}
 </div>
 </Field>
 <Field label="Title" required full error={titleError}>
@@ -1076,16 +1354,19 @@ step={STEP.qualification}
 onEdit={goToStep}
 rows={[
 ['Qualifying bet', `${qualificationRules.length} rule(s) across ${draft.qualification.triggers.length} trigger(s)`],
+...(draft.qualification.triggers.length > 1
+? [['Trigger logic', triggerChainSummary(draft.qualification.triggers, (trigger) => catalogEventLabel(trigger.eventId))] as [string, string]]
+: []),
 ...draft.qualification.triggers.flatMap((trigger, index): [string, string][] => {
 const visibleRules = trigger.rules.filter((rule) => !BET_RESTRICTIONS.some((restriction) => restriction.param === rule.param));
 return [
 [
-`Trigger ${index + 1}${index > 0 ? ' (OR)' : ''}`,
+`Trigger ${index + 1}${index > 0 ? ` (${TRIGGER_JOIN_LABELS[trigger.join ?? 'or']})` : ''}`,
 `${catalogEventLabel(trigger.eventId)}: ${visibleRules.length > 0 ? visibleRules.map(qualificationRuleSummary).join(' AND ') : 'No conditions'}`,
 ],
-...qualificationRestrictionRows(trigger.rules, index),
 ];
 }),
+...qualificationRestrictionRows(draft.qualification.triggers),
 [
 'How often',
 draft.qualification.counting.length > 0
@@ -1093,12 +1374,7 @@ draft.qualification.counting.length > 0
 : 'Each qualifying event (subject to award limits)',
 ],
 ['Channels', selectedChannelSummary],
-[
-'Eligibility',
-draft.qualification.eligibility.audience === 'all'
-? 'All players'
-: `New customers within ${draft.qualification.eligibility.windowDays ?? '·'} days of registration${draft.qualification.eligibility.nonConsecutive ? ' (days need not be consecutive)' : ''}`,
-],
+['Combinable with other offers', draft.combinableWithOtherOffers ? 'Yes' : 'No'],
 
 ]}
 />
@@ -1115,8 +1391,9 @@ rows={[
 ['Expiry', `${draft.freebetExpiryHours || '·'} hours`],
 ] as [string, string][])
 : ([
-['Payout', draft.payoutMode === 'fixed' ? `Fixed: K ${draft.fixedAmount || '·'}` : `Tier matrix (${draft.tiers.length} rows)`],
+['Payout', draft.payoutMode === 'fixed' ? `Fixed: K ${draft.fixedAmount || '·'}` : draft.payoutMode === 'percentage' ? stakePercentageSummary(draft.stakePercentage, draft.maxValuePerAward) : `Tier matrix (${draft.tiers.length} rows)`],
 ...(draft.payoutMode === 'tiers' ? ([['Payout cap', draft.payoutCap ? `K ${draft.payoutCap}` : '·']] as [string, string][]) : []),
+...(draft.payoutMode === 'percentage' ? ([['Maximum value per award', draft.maxValuePerAward.trim() ? formatAwardCap(draft.maxValuePerAward) : 'No cap']] as [string, string][]) : []),
 ] as [string, string][])),
 [
 'Caps',
@@ -1201,19 +1478,28 @@ rule.enabled
 </div>
 
 
-{/* Footer: Back / Continue per step; Review adds Save draft + Submit */}
+{/* Footer: Back / Save draft / Save and exit on every step; Continue, or Save as template (TBC) + Submit on Review */}
 <div className="np-wizard-footer">
-<GhostButton onClick={() => (draft.step === STEP.basics ? router.push('/admin/promotions') : goToStep(draft.step - 1))}>
+<GhostButton onClick={() => (draft.step === STEP.basics ? requestExit() : goToStep(draft.step - 1))}>
 <ChevronLeft size={16} /> Back
 </GhostButton>
 <div className="np-wizard-footer__group">
+{draft.step === STEPS.length && (
+/* Unreleased (TBC): shown on Review only, not wired up. */
+<GhostButton disabled title="Coming soon" ariaLabel="Save as template (coming soon)">
+<LayoutTemplate size={16} /> Save as template
+</GhostButton>
+)}
+<GhostButton onClick={saveDraft}>
+<Save size={16} /> Save draft
+</GhostButton>
+<GhostButton onClick={() => saveAndExit()}>
+<LogOut size={16} /> Save and exit
+</GhostButton>
 {draft.step === STEPS.length ? (
-<>
-<GhostButton onClick={saveDraft}>Save draft</GhostButton>
 <PrimaryButton onClick={() => setConfirmSubmit(true)}>
 <CircleCheck size={16} /> Submit for approval
 </PrimaryButton>
-</>
 ) : (
 <PrimaryButton onClick={goContinue}>Continue</PrimaryButton>
 )}
@@ -1221,6 +1507,30 @@ rule.enabled
 </div>
 </div>
 </div>
+
+{/* Unsaved-changes guard: browser back, sidebar/list links, or Back on Step 1 while unsaved. */}
+{leaveIntent && (
+<div role="dialog" aria-modal="true" aria-labelledby="np-leave-title" data-testid="draft-leave-guard">
+<div className="promo-modal__scrim" style={{ background: T.scrim }} onClick={() => setLeaveIntent(null)} />
+<div className="promo-modal__card" style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: T.radiusMd }}>
+<h2 id="np-leave-title" className="promo-modal__title" style={{ color: T.textPrimary }}>
+Save your changes before leaving?
+</h2>
+<p className="promo-modal__body" style={{ color: T.textSecondary }}>
+{draft.reference
+? `Changes since your last save of ${draft.reference} will be lost unless you save.`
+: 'This promotion has not been saved yet. Save it as a draft to continue later from the promotions list.'}
+</p>
+<div className="promo-modal__actions">
+<GhostButton onClick={() => setLeaveIntent(null)}>Keep editing</GhostButton>
+<GhostButton onClick={leaveWithoutSaving}>Leave without saving</GhostButton>
+<PrimaryButton onClick={() => saveAndExit(leaveIntent.kind === 'route' ? leaveIntent.href : '/admin/promotions')}>
+<Save size={16} /> Save and exit
+</PrimaryButton>
+</div>
+</div>
+</div>
+)}
 
 {/* Submit confirm: confirm-before-commit (maker-checker). */}
 {confirmSubmit && (

@@ -466,6 +466,28 @@ margin: 8px 0 0;
   font-weight: 600;
 }
 .np-or-divider__line { flex: 1; height: 1px; }
+/* AND / OR join switch between trigger cards and in the event picker */
+.np-join-switch {
+ display: inline-flex;
+ padding: 2px;
+ gap: 2px;
+}
+.np-join-switch__option {
+ border: 0;
+ padding: 4px 12px;
+ font: inherit;
+ font-size: 12px;
+ font-weight: 600;
+ line-height: 1.5;
+ cursor: pointer;
+}
+.np-join-picker {
+ display: flex;
+ flex-wrap: wrap;
+ align-items: center;
+ gap: 8px 12px;
+ margin-top: 12px;
+}
 /* Event picker modal — wider than the standard confirm card */
 .promo-modal__card.np-modal-card--wide {
   max-width: 640px;

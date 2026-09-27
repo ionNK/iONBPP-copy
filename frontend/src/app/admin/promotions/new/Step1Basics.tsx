@@ -151,6 +151,8 @@ onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; }}
 <div className="np-form-grid">
 <Field label="Name" required error={errors.name} full>
 <input
+/* Stable id: the wizard focuses this field when Save draft is used without a name. */
+id="np-field-name"
 className="np-input"
 style={inputStyle(errors.name)}
 value={draft.name}

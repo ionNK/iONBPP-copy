@@ -1,8 +1,8 @@
 /**
  * Proposed consumed-events contract, pending confirmation with platform
  * engineering (OPPR-14). Extend by adding entries, never UI. Derived params
- * (Remaining Odds) and event-envelope fields (Channel, player context) need
- * engineering confirmation.
+ * (Remaining Odds) and event-envelope fields (player context) need engineering
+ * confirmation.
  */
 
 export type ParamType = 'integer' | 'float' | 'string' | 'enum' | 'boolean';
@@ -55,12 +55,12 @@ export interface BetRestriction {
 
 /**
  * Checkbox-only exclusions, shared by qualification editing and Review readback.
- * A fixed set, shown on every trigger regardless of event: all of them are
+ * A fixed set, shown once per promotion regardless of event: all of them are
  * ticked by default because the standard offer excludes these bets, and the
- * author opts out rather than in.
+ * author opts out rather than in. Free-bet stakes are not a restriction: use
+ * the `Stake Funding` condition (Cash / Bonus) instead.
  */
 export const BET_RESTRICTIONS: BetRestriction[] = [
- { param: 'Free Bet', label: 'Bets placed using free bets', summary: 'free-bet stakes', warning: 'Free-bet stakes are allowed to qualify' },
  { param: 'Voided', label: 'Voided bets', summary: 'voided bets', warning: 'Voided bets are allowed to qualify' },
  { param: 'Cancelled', label: 'Cancelled bets', summary: 'cancelled bets', warning: 'Cancelled bets are allowed to qualify' },
   { param: 'Cashed Out', label: 'Cashed-out bets', summary: 'cashed-out bets', warning: 'Cashed-out bets are allowed to qualify' },
@@ -85,8 +85,11 @@ export const EVENT_CATALOG: EventCategory[] = [
  // Placement-triggered promos TBD: no launch promo consumes this event.
  params: [
  { name: 'Bet Type', type: 'enum', group: 'bet', options: ['Single', 'Multibet'] },
- { name: 'Channel', type: 'enum', group: 'bet', options: ['Web', 'Mobile Web', 'App', 'USSD'] },
- { name: 'Stake', type: 'float', group: 'bet' },
+  { name: 'Stake', type: 'float', group: 'bet' },
+ /* Wallet the stake was funded from; omit the rule to accept either. */
+ { name: 'Stake Funding', type: 'enum', group: 'bet', options: ['Cash', 'Bonus'] },
+ /* Number of selections (legs) on the bet. */
+ { name: 'Selections', type: 'integer', group: 'bet' },
  { name: 'Odds', type: 'float', group: 'bet' },
  /* Market state at placement: Pre-match = before the event starts, Live = in-play. A bet is exactly one of the two. */
         { name: 'Pre-match', type: 'boolean', group: 'bet' },
@@ -100,8 +103,8 @@ export const EVENT_CATALOG: EventCategory[] = [
  params: [
  { name: 'Stake', type: 'float', group: 'bet' },
  { name: 'Bet Type', type: 'enum', group: 'bet', options: ['Single', 'Multibet'] },
- { name: 'Channel', type: 'enum', group: 'bet', options: ['Web', 'Mobile Web', 'App', 'USSD'] },
- { name: 'Free Bet', type: 'boolean', group: 'bet' },
+ { name: 'Stake Funding', type: 'enum', group: 'bet', options: ['Cash', 'Bonus'] },
+ { name: 'Selections', type: 'integer', group: 'bet' },
  { name: 'Result', type: 'enum', group: 'result', options: ['Won', 'Lost', 'Cashed Out'] },
  { name: 'Cash-out multiplier', type: 'float', group: 'result' },
         /* Settled by cash-out (Result = Cashed Out). Boolean so it can be a checkbox restriction. */
@@ -128,11 +131,6 @@ export const EVENT_CATALOG: EventCategory[] = [
  name: 'Method',
  type: 'enum',
  options: ['Mpesa', 'AirtelMoney', 'Cashia', 'Card', 'BankTransfer', 'Voucher'],
- },
- {
- name: 'Channel',
- type: 'enum',
- options: ['Web', 'Mobile Web', 'App', 'USSD'],
  },
  { name: 'First Deposit', type: 'boolean' },
  ],

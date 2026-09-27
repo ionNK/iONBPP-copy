@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, CircleCheck, Clock, Funnel, Pencil, Plus, Search, Trash2, TriangleAlert, X } from 'lucide-react';
+import { ArrowRight, CircleCheck, Clock, Funnel, Pencil, Plus, Save, Search, Trash2, TriangleAlert, X } from 'lucide-react';
 import './promotions.css';
 import T from '@/theme/tokens';
 import { Badge, Checkbox, DateRangePicker, DestructiveGhostButton, FilterChip, GhostButton, PrimaryButton, StatChip } from '@/components/ui';
 import type { DateRange } from '@/components/ui';
 import { CHANNELS, CHANNEL_LABELS, NOTIFICATION_TRIGGERS, NOTIFICATION_TRIGGER_LABELS, PROMO_SEED, channelSummary, consumeListNotice, enabledNotificationTriggers, formatScheduleDate, loadPromotions, notificationChannelSummary, parseSchedule, savePromotions, scheduleOverlaps, sortPromotionsDefault } from '@/lib/promotions';
 import type { Channel, Promo, PromoStatus } from '@/lib/promotions';
+import { formatSavedAgo, loadDrafts } from '@/lib/promotions/draftStore';
 import { PRODUCT_VERTICALS } from '@/data/promotion-templates';
 import { loadSettings } from '@/lib/settings';
 import type { ProviderCode } from '@/lib/settings';
@@ -92,10 +93,18 @@ return (
 );
 }
 
-/* Schedule cell: "01 Sep 2026 → 31 Oct 2026", "… → Ongoing", or "Not scheduled" for drafts. */
-function ScheduleCell({ schedule }: { schedule: string }) {
+/* Schedule cell: "01 Sep 2026 → 31 Oct 2026", "… → Ongoing", or "Not scheduled" for drafts.
+ * A draft with no dates but an explicit wizard save shows "Last saved N min ago" instead. */
+function ScheduleCell({ schedule, savedAt }: { schedule: string; savedAt?: string | null }) {
 const parsed = parseSchedule(schedule);
 if (parsed.start === null) {
+if (savedAt) {
+return (
+<span className="promo-draft__last-saved" style={{ color: T.textSecondary }} data-testid="promo-last-saved">
+<Save size={12} aria-hidden="true" /> Last saved {formatSavedAgo(savedAt)}
+</span>
+);
+}
 return <span style={{ color: T.textSecondary }}>Not scheduled</span>;
 }
 return (
@@ -157,6 +166,8 @@ const [selected, setSelected] = useState<Promo | null>(null);
 const [drawerTab, setDrawerTab] = useState<'Overview' | 'Activity'>('Overview');
 const [deleteTarget, setDeleteTarget] = useState<Promo | null>(null);
 const [notice, setNotice] = useState<string | null>(null);
+/* Explicit wizard saves, by reference: drives "Last saved …" on Draft rows. */
+const [draftSavedAt, setDraftSavedAt] = useState<Record<string, string>>({});
 
 /* Hydrate from the shared mock stores (localStorage) + show one-shot notices
  * left by flows that routed back here (e.g. New Promotion submit). Provider
@@ -165,6 +176,11 @@ useEffect(() => {
 /* eslint-disable react-hooks/set-state-in-effect -- mount-only hydration from localStorage / sessionStorage */
 setPromos(loadPromotions());
 setProviders(loadSettings().providers);
+setDraftSavedAt(
+Object.fromEntries(
+Object.entries(loadDrafts()).flatMap(([reference, d]) => (d.savedAt ? [[reference, d.savedAt]] : [])),
+),
+);
 const message = consumeListNotice();
 if (message) setNotice(message);
 /* eslint-enable react-hooks/set-state-in-effect */
@@ -253,6 +269,12 @@ const pageRows = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAG
 const openDrawer = (p: Promo) => {
 setSelected(p);
 setDrawerTab('Overview');
+};
+
+/* Draft rows resume the wizard under their own reference (stored draft, or a
+ * seeded Draft such as PR-004 synthesised by the draft store). */
+const continueEditing = (p: Promo) => {
+router.push(`/admin/promotions/new?ref=${encodeURIComponent(p.id)}`);
 };
 
 /* Confirm-before-commit (maker-checker): mock-submits the deletion. */
@@ -401,7 +423,7 @@ Actions
 key={p.id}
 className="promo-row"
 style={i < pageRows.length - 1 ? { borderBottom: `1px solid ${T.border}` } : undefined}
-onClick={() => openDrawer(p)}
+onClick={() => (p.status === 'draft' ? continueEditing(p) : openDrawer(p))}
 onMouseEnter={(e) => (e.currentTarget.style.background = T.offWhite)}
 onMouseLeave={(e) => (e.currentTarget.style.background = T.white)}
 >
@@ -423,13 +445,27 @@ onMouseLeave={(e) => (e.currentTarget.style.background = T.white)}
 {p.vertical ?? 'Cross-product'}
 </td>
 <td className="promo-schedule">
-<ScheduleCell schedule={p.schedule} />
+<ScheduleCell schedule={p.schedule} savedAt={p.status === 'draft' ? draftSavedAt[p.id] : null} />
 </td>
 <td>
 <Badge color={STATUS[p.status].color} ghost={STATUS[p.status].ghost}>{STATUS[p.status].label}</Badge>
 </td>
 <td className="promo-actions">
 <div className="promo-actions__group">
+{/* Drafts: "Continue editing" resumes the wizard at the saved step; other rows open the drawer. */}
+{p.status === 'draft' ? (
+<button
+type="button"
+className="promo-icon-btn promo-draft__continue"
+style={{ color: T.textPrimary, borderRadius: T.radiusSm }}
+aria-label={`Continue editing ${p.name}`}
+onClick={(e) => { e.stopPropagation(); continueEditing(p); }}
+onMouseEnter={(e) => (e.currentTarget.style.background = T.offWhite)}
+onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+>
+<Pencil size={16} /> <span>Continue editing</span>
+</button>
+) : (
 <button
 type="button"
 className="promo-icon-btn"
@@ -441,6 +477,7 @@ onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
 >
 <Pencil size={16} />
 </button>
+)}
 <button
 type="button"
 className="promo-icon-btn"

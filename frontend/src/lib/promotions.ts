@@ -62,8 +62,15 @@ export function channelSummary(channels: Channel[]): string {
 /* Player notifications: optional messages on qualify and on award.    */
 /* ------------------------------------------------------------------ */
 
-export const NOTIFICATION_CHANNELS = ['push', 'sms', 'email', 'inapp'] as const;
+/* SMS first: it is the only channel released so far; the rest are listed disabled (TBC). */
+export const NOTIFICATION_CHANNELS = ['sms', 'push', 'email', 'inapp'] as const;
 export type NotificationChannel = typeof NOTIFICATION_CHANNELS[number];
+
+/** Channels that can currently be selected. Others render disabled and are dropped on load. */
+export const AVAILABLE_NOTIFICATION_CHANNELS: readonly NotificationChannel[] = ['sms'];
+
+export const isNotificationChannelAvailable = (channel: NotificationChannel): boolean =>
+ AVAILABLE_NOTIFICATION_CHANNELS.includes(channel);
 
 export const NOTIFICATION_CHANNEL_LABELS: Record<NotificationChannel, string> = {
   push: 'Push',
@@ -99,12 +106,12 @@ export const NOTIFICATION_TRIGGER_SHORT: Record<NotificationTrigger, string> = {
   onAward: 'Award',
 };
 
-export const DEFAULT_NOTIFICATION_CHANNELS: readonly NotificationChannel[] = ['push', 'inapp'];
+export const DEFAULT_NOTIFICATION_CHANNELS: readonly NotificationChannel[] = ['sms'];
 
 export const isNotificationChannel = (value: unknown): value is NotificationChannel =>
   typeof value === 'string' && (NOTIFICATION_CHANNELS as readonly string[]).includes(value);
 
-/** Default rule: disabled, push + in-app preselected, no copy. */
+/** Default rule: disabled, SMS preselected, no copy. */
 export function defaultNotificationRule(): NotificationRule {
   return { enabled: false, channels: [...DEFAULT_NOTIFICATION_CHANNELS], title: '', body: '' };
 }
@@ -127,7 +134,7 @@ export function cloneNotifications(notifications: Notifications): Notifications 
 }
 
 /**
- * Migration: a missing or invalid rule is the disabled default. Unknown
+ * Migration: a missing or invalid rule is the disabled default. Unknown and not-yet-available
  * channels are dropped; an explicit empty list is preserved so the wizard can
  * surface it, while an absent list falls back to the default channels.
  */
@@ -138,7 +145,7 @@ export function normalizeNotificationRule(value: unknown): NotificationRule {
   return {
     enabled: rule.enabled === true,
     channels: Array.isArray(rawChannels)
-      ? NOTIFICATION_CHANNELS.filter((channel) => rawChannels.includes(channel))
+      ? NOTIFICATION_CHANNELS.filter((channel) => rawChannels.includes(channel) && isNotificationChannelAvailable(channel))
       : [...DEFAULT_NOTIFICATION_CHANNELS],
     title: typeof rule.title === 'string' ? rule.title : '',
     body: typeof rule.body === 'string' ? rule.body : '',
@@ -163,7 +170,7 @@ export function hasNotifications(notifications: Notifications): boolean {
   return enabledNotificationTriggers(notifications).length > 0;
 }
 
-/** Selected notification channels in canonical order, e.g. "Push, SMS". */
+/** Selected notification channels in canonical order, e.g. "SMS, Push". */
 export function notificationChannelSummary(channels: NotificationChannel[]): string {
   const labels = NOTIFICATION_CHANNELS.filter((channel) => channels.includes(channel)).map((channel) => NOTIFICATION_CHANNEL_LABELS[channel]);
   return labels.length > 0 ? labels.join(', ') : 'No channels';
@@ -195,13 +202,13 @@ export function smsSegments(length: number): number {
 export const MONEY_BACK_NOTIFICATIONS: Notifications = {
   onQualify: {
     enabled: true,
-    channels: ['push', 'sms', 'inapp'],
+    channels: ['sms'],
     title: 'Money Back is on its way',
     body: 'Hi {{firstName}}, your multibet missed by one leg, so {{promoName}} has you covered. Your cashback will be credited by 14:00 tomorrow.',
   },
   onAward: {
     enabled: true,
-    channels: ['push', 'sms', 'inapp'],
+    channels: ['sms'],
     title: 'Your Money Back has landed',
     body: 'Hi {{firstName}}, {{amount}} from {{promoName}} is now in your wallet. Good luck on your next bet!',
   },
@@ -210,13 +217,13 @@ export const MONEY_BACK_NOTIFICATIONS: Notifications = {
 export const AVIATOR_WELCOME_NOTIFICATIONS: Notifications = {
   onQualify: {
     enabled: true,
-    channels: ['push', 'inapp'],
+    channels: ['sms'],
     title: 'Day complete, freebets coming',
     body: 'Nice one {{firstName}}! You placed 10 qualifying Aviator bets today. Your {{promoName}} freebets land tomorrow at 14:00.',
   },
   onAward: {
     enabled: true,
-    channels: ['push', 'inapp'],
+    channels: ['sms'],
     title: 'Your Aviator freebets are here',
     body: '{{firstName}}, {{amount}} in freebets from {{promoName}} is ready. Play Aviator before {{expiry}}.',
   },
@@ -407,6 +414,21 @@ window.localStorage.setItem(LIST_KEY, JSON.stringify(list));
 /** Prepends a promotion so newly created rows surface at the top of the list. */
 export function addPromotion(promo: Promo): void {
 savePromotions([promo, ...loadPromotions()]);
+}
+
+/**
+ * Replaces the row with the same id in place (keeping its list position), or
+ * prepends it when absent. Used by the wizard's Save draft so re-saving a
+ * draft — including a seeded one such as PR-004 — never duplicates its row.
+ */
+export function upsertPromotion(promo: Promo): void {
+const list = loadPromotions();
+const index = list.findIndex((p) => p.id === promo.id);
+if (index === -1) {
+savePromotions([promo, ...list]);
+return;
+}
+savePromotions(list.map((p, i) => (i === index ? promo : p)));
 }
 
 /** Next promotion ID: "PR-" + zero-padded next number from the mock data. */

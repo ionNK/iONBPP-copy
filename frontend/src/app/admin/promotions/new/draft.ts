@@ -1,9 +1,11 @@
 /**
  * Wizard draft model: New Promotion flow (/admin/promotions/new).
- * A single typed PromotionDraft is persisted to localStorage (promo_draft_v2).
- * Step 1 (Basics) is template-driven: selecting a template writes its full
- * prefill (src/data/promotion-templates.ts) over a fresh base draft.
- * Zambia is the implicit market and the game provider is derived by the
+ * The in-progress working copy is a single typed PromotionDraft persisted to
+ * localStorage (promo_draft_v2); explicit "Save draft" writes the same shape,
+ * keyed by promotion reference, through @/lib/promotions/draftStore
+ * (promo-drafts:v1). Step 1 (Basics) is template-driven: selecting a template
+ * writes its full prefill (src/data/promotion-templates.ts) over a fresh base
+ * draft. Zambia is the implicit market and the game provider is derived by the
  * engine, so the draft carries neither.
  */
 import { SEED_TIERS, getTemplate } from '@/data/promotion-templates';
@@ -22,6 +24,7 @@ import type { EventId } from '@/data/event-catalog';
 import { isRangeOperator, isZeroArityOperator } from '@/data/operator-catalog';
 import { CHANNELS, allChannels, cloneNotifications, defaultDraftNotifications } from '@/lib/promotions';
 import type { Channel, Notifications } from '@/lib/promotions';
+import type { StepId } from './steps';
 
 export interface TriggerRule {
  id: string;
@@ -32,24 +35,87 @@ export interface TriggerRule {
  value2?: string;
 }
 
+/** How a trigger combines with the trigger before it. Unset on the first trigger. */
+export type TriggerJoin = 'and' | 'or';
+export const TRIGGER_JOINS: TriggerJoin[] = ['and', 'or'];
+export const TRIGGER_JOIN_LABELS: Record<TriggerJoin, string> = { and: 'AND', or: 'OR' };
+
 export interface Trigger {
  id: string;
  eventId: EventId;
  rules: TriggerRule[];
+ /** Join with the previous trigger; absent on the first trigger. Legacy drafts default to 'or'. */
+ join?: TriggerJoin;
 }
 
+/** First trigger never carries a join; every later trigger has one (default 'or'). */
+export function normalizeTriggerJoins(triggers: Trigger[]): Trigger[] {
+ return triggers.map((trigger, index) => {
+ if (index === 0) {
+ const { join, ...rest } = trigger;
+ void join;
+ return rest;
+ }
+ return { ...trigger, join: trigger.join === 'and' ? 'and' : 'or' };
+ });
+}
+
+/**
+ * AND binds tighter than OR: `A AND B OR C` → [[A, B], [C]]. The promotion
+ * qualifies when every trigger in any one group fires.
+ */
+export function triggerGroups(triggers: Trigger[]): Trigger[][] {
+ const groups: Trigger[][] = [];
+ triggers.forEach((trigger, index) => {
+ if (index === 0 || trigger.join !== 'and') groups.push([trigger]);
+ else groups[groups.length - 1].push(trigger);
+ });
+ return groups;
+}
+
+/** Human-readable chain, e.g. "Bet Settled AND Deposit OR Registration". */
+export function triggerChainSummary(triggers: Trigger[], label: (trigger: Trigger) => string): string {
+ return triggers
+ .map((trigger, index) => (index > 0 ? `${TRIGGER_JOIN_LABELS[trigger.join ?? 'or']} ` : '') + label(trigger))
+ .join(' ');
+}
+
+/**
+ * Triggers (each an AND of rules, chained with AND / OR joins) plus
+ * promotion-wide counting rules.
+ * Audience targeting ("Who's eligible") was removed: persisted legacy values
+ * are silently discarded by sanitizeQualification.
+ */
 export interface Qualification {
  triggers: Trigger[];
  counting: TriggerRule[];
- eligibility: {
- audience: 'all' | 'new_customers';
- windowDays?: number;
- nonConsecutive?: boolean;
- };
 }
 
 /** The loader reads only v2; v1 payloads are ignored rather than migrated. */
 export const DRAFT_KEY = 'promo_draft_v2';
+
+/* ------------------------------------------------------------------ */
+/* Combinable flag + stake-back reward (100% Cash Stake Back).  */
+/* Additive fields: drafts saved before they existed load with the     */
+/* defaults in baseDraft(); the store sanitiser applies the same ones. */
+/* ------------------------------------------------------------------ */
+
+/* Stake funding, Selections and odds are ordinary trigger rules: see the
+ * Bet Placed / Bet Settled params in data/event-catalog.ts. */
+
+/** "10000" → "10,000" (domain convention: thousands separators, up to 2 decimals). */
+export function formatAwardCap(value: string): string {
+  const n = Number(value);
+  if (!value.trim() || !Number.isFinite(n)) return value;
+  return n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+}
+
+/** Review reward line: "{pct}% of stake, up to {cap}" or "{pct}% of stake, no cap". */
+export function stakePercentageSummary(percentage: string, maxValuePerAward: string): string {
+  const pct = percentage.trim() || '·';
+  const cap = maxValuePerAward.trim();
+  return cap ? `${pct}% of stake, up to ${formatAwardCap(cap)}` : `${pct}% of stake, no cap`;
+}
 
 export interface BannerSlot {
  id: number;
@@ -66,6 +132,17 @@ export interface PromotionDraft {
  step: number;
  /** True once the user has edited any field after the last template apply. */
  dirty: boolean;
+ /* Persistence (Save draft / resume). Additive: absent on legacy scratch drafts. */
+ /** Promotion reference (`PR-xxx`) this draft is stored under; `null` until first save. */
+ reference: string | null;
+ /** 1-based visible step index the author was on at the last save. */
+ lastStep: number;
+ /** Step id at the last save; wins over `lastStep` when the stepper renumbers. */
+ lastStepId: StepId | null;
+ /** ISO timestamp of the last explicit save; `null` when never saved. */
+ savedAt: string | null;
+ /** Saved drafts are always drafts; approval happens on the list row, never in the store. */
+ status: 'draft';
  /* Basics */
  name: string;
  type: PromotionTypeId | '';
@@ -75,6 +152,8 @@ export interface PromotionDraft {
  qualification: Qualification;
   /** Surfaces a player can qualify through; at least one is required. */
   channels: Channel[];
+  /** Recorded on the promotion and in T&Cs only; not enforced by the engine yet. Additive. */
+  combinableWithOtherOffers: boolean;
 
 
  /* Award */
@@ -89,6 +168,11 @@ export interface PromotionDraft {
  maxAwardsPerDay: string;
  lifetimeCount: string;
  lifetimeValue: string;
+ /* Stake-back reward (additive). */
+ /** Percentage of the qualifying cash stake returned (1–100) when payoutMode is `percentage`. */
+ stakePercentage: string;
+ /** Cap on the value of a single award; empty = no cap. */
+ maxValuePerAward: string;
  creditTiming: CreditTiming;
  creditTime: string;
  restrictedProduct: string;
@@ -124,6 +208,13 @@ function isEventId(value: unknown): value is EventId {
  return Object.values(QUALIFICATION_EVENT_IDS).includes(value as EventId);
 }
 
+/**
+ * Restriction params from earlier prototype revisions that no longer exist in the
+ * catalog. They were hidden checkbox exclusions, so drop them silently instead
+ * of surfacing them as visible conditions on resumed drafts.
+ */
+const LEGACY_RESTRICTION_PARAMS = new Set(['Free Bet']);
+
 function sanitizeRule(value: unknown): TriggerRule | undefined {
  if (!value || typeof value !== 'object') return undefined;
 
@@ -139,6 +230,8 @@ function sanitizeRule(value: unknown): TriggerRule | undefined {
  return undefined;
  }
 
+ if (LEGACY_RESTRICTION_PARAMS.has(rule.param)) return undefined;
+
  return {
  id: rule.id,
  param: rule.param,
@@ -152,8 +245,9 @@ function sanitizeRule(value: unknown): TriggerRule | undefined {
 /**
  * Canonical exclusion rules (`param = No`) for every restriction. The set is
  * fixed and independent of the trigger event: every new trigger starts with all
- * of them ticked so the standard offer excludes free-bet, voided, cancelled and
- * cashed-out bets unless the author unticks one. Rule IDs are deterministic per
+ * of them ticked so the standard offer excludes voided, cancelled and cashed-out
+ * bets unless the author unticks one. Free-bet stakes are handled by the
+ * `Stake Funding` condition, not a restriction. Rule IDs are deterministic per
  * trigger so re-creation is stable.
  */
 export function defaultRestrictionRules(triggerId: string): TriggerRule[] {
@@ -174,18 +268,16 @@ export function emptyQualification(): Qualification {
       rules: defaultRestrictionRules('primary-trigger'),
     }],
  counting: [],
- eligibility: { audience: 'all' },
  };
 }
 
 export function cloneQualification(qualification: Qualification): Qualification {
  return {
- triggers: qualification.triggers.map((trigger) => ({
+ triggers: normalizeTriggerJoins(qualification.triggers.map((trigger) => ({
  ...trigger,
  rules: trigger.rules.map((rule) => ({ ...rule })),
- })),
+ }))),
  counting: qualification.counting.map((rule) => ({ ...rule })),
- eligibility: { ...qualification.eligibility },
  };
 }
 
@@ -218,6 +310,7 @@ export function sanitizeQualification(value: unknown): Qualification {
  const sanitized = sanitizeRule(rule);
  return sanitized ? [sanitized] : [];
  }),
+ ...(trigger.join === 'and' || trigger.join === 'or' ? { join: trigger.join } : {}),
  }];
  });
 
@@ -228,40 +321,9 @@ export function sanitizeQualification(value: unknown): Qualification {
  return sanitized ? [sanitized] : [];
  });
 
- const rawEligibility = candidate.eligibility;
-
- if (!rawEligibility || typeof rawEligibility !== 'object') {
- return {
- triggers,
- counting,
- eligibility: { audience: 'all' },
- };
- }
-
- const eligibility = rawEligibility as Qualification['eligibility'];
-
- if (eligibility.audience !== 'new_customers') {
- return {
- triggers,
- counting,
- eligibility: { audience: 'all' },
- };
- }
-
- return {
- triggers,
- counting,
- eligibility: {
- audience: 'new_customers',
- ...(typeof eligibility.windowDays === 'number'
- && Number.isFinite(eligibility.windowDays)
- ? { windowDays: eligibility.windowDays }
- : {}),
- ...(typeof eligibility.nonConsecutive === 'boolean'
- ? { nonConsecutive: eligibility.nonConsecutive }
- : {}),
- },
- };
+ /* Legacy drafts may carry an `eligibility` key; it is dropped, not migrated.
+ * Pre-join drafts have no `join` on later triggers: they were OR branches. */
+ return { triggers: normalizeTriggerJoins(triggers), counting };
 }
 
 /**
@@ -287,12 +349,18 @@ export function baseDraft(): PromotionDraft {
  template: null,
  step: 1,
  dirty: false,
+ reference: null,
+ lastStep: 1,
+ lastStepId: null,
+ savedAt: null,
+ status: 'draft',
  name: '',
  type: '',
 
  vertical: '',
 channels: allChannels(),
  qualification: emptyQualification(),
+ combinableWithOtherOffers: false,
 
  rewardType: 'freebet',
  freebetCount: '',
@@ -305,6 +373,8 @@ channels: allChannels(),
  maxAwardsPerDay: '',
  lifetimeCount: '',
  lifetimeValue: '',
+ stakePercentage: '',
+ maxValuePerAward: '',
  creditTiming: 'instant',
  creditTime: '14:00',
  restrictedProduct: '',
@@ -427,15 +497,21 @@ export function validateQualification(d: PromotionDraft): Record<string, string>
  }
  }
 
- if (
- d.qualification.eligibility.audience === 'new_customers'
- && (
- !d.qualification.eligibility.windowDays
- || d.qualification.eligibility.windowDays <= 0
- )
- ) {
- errors.eligibilityDays = 'Enter the number of days.';
- }
+ return errors;
+}
 
+/** Award-step checks for the stake-back reward (percentage 1–100; cap must be positive when set). */
+export function validateStakeBack(d: PromotionDraft): Record<string, string> {
+ const errors: Record<string, string> = {};
+ if (d.rewardType === 'cash' && d.payoutMode === 'percentage') {
+ const pct = Number(d.stakePercentage);
+ if (!d.stakePercentage.trim() || !Number.isFinite(pct) || pct < 1 || pct > 100) {
+ errors.stakePercentage = 'Enter a percentage between 1 and 100.';
+ }
+ }
+ if (d.maxValuePerAward.trim()) {
+ const cap = Number(d.maxValuePerAward);
+ if (!Number.isFinite(cap) || cap <= 0) errors.maxValuePerAward = 'Enter an amount greater than 0, or leave blank for no cap.';
+ }
  return errors;
 }

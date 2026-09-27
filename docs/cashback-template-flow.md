@@ -35,8 +35,11 @@ The template qualifies settled Sportsbook multibets that meet all of these rules
 - Result: **Lost**
 - Losing legs: **1**
 - Remaining odds: **at least 25**
+- Stake funding: **Cash** (free-bet / bonus stakes do not qualify)
 
-Bets placed with free bets, voided bets, cancelled bets, and cashed-out bets are excluded. The default audience is all players and all channels are enabled.
+Voided bets, cancelled bets, and cashed-out bets are excluded. All channels are enabled by default. Target new customers with a Registration trigger or player-context conditions.
+
+**Add trigger event** opens the event picker with an **AND / OR** switch (OR by default). OR means either event qualifies on its own; AND means the player must complete both. The join is shown on the divider between trigger cards and can be changed there later. AND binds tighter than OR, so `Bet Settled AND Deposit OR Registration` reads as "(Bet Settled and Deposit) or Registration".
 
 ![Qualification defaults](images/cashback-flow/04-qualification.png)
 
@@ -56,7 +59,7 @@ The Schedule step opens without a required start date and time. Enter these befo
 
 ## 7. Notifications
 
-The template enables notification messages for qualification and award. The configured titles are **“Money Back is on its way”** and **“Your Money Back has landed.”**
+The template enables notification messages for qualification and award, delivered by **SMS**. Push, Email and In-app are visible but disabled while those channels are TBC. The configured titles are **“Money Back is on its way”** and **“Your Money Back has landed.”**
 
 ![Notification defaults](images/cashback-flow/08-notifications.png)
 
